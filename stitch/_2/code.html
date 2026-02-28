@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Каталог - Подготовка к исповеди</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1111d4",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101022",
+                        "surface-dark": "#1a1a2e", // Slightly lighter for cards
+                        "border-dark": "#2a2a45",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #323267;
+            border-radius: 4px;
+        }
+        body {
+            font-family: 'Lexend', sans-serif;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col antialiased selection:bg-primary selection:text-white">
+<!-- Header Section -->
+<div class="sticky top-0 z-10 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-slate-200 dark:border-border-dark pt-safe-top">
+<div class="flex items-center justify-between px-4 py-3">
+<h2 class="text-xl font-bold tracking-tight text-center w-full">Каталог грехов</h2>
+</div>
+<!-- Search Bar -->
+<div class="px-4 pb-4">
+<label class="relative flex w-full items-center">
+<div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400 dark:text-slate-500">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="block w-full rounded-lg border-0 py-3 pl-10 pr-4 bg-white dark:bg-surface-dark text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-primary shadow-sm ring-1 ring-slate-900/5 dark:ring-white/10" placeholder="Поиск..." type="text"/>
+</label>
+</div>
+</div>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto px-4 py-6 space-y-6 pb-24">
+<!-- Section 1: Relation to God -->
+<section class="space-y-3">
+<div class="flex items-center justify-between">
+<h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">church</span>
+                    Отношение к Богу
+                </h3>
+<span class="text-xs font-medium px-2 py-1 rounded bg-slate-200 dark:bg-border-dark text-slate-600 dark:text-slate-400">0/3</span>
+</div>
+<div class="bg-white dark:bg-surface-dark rounded-xl overflow-hidden shadow-sm ring-1 ring-slate-900/5 dark:ring-white/5">
+<label class="flex items-start gap-4 p-4 hover:bg-slate-50 dark:hover:bg-white/5 cursor-pointer transition-colors border-b border-slate-100 dark:border-border-dark last:border-0">
+<div class="relative flex items-center pt-0.5">
+<input class="peer h-5 w-5 rounded border-slate-300 dark:border-slate-600 text-primary focus:ring-primary/50 dark:focus:ring-offset-surface-dark bg-transparent" type="checkbox"/>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-base font-medium leading-tight peer-checked:text-slate-500 dark:peer-checked:text-slate-400 peer-checked:line-through transition-all">Неверие и сомнение в вере</span>
+<p class="text-sm text-slate-500 dark:text-slate-400 leading-snug">Сомнения в существовании Бога, истинности Писания или догматов Церкви.</p>
+</div>
+</label>
+<label class="flex items-start gap-4 p-4 hover:bg-slate-50 dark:hover:bg-white/5 cursor-pointer transition-colors border-b border-slate-100 dark:border-border-dark last:border-0">
+<div class="relative flex items-center pt-0.5">
+<input class="peer h-5 w-5 rounded border-slate-300 dark:border-slate-600 text-primary focus:ring-primary/50 dark:focus:ring-offset-surface-dark bg-transparent" type="checkbox"/>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-base font-medium leading-tight peer-checked:text-slate-500 dark:peer-checked:text-slate-400 peer-checked:line-through transition-all">Суеверие</span>
+<p class="text-sm text-slate-500 dark:text-slate-400 leading-snug">Вера в приметы, гадания, гороскопы, использование талисманов.</p>
+</div>
+</label>
+<label class="flex items-start gap-4 p-4 hover:bg-slate-50 dark:hover:bg-white/5 cursor-pointer transition-colors border-b border-slate-100 dark:border-border-dark last:border-0">
+<div class="relative flex items-center pt-0.5">
+<input class="peer h-5 w-5 rounded border-slate-300 dark:border-slate-600 text-primary focus:ring-primary/50 dark:focus:ring-offset-surface-dark bg-transparent" type="checkbox"/>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-base font-medium leading-tight peer-checked:text-slate-500 dark:peer-checked:text-slate-400 peer-checked:line-through transition-all">Божба</span>
+<p class="text-sm text-slate-500 dark:text-slate-400 leading-snug">Употребление имени Божия всуе, в шутках или пустых разговорах.</p>
+</div>
+</label>
+</div>
+</section>
+<!-- Section 2: Relation to Neighbors -->
+<section class="space-y-3">
+<div class="flex items-center justify-between">
+<h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">groups</span>
+                    Отношение к ближним
+                </h3>
+<span class="text-xs font-medium px-2 py-1 rounded bg-slate-200 dark:bg-border-dark text-slate-600 dark:text-slate-400">0/2</span>
+</div>
+<div class="bg-white dark:bg-surface-dark rounded-xl overflow-hidden shadow-sm ring-1 ring-slate-900/5 dark:ring-white/5">
+<label class="flex items-start gap-4 p-4 hover:bg-slate-50 dark:hover:bg-white/5 cursor-pointer transition-colors border-b border-slate-100 dark:border-border-dark last:border-0">
+<div class="relative flex items-center pt-0.5">
+<input class="peer h-5 w-5 rounded border-slate-300 dark:border-slate-600 text-primary focus:ring-primary/50 dark:focus:ring-offset-surface-dark bg-transparent" type="checkbox"/>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-base font-medium leading-tight peer-checked:text-slate-500 dark:peer-checked:text-slate-400 peer-checked:line-through transition-all">Осуждение</span>
+<p class="text-sm text-slate-500 dark:text-slate-400 leading-snug">Обсуждение недостатков других людей, сплетни.</p>
+</div>
+</label>
+<label class="flex items-start gap-4 p-4 hover:bg-slate-50 dark:hover:bg-white/5 cursor-pointer transition-colors border-b border-slate-100 dark:border-border-dark last:border-0">
+<div class="relative flex items-center pt-0.5">
+<input class="peer h-5 w-5 rounded border-slate-300 dark:border-slate-600 text-primary focus:ring-primary/50 dark:focus:ring-offset-surface-dark bg-transparent" type="checkbox"/>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-base font-medium leading-tight peer-checked:text-slate-500 dark:peer-checked:text-slate-400 peer-checked:line-through transition-all">Гнев и раздражительность</span>
+</div>
+</label>
+</div>
+</section>
+<!-- Section 3: Relation to Self -->
+<section class="space-y-3">
+<div class="flex items-center justify-between">
+<h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">person</span>
+                    Отношение к себе
+                </h3>
+<span class="text-xs font-medium px-2 py-1 rounded bg-slate-200 dark:bg-border-dark text-slate-600 dark:text-slate-400">0/2</span>
+</div>
+<div class="bg-white dark:bg-surface-dark rounded-xl overflow-hidden shadow-sm ring-1 ring-slate-900/5 dark:ring-white/5">
+<label class="flex items-start gap-4 p-4 hover:bg-slate-50 dark:hover:bg-white/5 cursor-pointer transition-colors border-b border-slate-100 dark:border-border-dark last:border-0">
+<div class="relative flex items-center pt-0.5">
+<input class="peer h-5 w-5 rounded border-slate-300 dark:border-slate-600 text-primary focus:ring-primary/50 dark:focus:ring-offset-surface-dark bg-transparent" type="checkbox"/>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-base font-medium leading-tight peer-checked:text-slate-500 dark:peer-checked:text-slate-400 peer-checked:line-through transition-all">Уныние</span>
+<p class="text-sm text-slate-500 dark:text-slate-400 leading-snug">Отсутствие надежды на Бога, леность к духовной жизни.</p>
+</div>
+</label>
+<label class="flex items-start gap-4 p-4 hover:bg-slate-50 dark:hover:bg-white/5 cursor-pointer transition-colors border-b border-slate-100 dark:border-border-dark last:border-0">
+<div class="relative flex items-center pt-0.5">
+<input class="peer h-5 w-5 rounded border-slate-300 dark:border-slate-600 text-primary focus:ring-primary/50 dark:focus:ring-offset-surface-dark bg-transparent" type="checkbox"/>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-base font-medium leading-tight peer-checked:text-slate-500 dark:peer-checked:text-slate-400 peer-checked:line-through transition-all">Чревоугодие</span>
+</div>
+</label>
+</div>
+</section>
+<!-- Promo / Tip Card -->
+<div class="mt-8 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 dark:from-primary/30 dark:to-primary/10 p-5 border border-primary/20">
+<div class="flex gap-4">
+<div class="shrink-0 rounded-full bg-primary/20 p-2 text-primary h-fit">
+<span class="material-symbols-outlined">lightbulb</span>
+</div>
+<div>
+<h4 class="font-bold text-slate-900 dark:text-slate-100 mb-1">Совет</h4>
+<p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Не бойтесь называть грехи своими именами. Искренность — ключ к очищению души.
+                    </p>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 w-full bg-white dark:bg-surface-dark border-t border-slate-200 dark:border-border-dark pb-safe-bottom">
+<div class="flex justify-around items-center px-2 py-2">
+<a class="flex flex-col items-center justify-center p-2 rounded-lg gap-1 min-w-[4rem] group" href="#">
+<span class="material-symbols-outlined text-primary text-[28px] font-variation-settings-fill">list_alt</span>
+<span class="text-[10px] font-medium text-primary">Каталог</span>
+</a>
+<a class="flex flex-col items-center justify-center p-2 rounded-lg gap-1 min-w-[4rem] group" href="#">
+<span class="material-symbols-outlined text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors text-[24px]">bookmark</span>
+<span class="text-[10px] font-medium text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors">Избранное</span>
+</a>
+<a class="flex flex-col items-center justify-center p-2 rounded-lg gap-1 min-w-[4rem] group" href="#">
+<span class="material-symbols-outlined text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors text-[24px]">account_circle</span>
+<span class="text-[10px] font-medium text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors">Профиль</span>
+</a>
+</div>
+</nav>
+<!-- CSS for Material Symbols Fill effect on active state -->
+<style>
+        .font-variation-settings-fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Safe area padding for iPhones with notch/home indicator */
+        .pb-safe-bottom {
+            padding-bottom: env(safe-area-inset-bottom, 20px);
+        }
+        .pt-safe-top {
+            padding-top: env(safe-area-inset-top, 0px);
+        }
+    </style>
+</body></html>

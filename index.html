@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Исповедь</title>
+    <!-- Fonts and Icons (PWA will cache them based on Vite Config) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <meta name="theme-color" content="#121212">
+    <link rel="apple-touch-icon" href="/icon.svg">
+</head>
+
+<body class="bg-[#121212] font-sans antialiased text-[#f2f2f7] h-screen flex justify-center selection:bg-blue-500/30">
+    <div class="w-full max-w-md h-full flex flex-col bg-[#121212] relative">
+        <header
+            class="flex-none pt-12 pb-3 px-4 z-10 sticky top-0 bg-[#121212]/80 backdrop-blur-xl border-b border-[#2c2c2e]/50">
+            <h1 id="page-title" class="text-[34px] font-bold tracking-tight text-white mb-0 text-center">Настройки</h1>
+        </header>
+
+        <!-- CATALOG TAB -->
+        <main id="tab-catalog" class="flex-1 overflow-y-auto no-scrollbar px-4 py-6 pb-28 hidden">
+            <div id="sins-container" class="flex flex-col gap-6">
+                <!-- Data will be injected here by src/main.js -->
+            </div>
+            <div class="h-8"></div>
+        </main>
+
+        <!-- MY LIST TAB -->
+        <main id="tab-list" class="flex-1 overflow-y-auto no-scrollbar px-4 py-6 pb-28 hidden">
+            <div class="flex justify-end mb-4">
+                <button id="clear-list-btn"
+                    class="group flex items-center justify-center gap-2 rounded-xl bg-[#1c1c1e] px-4 py-2 text-[15px] font-medium text-[#ff453a] transition-all active:opacity-70">
+                    <span>Очистить листок</span>
+                </button>
+            </div>
+            <div id="my-list-container" class="space-y-[1px] bg-[#1c1c1e] rounded-2xl overflow-hidden">
+                <!-- Selected sins will be injected here -->
+            </div>
+            <div id="empty-state" class="hidden flex-col items-center justify-center pt-24 text-[#8e8e93]">
+                <div class="w-20 h-20 mb-4 rounded-full bg-[#1c1c1e] flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[40px] opacity-80">list_alt</span>
+                </div>
+                <p class="text-[17px] font-medium text-[#f2f2f7]">Ваш список пуст</p>
+                <p class="text-[15px] mt-1 text-center px-8">Отметьте грехи в каталоге, чтобы добавить их сюда
+                </p>
+            </div>
+            <div class="h-8"></div>
+        </main>
+
+        <!-- SETTINGS TAB -->
+        <main id="tab-settings" class="flex-1 overflow-y-auto no-scrollbar px-4 py-6 pb-28">
+            <!-- Appearance Section -->
+            <div class="mb-6">
+                <h2 class="mb-2 px-4 text-[13px] font-semibold uppercase tracking-wider text-[#8e8e93]">
+                    Внешний вид</h2>
+
+                <div class="overflow-hidden rounded-2xl bg-[#1c1c1e]">
+                    <!-- Dark Mode Toggle -->
+                    <div class="flex items-center justify-between p-3.5 pr-4 transition-colors active:bg-[#2c2c2e]"
+                        id="dark-mode-container">
+                        <div class="flex items-center gap-3.5 flex-1">
+                            <div
+                                class="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg bg-[#007aff] text-white">
+                                <span class="material-symbols-outlined text-[18px]">nightlight</span>
+                            </div>
+                            <span class="text-[17px] font-normal text-white">Темная тема</span>
+                        </div>
+                        <div class="shrink-0 pl-2 flex items-center">
+                            <label class="relative inline-flex cursor-pointer items-center">
+                                <input id="theme-toggle" type="checkbox" class="sr-only peer" checked />
+                                <div
+                                    class="w-[51px] h-[31px] bg-[#39393d] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-[20px] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-[27px] after:w-[27px] after:shadow-sm after:transition-all peer-checked:bg-[#34c759]">
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="h-[0.5px] w-full bg-[#38383a] ml-11"></div>
+
+                    <!-- Font Size Toggle -->
+                    <div class="flex items-center justify-between p-3.5 pr-4 transition-colors active:bg-[#2c2c2e] cursor-pointer"
+                        id="font-size-container">
+                        <div class="flex items-center gap-3.5 flex-1">
+                            <div
+                                class="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg bg-[#5ac8fa] text-white">
+                                <span class="material-symbols-outlined text-[18px]">text_increase</span>
+                            </div>
+                            <span class="text-[17px] font-normal text-white">Размер шрифта</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 text-[#8e8e93]">
+                            <span id="font-size-label" class="text-[17px] font-normal">Обычный</span>
+                            <span class="material-symbols-outlined text-xl">chevron_right</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- General Section -->
+            <div class="mb-6">
+                <h2 class="mb-2 px-4 text-[13px] font-semibold uppercase tracking-wider text-[#8e8e93]">
+                    Общее</h2>
+
+                <div class="overflow-hidden rounded-2xl bg-[#1c1c1e]">
+                    <!-- Notifications -->
+                    <div
+                        class="flex items-center justify-between p-3.5 pr-4 transition-colors active:bg-[#2c2c2e] cursor-pointer">
+                        <div class="flex items-center gap-3.5 flex-1">
+                            <div
+                                class="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg bg-[#ff9500] text-white">
+                                <span class="material-symbols-outlined text-[18px]">notifications</span>
+                            </div>
+                            <span class="text-[17px] font-normal text-white">Уведомления</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 text-[#8e8e93]">
+                            <span class="material-symbols-outlined text-xl">chevron_right</span>
+                        </div>
+                    </div>
+
+                    <div class="h-[0.5px] w-full bg-[#38383a] ml-11"></div>
+
+                    <!-- Language -->
+                    <div
+                        class="flex items-center justify-between p-3.5 pr-4 transition-colors active:bg-[#2c2c2e] cursor-pointer">
+                        <div class="flex items-center gap-3.5 flex-1">
+                            <div
+                                class="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg bg-[#34c759] text-white">
+                                <span class="material-symbols-outlined text-[18px]">language</span>
+                            </div>
+                            <span class="text-[17px] font-normal text-white">Язык</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 text-[#8e8e93]">
+                            <span class="text-[17px] font-normal">Русский</span>
+                            <span class="material-symbols-outlined text-xl">chevron_right</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- App Section -->
+            <div class="mb-8">
+                <h2 class="mb-2 px-4 text-[13px] font-semibold uppercase tracking-wider text-[#8e8e93]">
+                    Приложение</h2>
+
+                <div class="overflow-hidden rounded-2xl bg-[#1c1c1e]">
+                    <!-- About -->
+                    <div
+                        class="flex items-center justify-between p-3.5 pr-4 transition-colors active:bg-[#2c2c2e] cursor-pointer">
+                        <div class="flex items-center gap-3.5 flex-1">
+                            <div
+                                class="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg bg-[#af52de] text-white">
+                                <span class="material-symbols-outlined text-[18px]">info</span>
+                            </div>
+                            <span class="text-[17px] font-normal text-white">О приложении</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 text-[#8e8e93]">
+                            <span class="material-symbols-outlined text-xl">chevron_right</span>
+                        </div>
+                    </div>
+
+                    <div class="h-[0.5px] w-full bg-[#38383a] ml-11"></div>
+
+                    <!-- Contact -->
+                    <div
+                        class="flex items-center justify-between p-3.5 pr-4 transition-colors active:bg-[#2c2c2e] cursor-pointer">
+                        <div class="flex items-center gap-3.5 flex-1">
+                            <div
+                                class="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg bg-[#ff2d55] text-white">
+                                <span class="material-symbols-outlined text-[18px]">mail</span>
+                            </div>
+                            <span class="text-[17px] font-normal text-white">Написать разработчикам</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 text-[#8e8e93]">
+                            <span class="material-symbols-outlined text-xl">chevron_right</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col items-center justify-center gap-0 text-center pb-8 pt-2 object-bottom">
+                <p class="text-[13px] font-normal text-[#8e8e93]">Версия 1.0.1</p>
+                <p class="text-[13px] font-normal text-[#8e8e93] mt-0.5">Сделано с молитвой</p>
+            </div>
+        </main>
+
+        <nav
+            class="absolute bottom-0 left-0 right-0 bg-[#121212]/90 backdrop-blur-xl border-t border-[#2c2c2e]/80 pb-6 pt-2 px-2 z-20">
+            <div class="flex justify-around items-center" id="bottom-nav">
+                <button data-tab="catalog"
+                    class="nav-btn flex flex-1 flex-col items-center justify-center gap-1 text-[#8e8e93] hover:text-[#0a84ff] transition-colors">
+                    <span class="nav-icon material-symbols-outlined text-[28px]">menu_book</span>
+                    <span class="text-[10px] font-medium leading-none">Исповедь</span>
+                </button>
+                <button data-tab="list"
+                    class="nav-btn flex flex-1 flex-col items-center justify-center gap-1 text-[#8e8e93] hover:text-[#0a84ff] transition-colors">
+                    <span class="nav-icon material-symbols-outlined text-[28px]">edit_document</span>
+                    <span class="text-[10px] font-medium leading-none">Заметки</span>
+                </button>
+                <button data-tab="settings"
+                    class="nav-btn flex flex-1 flex-col items-center justify-center gap-1 text-[#0a84ff] hover:text-[#0a84ff] transition-colors">
+                    <span
+                        class="nav-icon material-symbols-outlined text-[28px] font-variation-settings-fill">settings</span>
+                    <span class="text-[10px] font-medium leading-none">Настройки</span>
+                </button>
+            </div>
+        </nav>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
