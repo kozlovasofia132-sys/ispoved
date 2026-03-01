@@ -14,10 +14,11 @@
     <link rel="apple-touch-icon" href="/icon.svg">
 </head>
 
-<body class="bg-[#121212] font-sans antialiased text-[#f2f2f7] h-screen flex justify-center selection:bg-blue-500/30">
-    <div class="w-full max-w-md h-full flex flex-col bg-[#121212] relative">
+<body
+    class="bg-gradient-to-br from-[#1c1c1e] to-[#000000] font-sans antialiased text-[#f2f2f7] h-screen flex justify-center selection:bg-blue-accent/30">
+    <div class="w-full max-w-md h-full flex flex-col relative overflow-hidden">
         <header
-            class="flex-none pt-12 pb-3 px-4 z-10 sticky top-0 bg-[#121212]/80 backdrop-blur-xl border-b border-[#2c2c2e]/50">
+            class="flex-none pt-12 pb-3 px-4 z-10 sticky top-0 bg-black/40 backdrop-blur-3xl border-b border-glass-border">
             <h1 id="page-title" class="text-[34px] font-bold tracking-tight text-white mb-0 text-center">Настройки</h1>
         </header>
 
@@ -33,19 +34,22 @@
         <main id="tab-list" class="flex-1 overflow-y-auto no-scrollbar px-4 py-6 pb-28 hidden">
             <div class="flex justify-end mb-4">
                 <button id="clear-list-btn"
-                    class="group flex items-center justify-center gap-2 rounded-xl bg-[#1c1c1e] px-4 py-2 text-[15px] font-medium text-[#ff453a] transition-all active:opacity-70">
-                    <span>Очистить листок</span>
+                    class="group flex items-center justify-center gap-2 rounded-full bg-glass-bg backdrop-blur-2xl px-4 py-3.5 text-xl font-medium text-[#ff453a] transition-all active:scale-95 w-full border border-glass-border shadow-lg">
+                    <span class="material-symbols-outlined text-[20px]">delete</span>
+                    <span>Очистить список</span>
                 </button>
             </div>
-            <div id="my-list-container" class="space-y-[1px] bg-[#1c1c1e] rounded-2xl overflow-hidden">
+            <div id="my-list-container"
+                class="space-y-[1px] bg-glass-bg backdrop-blur-2xl rounded-3xl overflow-hidden border border-glass-border shadow-lg">
                 <!-- Selected sins will be injected here -->
             </div>
             <div id="empty-state" class="hidden flex-col items-center justify-center pt-24 text-[#8e8e93]">
-                <div class="w-20 h-20 mb-4 rounded-full bg-[#1c1c1e] flex items-center justify-center">
-                    <span class="material-symbols-outlined text-[40px] opacity-80">list_alt</span>
+                <div
+                    class="w-24 h-24 mb-4 rounded-full bg-glass-bg backdrop-blur-2xl flex items-center justify-center border border-glass-border shadow-lg">
+                    <span class="material-symbols-outlined text-[48px] opacity-80">list_alt</span>
                 </div>
-                <p class="text-[17px] font-medium text-[#f2f2f7]">Ваш список пуст</p>
-                <p class="text-[15px] mt-1 text-center px-8">Отметьте грехи в каталоге, чтобы добавить их сюда
+                <p class="text-xl font-medium text-[#f2f2f7]">Ваш список пуст</p>
+                <p class="text-lg mt-1 text-center px-8">Отметьте грехи в каталоге, чтобы добавить их сюда
                 </p>
             </div>
             <div class="h-8"></div>
@@ -55,19 +59,20 @@
         <main id="tab-settings" class="flex-1 overflow-y-auto no-scrollbar px-4 py-6 pb-28">
             <!-- Appearance Section -->
             <div class="mb-6">
-                <h2 class="mb-2 px-4 text-[13px] font-semibold uppercase tracking-wider text-[#8e8e93]">
+                <h2 class="mb-2 px-4 text-sm font-semibold uppercase tracking-wider text-[#8e8e93]">
                     Внешний вид</h2>
 
-                <div class="overflow-hidden rounded-2xl bg-[#1c1c1e]">
+                <div
+                    class="overflow-hidden rounded-3xl bg-glass-bg backdrop-blur-2xl border border-glass-border shadow-lg">
                     <!-- Dark Mode Toggle -->
-                    <div class="flex items-center justify-between p-3.5 pr-4 transition-colors active:bg-[#2c2c2e]"
+                    <div class="flex items-center justify-between p-3.5 pr-4 transition-colors active:bg-[#2c2c2e]/50"
                         id="dark-mode-container">
                         <div class="flex items-center gap-3.5 flex-1">
                             <div
-                                class="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg bg-[#007aff] text-white">
+                                class="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-full bg-blue-accent text-white shadow-sm">
                                 <span class="material-symbols-outlined text-[18px]">nightlight</span>
                             </div>
-                            <span class="text-[17px] font-normal text-white">Темная тема</span>
+                            <span class="text-xl font-normal text-white">Режим для храма</span>
                         </div>
                         <div class="shrink-0 pl-2 flex items-center">
                             <label class="relative inline-flex cursor-pointer items-center">
@@ -79,20 +84,20 @@
                         </div>
                     </div>
 
-                    <div class="h-[0.5px] w-full bg-[#38383a] ml-11"></div>
+                    <div class="h-[0.5px] w-full bg-[#38383a]/70 ml-[52px]"></div>
 
                     <!-- Font Size Toggle -->
-                    <div class="flex items-center justify-between p-3.5 pr-4 transition-colors active:bg-[#2c2c2e] cursor-pointer"
+                    <div class="flex items-center justify-between p-3.5 pr-4 transition-colors active:bg-[#2c2c2e]/50 cursor-pointer"
                         id="font-size-container">
                         <div class="flex items-center gap-3.5 flex-1">
                             <div
-                                class="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg bg-[#5ac8fa] text-white">
+                                class="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-full bg-[#5ac8fa] text-white shadow-sm">
                                 <span class="material-symbols-outlined text-[18px]">text_increase</span>
                             </div>
-                            <span class="text-[17px] font-normal text-white">Размер шрифта</span>
+                            <span class="text-xl font-normal text-white">Размер шрифта</span>
                         </div>
                         <div class="flex items-center gap-1.5 text-[#8e8e93]">
-                            <span id="font-size-label" class="text-[17px] font-normal">Обычный</span>
+                            <span id="font-size-label" class="text-xl font-normal">Обычный</span>
                             <span class="material-symbols-outlined text-xl">chevron_right</span>
                         </div>
                     </div>
@@ -101,39 +106,40 @@
 
             <!-- General Section -->
             <div class="mb-6">
-                <h2 class="mb-2 px-4 text-[13px] font-semibold uppercase tracking-wider text-[#8e8e93]">
+                <h2 class="mb-2 px-4 text-sm font-semibold uppercase tracking-wider text-[#8e8e93]">
                     Общее</h2>
 
-                <div class="overflow-hidden rounded-2xl bg-[#1c1c1e]">
+                <div
+                    class="overflow-hidden rounded-3xl bg-glass-bg backdrop-blur-2xl border border-glass-border shadow-lg">
                     <!-- Notifications -->
                     <div
-                        class="flex items-center justify-between p-3.5 pr-4 transition-colors active:bg-[#2c2c2e] cursor-pointer">
+                        class="flex items-center justify-between p-3.5 pr-4 transition-colors active:bg-[#2c2c2e]/50 cursor-pointer">
                         <div class="flex items-center gap-3.5 flex-1">
                             <div
-                                class="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg bg-[#ff9500] text-white">
+                                class="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-full bg-[#ff9500] text-white shadow-sm">
                                 <span class="material-symbols-outlined text-[18px]">notifications</span>
                             </div>
-                            <span class="text-[17px] font-normal text-white">Уведомления</span>
+                            <span class="text-xl font-normal text-white">Уведомления</span>
                         </div>
                         <div class="flex items-center gap-1.5 text-[#8e8e93]">
                             <span class="material-symbols-outlined text-xl">chevron_right</span>
                         </div>
                     </div>
 
-                    <div class="h-[0.5px] w-full bg-[#38383a] ml-11"></div>
+                    <div class="h-[0.5px] w-full bg-[#38383a]/70 ml-[52px]"></div>
 
                     <!-- Language -->
                     <div
-                        class="flex items-center justify-between p-3.5 pr-4 transition-colors active:bg-[#2c2c2e] cursor-pointer">
+                        class="flex items-center justify-between p-3.5 pr-4 transition-colors active:bg-[#2c2c2e]/50 cursor-pointer">
                         <div class="flex items-center gap-3.5 flex-1">
                             <div
-                                class="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg bg-[#34c759] text-white">
+                                class="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-full bg-[#34c759] text-white shadow-sm">
                                 <span class="material-symbols-outlined text-[18px]">language</span>
                             </div>
-                            <span class="text-[17px] font-normal text-white">Язык</span>
+                            <span class="text-xl font-normal text-white">Язык</span>
                         </div>
                         <div class="flex items-center gap-1.5 text-[#8e8e93]">
-                            <span class="text-[17px] font-normal">Русский</span>
+                            <span class="text-xl font-normal">Русский</span>
                             <span class="material-symbols-outlined text-xl">chevron_right</span>
                         </div>
                     </div>
@@ -142,36 +148,37 @@
 
             <!-- App Section -->
             <div class="mb-8">
-                <h2 class="mb-2 px-4 text-[13px] font-semibold uppercase tracking-wider text-[#8e8e93]">
+                <h2 class="mb-2 px-4 text-sm font-semibold uppercase tracking-wider text-[#8e8e93]">
                     Приложение</h2>
 
-                <div class="overflow-hidden rounded-2xl bg-[#1c1c1e]">
+                <div
+                    class="overflow-hidden rounded-3xl bg-glass-bg backdrop-blur-2xl border border-glass-border shadow-lg">
                     <!-- About -->
                     <div
-                        class="flex items-center justify-between p-3.5 pr-4 transition-colors active:bg-[#2c2c2e] cursor-pointer">
+                        class="flex items-center justify-between p-3.5 pr-4 transition-colors active:bg-[#2c2c2e]/50 cursor-pointer">
                         <div class="flex items-center gap-3.5 flex-1">
                             <div
-                                class="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg bg-[#af52de] text-white">
+                                class="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-full bg-[#af52de] text-white shadow-sm">
                                 <span class="material-symbols-outlined text-[18px]">info</span>
                             </div>
-                            <span class="text-[17px] font-normal text-white">О приложении</span>
+                            <span class="text-xl font-normal text-white">О приложении</span>
                         </div>
                         <div class="flex items-center gap-1.5 text-[#8e8e93]">
                             <span class="material-symbols-outlined text-xl">chevron_right</span>
                         </div>
                     </div>
 
-                    <div class="h-[0.5px] w-full bg-[#38383a] ml-11"></div>
+                    <div class="h-[0.5px] w-full bg-[#38383a]/70 ml-[52px]"></div>
 
                     <!-- Contact -->
                     <div
-                        class="flex items-center justify-between p-3.5 pr-4 transition-colors active:bg-[#2c2c2e] cursor-pointer">
+                        class="flex items-center justify-between p-3.5 pr-4 transition-colors active:bg-[#2c2c2e]/50 cursor-pointer">
                         <div class="flex items-center gap-3.5 flex-1">
                             <div
-                                class="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg bg-[#ff2d55] text-white">
+                                class="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-full bg-[#ff2d55] text-white shadow-sm">
                                 <span class="material-symbols-outlined text-[18px]">mail</span>
                             </div>
-                            <span class="text-[17px] font-normal text-white">Написать разработчикам</span>
+                            <span class="text-xl font-normal text-white">Написать разработчикам</span>
                         </div>
                         <div class="flex items-center gap-1.5 text-[#8e8e93]">
                             <span class="material-symbols-outlined text-xl">chevron_right</span>
@@ -181,29 +188,29 @@
             </div>
 
             <div class="flex flex-col items-center justify-center gap-0 text-center pb-8 pt-2 object-bottom">
-                <p class="text-[13px] font-normal text-[#8e8e93]">Версия 1.0.1</p>
-                <p class="text-[13px] font-normal text-[#8e8e93] mt-0.5">Сделано с молитвой</p>
+                <p class="text-sm font-normal text-[#8e8e93]">Версия 1.0.1</p>
+                <p class="text-sm font-normal text-[#8e8e93] mt-0.5">Сделано с молитвой</p>
             </div>
         </main>
 
         <nav
-            class="absolute bottom-0 left-0 right-0 bg-[#121212]/90 backdrop-blur-xl border-t border-[#2c2c2e]/80 pb-6 pt-2 px-2 z-20">
+            class="absolute bottom-0 left-0 right-0 bg-black/40 backdrop-blur-3xl border-t border-glass-border pb-6 pt-2 px-2 z-20">
             <div class="flex justify-around items-center" id="bottom-nav">
                 <button data-tab="catalog"
-                    class="nav-btn flex flex-1 flex-col items-center justify-center gap-1 text-[#8e8e93] hover:text-[#0a84ff] transition-colors">
+                    class="nav-btn flex flex-1 flex-col items-center justify-center gap-1 text-[#8e8e93] hover:text-white transition-colors">
                     <span class="nav-icon material-symbols-outlined text-[28px]">menu_book</span>
-                    <span class="text-[10px] font-medium leading-none">Исповедь</span>
+                    <span class="text-[11px] font-medium leading-none mt-1">Исповедь</span>
                 </button>
                 <button data-tab="list"
-                    class="nav-btn flex flex-1 flex-col items-center justify-center gap-1 text-[#8e8e93] hover:text-[#0a84ff] transition-colors">
+                    class="nav-btn flex flex-1 flex-col items-center justify-center gap-1 text-[#8e8e93] hover:text-white transition-colors">
                     <span class="nav-icon material-symbols-outlined text-[28px]">edit_document</span>
-                    <span class="text-[10px] font-medium leading-none">Заметки</span>
+                    <span class="text-[11px] font-medium leading-none mt-1">Заметки</span>
                 </button>
                 <button data-tab="settings"
-                    class="nav-btn flex flex-1 flex-col items-center justify-center gap-1 text-[#0a84ff] hover:text-[#0a84ff] transition-colors">
+                    class="nav-btn flex flex-1 flex-col items-center justify-center gap-1 text-white hover:text-white transition-colors">
                     <span
                         class="nav-icon material-symbols-outlined text-[28px] font-variation-settings-fill">settings</span>
-                    <span class="text-[10px] font-medium leading-none">Настройки</span>
+                    <span class="text-[11px] font-medium leading-none mt-1">Настройки</span>
                 </button>
             </div>
         </nav>

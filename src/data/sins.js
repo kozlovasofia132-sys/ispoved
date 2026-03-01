@@ -1,7 +1,7 @@
 export const getSinsData = () => [
     {
         id: 'god',
-        title: 'Отношение к Богу',
+        title: 'Против Бога',
         subtitle: 'Вера и духовная жизнь',
         icon: 'church',
         sins: [
@@ -19,7 +19,7 @@ export const getSinsData = () => [
     },
     {
         id: 'neighbors',
-        title: 'Отношение к ближним',
+        title: 'Против ближнего',
         subtitle: 'Семья, друзья и окружение',
         icon: 'group',
         sins: [
@@ -37,7 +37,7 @@ export const getSinsData = () => [
     },
     {
         id: 'self',
-        title: 'Отношение к себе',
+        title: 'Против себя',
         subtitle: 'Внутренний мир и поступки',
         icon: 'person',
         sins: [

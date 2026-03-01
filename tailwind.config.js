@@ -8,14 +8,17 @@ export default {
     theme: {
         extend: {
             colors: {
-                "primary": "#1111d4",
-                "background-light": "#f6f6f8",
-                "background-dark": "#101022",
+                "primary": "#0A84FF",
+                "background-light": "#f2f2f7",
+                "background-dark": "#000000",
+                "blue-accent": "#0A84FF",
+                "dark-bg": "#000000",
+                "glass-bg": "rgba(255, 255, 255, 0.05)",
+                "glass-border": "rgba(255, 255, 255, 0.1)",
             },
             fontFamily: {
-                "display": ["Lexend", "sans-serif"]
-            },
-            borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                "display": ["Inter", "sans-serif"]
+            }
         },
     },
     plugins: [],

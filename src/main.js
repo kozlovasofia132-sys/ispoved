@@ -62,11 +62,11 @@ document.addEventListener('DOMContentLoaded', () => {
         navButtons.forEach(btn => {
             const icon = btn.querySelector('.nav-icon');
             if (btn.getAttribute('data-tab') === tabId) {
-                btn.classList.add('text-[#0a84ff]');
+                btn.classList.add('text-blue-accent');
                 btn.classList.remove('text-[#8e8e93]');
                 if (icon) icon.classList.add('font-variation-settings-fill');
             } else {
-                btn.classList.remove('text-[#0a84ff]');
+                btn.classList.remove('text-blue-accent');
                 btn.classList.add('text-[#8e8e93]');
                 if (icon) icon.classList.remove('font-variation-settings-fill');
             }
@@ -80,33 +80,33 @@ document.addEventListener('DOMContentLoaded', () => {
     data.forEach((category, index) => {
         const isOpen = index === 0 ? 'open' : '';
         catalogHtml += `
-        <details class="group rounded-2xl bg-[#1c1c1e] overflow-hidden transition-all duration-300 shadow-sm" ${isOpen}>
-            <summary class="flex cursor-pointer items-center justify-between gap-4 p-4 hover:bg-[#2c2c2e] transition-colors list-none [&::-webkit-details-marker]:hidden">
+        <details class="group rounded-3xl bg-glass-bg border border-glass-border backdrop-blur-2xl overflow-hidden shadow-lg transition-all duration-300 mb-4" ${isOpen}>
+            <summary class="flex cursor-pointer items-center justify-between gap-4 p-4 hover:bg-[#2c2c2e]/40 transition-colors list-none [&::-webkit-details-marker]:hidden">
                 <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-xl bg-[#2c2c2e] flex items-center justify-center text-[#0a84ff]">
-                        <span class="material-symbols-outlined text-[20px]">${category.icon}</span>
+                    <div class="w-12 h-12 rounded-full bg-[#2c2c2e]/60 flex items-center justify-center text-blue-accent shadow-inner">
+                        <span class="material-symbols-outlined text-[24px]">${category.icon}</span>
                     </div>
                     <div>
-                        <h3 class="font-semibold text-white text-[17px] leading-tight mb-0.5">${category.title}</h3>
-                        <p class="text-[13px] text-[#8e8e93] font-normal">${category.subtitle}</p>
+                        <h3 class="font-semibold text-white text-xl leading-tight mb-0.5">${category.title}</h3>
+                        <p class="text-[15px] text-[#8e8e93] font-normal">${category.subtitle}</p>
                     </div>
                 </div>
-                <div class="w-7 h-7 rounded-full bg-[#2c2c2e] flex items-center justify-center group-open:rotate-180 transition-transform duration-300">
-                    <span class="material-symbols-outlined text-[#8e8e93] text-[18px]">expand_more</span>
+                <div class="w-8 h-8 rounded-full bg-[#2c2c2e]/60 flex items-center justify-center group-open:rotate-180 transition-transform duration-300">
+                    <span class="material-symbols-outlined text-[#8e8e93] text-[20px]">expand_more</span>
                 </div>
             </summary>
-            <div class="flex flex-col border-t border-[#38383a]">
+            <div class="flex flex-col border-t border-[#38383a]/50">
         `;
 
         category.sins.forEach((sin, i) => {
             const isLast = i === category.sins.length - 1;
-            const borderClass = isLast ? '' : 'border-b border-[#38383a] ml-12';
-            const paddingClass = isLast ? 'pb-3' : '';
+            const borderClass = isLast ? '' : 'border-b border-[#38383a]/50 ml-[68px]';
+            const paddingClass = isLast ? 'pb-4' : '';
 
             catalogHtml += `
-                <label class="flex items-center gap-3 py-3 pr-4 cursor-pointer group/item hover:bg-[#2c2c2e] transition-colors pl-4 ${paddingClass}">
+                <label class="flex items-center gap-4 py-3.5 pr-4 cursor-pointer group/item hover:bg-[#2c2c2e]/30 transition-colors pl-4 ${paddingClass}">
                     <input class="sin-checkbox ios-checkbox flex-shrink-0 transition-all cursor-pointer" type="checkbox" value="${sin}"/>
-                    <span class="text-[#f2f2f7] text-[17px] font-normal leading-snug flex-1">${sin}</span>
+                    <span class="text-[#f2f2f7] text-xl font-normal leading-snug flex-1">${sin}</span>
                 </label>
                 ${!isLast ? `<div class="${borderClass}"></div>` : ''}
             `;
@@ -159,9 +159,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const borderClass = isLast ? '' : 'border-b border-[#38383a] ml-12';
 
             listHtml += `
-            <label class="group flex cursor-pointer items-center gap-3 py-3 pr-4 transition-colors hover:bg-[#2c2c2e] pl-4">
+            <label class="group flex cursor-pointer items-center gap-4 py-4 pr-4 transition-colors hover:bg-[#2c2c2e]/30 pl-4">
                 <input checked class="list-sin-checkbox ios-checkbox flex-shrink-0 transition-all cursor-pointer" type="checkbox" value="${sin}"/>
-                <span class="flex-1 text-[17px] font-normal text-[#f2f2f7] leading-snug">${sin}</span>
+                <span class="flex-1 text-xl font-normal text-[#f2f2f7] leading-snug">${sin}</span>
             </label>
             ${!isLast ? `<div class="${borderClass}"></div>` : ''}
             `;
@@ -211,10 +211,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function applyFontSize() {
         if (isLargeFont) {
-            document.documentElement.style.fontSize = '21px'; // Even larger
+            document.documentElement.style.fontSize = '18px'; // Very large
             if (fontSizeLabel) fontSizeLabel.textContent = 'Крупный';
         } else {
-            document.documentElement.style.fontSize = '17px'; // iOS standard body size roughly 17px default
+            document.documentElement.style.fontSize = '16px'; // iOS standard body size roughly 17px default
             if (fontSizeLabel) fontSizeLabel.textContent = 'Обычный';
         }
     }
