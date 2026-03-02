@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html class="dark" lang="ru"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Confession Catalog</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#7f19e6",
+                        "primary-dark": "#5e12ab",
+                        "background-light": "#f7f6f8",
+                        "background-dark": "#191121",
+                        "surface-dark": "#2a1f33",
+                        "text-secondary": "#ab9db8",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        "2xl": "1rem",
+                        full: "9999px",
+                    },
+                },
+            },
+        }
+    </script>
+<style>::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+        }.glass-panel {
+            background: rgba(42, 31, 51, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .glass-header {
+            background: rgba(25, 17, 33, 0.8);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }input[type="checkbox"] {
+            border-radius: 6px; 
+            border-color: rgba(255,255,255,0.2);
+            background-color: rgba(255,255,255,0.05);
+        }
+        input[type="checkbox"]:checked {
+            background-color: #7f19e6;
+            border-color: transparent;
+        }details > summary {
+            list-style: none;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }.no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display antialiased text-slate-900 dark:text-slate-100 min-h-screen flex flex-col overflow-hidden">
+<header class="fixed top-0 left-0 right-0 z-50 glass-header px-4 pt-12 pb-4 flex items-center justify-between">
+<button class="flex items-center justify-center p-2 rounded-full hover:bg-white/5 text-slate-100 transition-colors">
+<span class="material-symbols-outlined text-2xl">close</span>
+</button>
+<h1 class="text-lg font-semibold tracking-tight text-white">Подготовка к исповеди</h1>
+<button class="text-sm font-medium text-primary hover:text-primary-dark transition-colors px-2">
+            Сбросить
+        </button>
+</header>
+<main class="flex-1 overflow-y-auto pt-32 pb-24 px-4 scroll-smooth">
+<div class="mb-8 text-center animate-fade-in-up">
+<div class="inline-flex items-center justify-center p-3 mb-4 rounded-full bg-primary/10 text-primary">
+<span class="material-symbols-outlined">psychology_alt</span>
+</div>
+<h2 class="text-2xl font-bold text-white mb-2 tracking-tight">Испытание совести</h2>
+<p class="text-text-secondary text-sm leading-relaxed max-w-xs mx-auto">
+                «Сердце чистое сотвори во мне, Боже, и дух правый обнови внутри меня»
+                <br/><span class="opacity-60 text-xs mt-1 block">— Псалом 50:12</span>
+</p>
+</div>
+<div class="space-y-4">
+<details class="group glass-panel rounded-2xl overflow-hidden transition-all duration-300">
+<summary class="cursor-pointer relative min-h-[140px] flex flex-col justify-end p-6 select-none">
+<div class="absolute inset-0 z-0">
+<img alt="Abstract gentle light beams in dark space" class="w-full h-full object-cover opacity-60 group-open:opacity-30 transition-opacity duration-300" data-alt="Abstract gentle light beams in dark space" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmCg9TRqa5b9cZxSAQYyxwCbaGnvn9Totxrh2v2KC9zH4RhMPMd0iCb-dKqcot1R3AWXruRCQIjf-cJWkeYNwFE2ScaOBRZdIvQ6YD0Lhr5Cm3XhC_qQJxQQzCRxw4xayovy61QmQbuqQMFQsYUtTmikT5YYHxE-RTHnyAPDzZJK-_HgR-PiPrAhsJnfVNz7A0katctFfJOj3EtPQP2d11ywJnya6nmIuc427eM-3RuXF2mmPWxskFV2KVg4_0OWXG_sgr8vV0aIML"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/80 to-transparent"></div>
+</div>
+<div class="relative z-10 flex items-center justify-between">
+<div>
+<span class="text-xs font-medium tracking-wider uppercase text-primary mb-1 block">I. Отношения</span>
+<h3 class="text-xl font-bold text-white group-open:text-primary transition-colors">Против Бога</h3>
+</div>
+<span class="material-symbols-outlined text-white/50 group-open:rotate-180 transition-transform duration-300">expand_more</span>
+</div>
+</summary>
+<div class="p-4 space-y-1 bg-background-dark/50 backdrop-blur-sm border-t border-white/5">
+<label class="flex items-start gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors cursor-pointer group/item">
+<input class="mt-1 w-5 h-5 rounded border-white/20 text-primary focus:ring-offset-0 focus:ring-0 bg-white/5 cursor-pointer" type="checkbox"/>
+<div class="flex-1">
+<p class="text-sm text-slate-200 font-medium group-hover/item:text-white transition-colors">Отрицал ли я существование Бога?</p>
+<p class="text-xs text-text-secondary mt-1">Сомнения в вере, атеизм в разговорах.</p>
+</div>
+</label>
+<label class="flex items-start gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors cursor-pointer group/item">
+<input class="mt-1 w-5 h-5 rounded border-white/20 text-primary focus:ring-offset-0 focus:ring-0 bg-white/5 cursor-pointer" type="checkbox"/>
+<div class="flex-1">
+<p class="text-sm text-slate-200 font-medium group-hover/item:text-white transition-colors">Пропускал ли я Воскресную Мессу?</p>
+<p class="text-xs text-text-secondary mt-1">Без уважительной причины.</p>
+</div>
+</label>
+<label class="flex items-start gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors cursor-pointer group/item">
+<input class="mt-1 w-5 h-5 rounded border-white/20 text-primary focus:ring-offset-0 focus:ring-0 bg-white/5 cursor-pointer" type="checkbox"/>
+<div class="flex-1">
+<p class="text-sm text-slate-200 font-medium group-hover/item:text-white transition-colors">Произносил ли имя Божье всуе?</p>
+</div>
+</label>
+</div>
+</details>
+<details class="group glass-panel rounded-2xl overflow-hidden transition-all duration-300">
+<summary class="cursor-pointer relative min-h-[140px] flex flex-col justify-end p-6 select-none">
+<div class="absolute inset-0 z-0">
+<img alt="Hands reaching out in support abstract" class="w-full h-full object-cover opacity-60 group-open:opacity-30 transition-opacity duration-300" data-alt="Hands reaching out in support abstract" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3IOXBKqJdrR1AJw_HK-UJU_5EFC6f2WIHUUJ5cf6uMtoAYLMTRdTcXpwMwalvz5Wzry2pdf-VIH8RGUrLwZUgmNDVNLFGLfDRfvdpeNMs-yNfiRvC2KqV_D3Bj2RVgS6imto4jW3hCZvk64reGr3u-F-FFlpYxM0SHsjw8kg6iJ2J-IFq8-8L6OoJX7otVT48Itb3JX75DnVUROPK4RRNicexBKU7Tm8sNDRlq9m_qHfoJsWGOSUlMGnLzIvaYML9N697KQmmdE0p"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/80 to-transparent"></div>
+</div>
+<div class="relative z-10 flex items-center justify-between">
+<div>
+<span class="text-xs font-medium tracking-wider uppercase text-blue-400 mb-1 block">II. Ближние</span>
+<h3 class="text-xl font-bold text-white group-open:text-blue-400 transition-colors">Против ближнего</h3>
+</div>
+<span class="material-symbols-outlined text-white/50 group-open:rotate-180 transition-transform duration-300">expand_more</span>
+</div>
+</summary>
+<div class="p-4 space-y-1 bg-background-dark/50 backdrop-blur-sm border-t border-white/5">
+<label class="flex items-start gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors cursor-pointer group/item">
+<input class="mt-1 w-5 h-5 rounded border-white/20 text-primary focus:ring-offset-0 focus:ring-0 bg-white/5 cursor-pointer" type="checkbox"/>
+<div class="flex-1">
+<p class="text-sm text-slate-200 font-medium group-hover/item:text-white transition-colors">Был ли я причиной ссор?</p>
+<p class="text-xs text-text-secondary mt-1">Гнев, раздражительность, нетерпение.</p>
+</div>
+</label>
+<label class="flex items-start gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors cursor-pointer group/item">
+<input class="mt-1 w-5 h-5 rounded border-white/20 text-primary focus:ring-offset-0 focus:ring-0 bg-white/5 cursor-pointer" type="checkbox"/>
+<div class="flex-1">
+<p class="text-sm text-slate-200 font-medium group-hover/item:text-white transition-colors">Осуждал ли я других?</p>
+<p class="text-xs text-text-secondary mt-1">Сплетни, клевета, осуждение в мыслях.</p>
+</div>
+</label>
+</div>
+</details>
+<details class="group glass-panel rounded-2xl overflow-hidden transition-all duration-300">
+<summary class="cursor-pointer relative min-h-[140px] flex flex-col justify-end p-6 select-none">
+<div class="absolute inset-0 z-0">
+<img alt="Reflection on water dark moody" class="w-full h-full object-cover opacity-60 group-open:opacity-30 transition-opacity duration-300" data-alt="Reflection on water dark moody" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCP1NVYiCpbUrYta1xk6ZQ4Ph5kLI1kNzN8EcZ2ct-6X9uj82-Bb0uE5zqqYKm9V_Ks5aPyxFyOXlY1x0ol2nPhVblMgGva9hEmnd-ZvVLIyxUSr1DvVGv-8XgMgPzLl0yAI_3NrAocV5EcoOAhBmu2X06iZ1G-ySSWDG-xPEjjQJaeioYt-HvY-W7qoutNuptZmUCEVnTTvRegaOIqplx10JqNkaMKG0w08hCG2F4_8hZ_bs-TEvo5pVoIQ-VbiNGwiq3aqKdEMURQ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/80 to-transparent"></div>
+</div>
+<div class="relative z-10 flex items-center justify-between">
+<div>
+<span class="text-xs font-medium tracking-wider uppercase text-emerald-400 mb-1 block">III. Личность</span>
+<h3 class="text-xl font-bold text-white group-open:text-emerald-400 transition-colors">Против себя</h3>
+</div>
+<span class="material-symbols-outlined text-white/50 group-open:rotate-180 transition-transform duration-300">expand_more</span>
+</div>
+</summary>
+<div class="p-4 space-y-1 bg-background-dark/50 backdrop-blur-sm border-t border-white/5">
+<label class="flex items-start gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors cursor-pointer group/item">
+<input class="mt-1 w-5 h-5 rounded border-white/20 text-primary focus:ring-offset-0 focus:ring-0 bg-white/5 cursor-pointer" type="checkbox"/>
+<div class="flex-1">
+<p class="text-sm text-slate-200 font-medium group-hover/item:text-white transition-colors">Предавался ли я унынию?</p>
+<p class="text-xs text-text-secondary mt-1">Отсутствие надежды, лень, апатия.</p>
+</div>
+</label>
+<label class="flex items-start gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors cursor-pointer group/item">
+<input class="mt-1 w-5 h-5 rounded border-white/20 text-primary focus:ring-offset-0 focus:ring-0 bg-white/5 cursor-pointer" type="checkbox"/>
+<div class="flex-1">
+<p class="text-sm text-slate-200 font-medium group-hover/item:text-white transition-colors">Был ли я горд или тщеславен?</p>
+</div>
+</label>
+</div>
+</details>
+</div>
+<div class="h-8"></div>
+</main>
+<nav class="fixed bottom-0 w-full bg-[#191121] dark:bg-[#191121] border-t border-[#302938] px-4 pb-6 pt-2 z-50">
+<div class="grid grid-cols-4 items-end">
+<a class="flex flex-1 flex-col items-center gap-1 group" href="#">
+<div class="flex items-center justify-center w-12 h-8 rounded-full bg-primary/20 text-primary transition-colors">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;">menu_book</span>
+</div>
+<span class="text-xs font-medium text-white">Каталог</span>
+</a>
+<a class="flex flex-1 flex-col items-center gap-1 group" href="#">
+<div class="flex items-center justify-center w-12 h-8 rounded-full text-text-secondary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[24px]">edit_note</span>
+</div>
+<span class="text-xs font-medium text-text-secondary group-hover:text-white transition-colors">Записка</span>
+</a>
+<a class="flex flex-1 flex-col items-center gap-1 group" href="#">
+<div class="flex items-center justify-center w-12 h-8 rounded-full text-text-secondary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[24px]">school</span>
+</div>
+<span class="text-xs font-medium text-text-secondary group-hover:text-white transition-colors">Поучения</span>
+</a>
+<a class="flex flex-1 flex-col items-center gap-1 group" href="#">
+<div class="flex items-center justify-center w-12 h-8 rounded-full text-text-secondary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[24px]">settings</span>
+</div>
+<span class="text-xs font-medium text-text-secondary group-hover:text-white transition-colors">Настройки</span>
+</a>
+</div>
+</nav>
+</body></html>

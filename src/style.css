@@ -12,8 +12,19 @@
     scrollbar-width: none;
   }
 
+  body {
+    background-color: theme('colors.background-dark');
+    color: white;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  body.light {
+    background-color: theme('colors.background-light') !important;
+    color: #1a1a1a !important;
+  }
+
   ::-webkit-scrollbar {
-    width: 6px;
+    width: 4px;
   }
 
   ::-webkit-scrollbar-track {
@@ -21,56 +32,173 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background-color: #3a3a3c;
-    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
   }
 
-  /* iOS Style Checkboxes */
-  .ios-checkbox {
+  .glass-panel {
+    background: rgba(42, 31, 51, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .light .glass-panel {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  }
+
+  .glass-header {
+    background: rgba(25, 17, 33, 0.8);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .light .glass-header {
+    background: rgba(255, 255, 255, 0.85);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  /* Custom Checkbox */
+  .sin-checkbox {
     appearance: none;
-    background-color: transparent;
-    margin: 0;
-    width: 22px;
-    height: 22px;
-    border: 1px solid #48484a;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.05);
+    width: 20px;
+    height: 20px;
     cursor: pointer;
-    transition: all 0.2s ease-in-out;
+    position: relative;
+    transition: all 0.2s ease;
   }
 
-  .ios-checkbox:checked {
-    background-color: #3b82f6;
-    border-color: #3b82f6;
+  .sin-checkbox:checked {
+    background-color: #7f19e6;
+    border-color: transparent;
   }
 
-  .ios-checkbox::before {
+  .sin-checkbox:checked::after {
     content: "";
-    width: 14px;
-    height: 14px;
-    background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
-    background-size: contain;
-    background-repeat: no-repeat;
-    transform: scale(0.5);
-    opacity: 0;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-
-  .ios-checkbox:checked::before {
-    transform: scale(1.05);
-    opacity: 1;
+    position: absolute;
+    left: 6px;
+    top: 2px;
+    width: 6px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
   }
 }
 
 /* Base Body Styles */
 body {
-  min-height: max(884px, 100dvh);
-  background-color: #121212;
+  min-height: 100dvh;
+}
+
+.light .text-white {
+  color: #1a1a1a !important;
+}
+
+.light .text-slate-100 {
+  color: #1a1a1a !important;
+}
+
+.light .text-slate-200 {
+  color: #2d2d2d !important;
+}
+
+.light .text-\[\#ab9db8\] {
+  color: #6e6e73 !important;
+}
+
+/* Section headers and labels in light mode */
+.light h2[data-t],
+.light p[data-t],
+.light h3[data-t] {
+  color: #1a1a1a !important;
+}
+
+.light .bg-black\/40 {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+.light .bg-white\/5 {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+.light .border-white\/5 {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+.light .border-white\/10 {
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Theme toggle switch in light mode */
+.light #theme-toggle+div {
+  background-color: #e5e7eb !important;
+  /* bg-gray-200 */
+  border: 1px solid #d1d5db !important;
+  /* border-gray-300 */
+}
+
+.light #theme-toggle:checked+div {
+  background-color: #7f19e6 !important;
+  border-color: transparent !important;
+}
+
+.light #theme-toggle+div::after {
+  background-color: white !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Smooth transition for theme toggle */
 * {
-  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+/* Catalog cards text must remain white even in light mode due to dark image/gradient */
+.light .glass-panel summary h3.text-white {
+  color: white !important;
+}
+
+/* Subtitles (e.g., "I. ОТНОШЕНИЯ") must keep their accent colors */
+.light .glass-panel summary span.text-primary {
+  color: #7f19e6 !important;
+}
+
+.light .glass-panel summary span.text-blue-400 {
+  color: #60a5fa !important;
+}
+
+.light .glass-panel summary span.text-emerald-400 {
+  color: #34d399 !important;
+}
+
+.light .glass-panel summary span.opacity-90 {
+  opacity: 1 !important;
+}
+
+@keyframes fadeInKeyUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInKeyUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.teaching-filter-btn.active {
+  background-color: #7f19e6 !important;
+  color: white !important;
+  border-color: transparent !important;
 }

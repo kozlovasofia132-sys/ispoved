@@ -8,13 +8,13 @@ export default {
     theme: {
         extend: {
             colors: {
-                "primary": "#0A84FF",
-                "background-light": "#f2f2f7",
-                "background-dark": "#000000",
+                "primary": "#7f19e6",
+                "primary-dark": "#5e12ab",
+                "background-light": "#f7f6f8",
+                "background-dark": "#191121",
+                "surface-dark": "#2a1f33",
+                "text-secondary": "#ab9db8",
                 "blue-accent": "#0A84FF",
-                "dark-bg": "#000000",
-                "glass-bg": "rgba(255, 255, 255, 0.05)",
-                "glass-border": "rgba(255, 255, 255, 0.1)",
             },
             fontFamily: {
                 "display": ["Inter", "sans-serif"]
