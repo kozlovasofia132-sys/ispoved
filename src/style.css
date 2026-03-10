@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,700;1,400&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -40,7 +42,114 @@
     background: rgba(42, 31, 51, 0.4);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  }
+
+  .text-gold {
+    background: linear-gradient(135deg, #FFD700 0%, #B8860B 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+  }
+
+  .font-serif {
+    font-family: 'Lora', serif;
+  }
+
+  .font-cs {
+    font-family: 'Lora', Georgia, 'Times New Roman', Times, serif;
+    letter-spacing: 0.01em;
+    line-height: 1.6;
+  }
+
+  .quote-card {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    padding: 32px;
+    position: relative;
+    margin: 20px 0;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+  }
+
+  .light .quote-card {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  }
+
+  .quote-text {
+    font-size: 1.25rem;
+    line-height: 1.6;
+    font-style: italic;
+    color: white;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .light .quote-text {
+    color: #1a1a1a;
+  }
+
+  .quote-author {
+    margin-top: 16px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #ab9db8;
+    text-align: center;
+    display: block;
+  }
+
+  .quote-icon {
+    position: absolute;
+    font-size: 4rem;
+    color: rgba(127, 25, 230, 0.15);
+    font-family: serif;
+    line-height: 1;
+    z-index: 0;
+  }
+
+  .quote-icon-start {
+    top: 10px;
+    left: 20px;
+  }
+
+  .quote-icon-end {
+    bottom: -10px;
+    right: 20px;
+  }
+
+  .refresh-quote-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 auto;
+    padding: 8px 16px;
+    background: rgba(127, 25, 230, 0.1);
+    border: 1px solid rgba(127, 25, 230, 0.2);
+    border-radius: 12px;
+    color: #a78bfa;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+  }
+
+  .refresh-quote-btn:active {
+    scale: 0.95;
+    background: rgba(127, 25, 230, 0.2);
+  }
+
+  .refresh-quote-btn .material-symbols-outlined {
+    font-size: 18px;
+    transition: transform 0.5s ease;
+  }
+
+  .refresh-quote-btn:hover .material-symbols-outlined {
+    transform: rotate(180deg);
   }
 
   .light .glass-panel {
@@ -67,11 +176,16 @@
     border-radius: 6px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     background-color: rgba(255, 255, 255, 0.05);
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     cursor: pointer;
     position: relative;
     transition: all 0.2s ease;
+  }
+
+  .light .sin-checkbox {
+    border: 2px solid #94a3b8;
+    background-color: white;
   }
 
   .sin-checkbox:checked {
@@ -82,13 +196,17 @@
   .sin-checkbox:checked::after {
     content: "";
     position: absolute;
-    left: 6px;
-    top: 2px;
-    width: 6px;
-    height: 10px;
+    left: 8px;
+    top: 3px;
+    width: 7px;
+    height: 13px;
     border: solid white;
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);
+  }
+
+  details {
+    scroll-margin-top: 100px;
   }
 }
 
@@ -202,3 +320,147 @@ body {
   color: white !important;
   border-color: transparent !important;
 }
+
+#bottom-nav {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px) !important;
+}
+
+/* Reading Mode Styles */
+#reading-mode-modal .reading-sin-item {
+  border-left: 6px solid #7f19e6;
+  padding-left: 24px;
+}
+
+#reading-mode-modal .reading-sin-text {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+#reading-mode-modal .reading-sin-note {
+  font-size: 1.4rem;
+  color: #ab9db8;
+  font-style: italic;
+  margin-top: 12px;
+}
+
+/*
+   Interactive Sin Card (Accordion + Swipe)
+*/
+.sin-card-wrapper {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  background: rgba(42, 31, 51, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.sin-card-main {
+  position: relative;
+  z-index: 10;
+  background: transparent;
+}
+
+/* Light mode overrides for card */
+.light .sin-card-main {
+  background: white;
+}
+
+.light .sin-card-wrapper {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(0, 0, 0, 0.05);
+}
+
+.sin-card-header {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.sin-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+  flex: 1;
+  line-height: 1.3;
+}
+
+.light .sin-card-title {
+  color: #1a1a1a;
+}
+
+.sin-card-indicator {
+  color: #ab9db8;
+  transition: transform 0.3s ease;
+}
+
+.sin-card-wrapper.open .sin-card-indicator {
+  transform: rotate(180deg);
+  color: #7f19e6;
+}
+
+.sin-card-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), padding 0.3s ease;
+  padding: 0 20px;
+}
+
+.sin-card-wrapper.open .sin-card-body {
+  max-height: 500px;
+  padding-bottom: 20px;
+}
+
+/* Details Label */
+.details-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #ab9db8;
+  opacity: 0.6;
+  display: block;
+  margin-bottom: 8px;
+}
+
+/* Per-sin Note Input */
+.sin-note-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  color: white;
+  font-size: 14px;
+  padding: 12px;
+  outline: none;
+  transition: all 0.2s ease;
+  min-height: 80px;
+}
+
+.sin-note-input:focus {
+  border-color: #7f19e6;
+  background: rgba(127, 25, 230, 0.05);
+}
+
+.light .sin-note-input {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.05);
+  color: #1a1a1a;
+}
+
+@keyframes ttsPulse {
+  0% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.2); opacity: 1; color: #7f19e6; }
+  100% { transform: scale(1); opacity: 0.6; }
+}
+
+.pulse-tts {
+  animation: ttsPulse 1.5s infinite ease-in-out;
+  color: #7f19e6 !important;
+  opacity: 1 !important;
+}
+
+

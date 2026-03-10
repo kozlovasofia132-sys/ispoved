@@ -1,0 +1,12 @@
+{
+  "appId": "com.piskunov.ispoved",
+  "appName": "Ispoved",
+  "webDir": "dist",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0,
+      "backgroundColor": "#191121",
+      "androidScaleType": "CENTER_CROP"
+    }
+  }
+}
