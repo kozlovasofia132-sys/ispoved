@@ -1,12 +1,14 @@
 {
   "name": "ispoved",
   "private": true,
-  "version": "1.3.0",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "node sync-version.js && vite build && npx cap sync",
+    "preview": "vite preview",
+    "cap:sync": "node sync-version.js && npx cap sync",
+    "sync-version": "node sync-version.js"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.18",
@@ -14,5 +16,15 @@
     "tailwindcss": "^3.4.1",
     "vite": "^5.1.4",
     "vite-plugin-pwa": "^0.19.0"
+  },
+  "dependencies": {
+    "@capacitor-community/text-to-speech": "^8.0.0",
+    "@capacitor/android": "^8.1.0",
+    "@capacitor/cli": "^8.1.0",
+    "@capacitor/core": "^8.1.0",
+    "@capacitor/share": "^8.0.1",
+    "@capacitor/splash-screen": "^8.0.1",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.2.0"
   }
 }

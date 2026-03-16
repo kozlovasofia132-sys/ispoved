@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="ru"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=EB+Garamond:ital,wght@0,400..800;1,400..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#E1C16E", // Gold for accents/headings
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#0F0F10", // Deep black requested
+                        "milky": "#E5E7EB",
+                    },
+                    fontFamily: {
+                        "display": ["EB Garamond", "Noto Serif", "serif"],
+                        "sans": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .slavonic-text {
+            line-height: 1.8;
+            letter-spacing: 0.01em;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-milky antialiased selection:bg-primary/30">
+<!-- Global Layout Container -->
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+<!-- Top Progress Bar -->
+<div class="fixed top-0 left-0 w-full z-50 h-1 bg-white/5">
+<div class="h-full bg-primary shadow-[0_0_8px_rgba(225,193,110,0.5)]" style="width: 42%;"></div>
+</div>
+<!-- Sticky Header Bar -->
+<header class="sticky top-1 z-40 flex items-center justify-between px-6 py-6 bg-background-dark/80 backdrop-blur-md">
+<button class="flex items-center justify-center size-10 rounded-full bg-white/5 border border-white/10 text-milky hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-xl">close</span>
+</button>
+<div class="flex flex-col items-center">
+<h2 class="text-xs uppercase tracking-[0.2em] text-primary/70 font-sans font-medium">Молитвослов</h2>
+<h1 class="text-lg font-bold text-milky tracking-tight">Вечерние молитвы</h1>
+</div>
+<!-- Empty div for symmetry -->
+<div class="size-10"></div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 px-6 pb-20 pt-4 max-w-2xl mx-auto w-full">
+<!-- Immersive Single Card Layout -->
+<div class="glass-card rounded-xl p-8 mb-12 shadow-2xl">
+<!-- Hero Image in Rule -->
+<div class="mb-10 overflow-hidden rounded-lg border border-white/5">
+<div class="w-full aspect-[21/9] bg-center bg-no-repeat bg-cover opacity-80" data-alt="Interior of an Orthodox church with glowing candles and icons" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCq-y6AXKXjYyX4jqmMLKpEK5hVmWf2ABR0t79GNCk5wM3Xy15hXjJeChCc7627hVTKwQZ-mzmaXwPpjEPCKiadSuxYHHiBDeMqED-69EkHQlZ0_eA-lMJbv4wDGIuHdHdELvvk81Yb7QFEYp7dDrJRBg9ZvgyCYTkH2tWDa93VRJGcme48veLQ8fYqH2tjGn1Z-zuYzCiI9aEnjeL-UbJ-ntLdemNtm9ggXZOYAq43paX-Z0t5JnfLiCC1Uc-4lcvU_9Q1_snuQM4n");'>
+</div>
+</div>
+<div class="space-y-10 slavonic-text text-lg md:text-xl">
+<!-- Section: Beginning -->
+<section class="space-y-4">
+<p class="text-primary font-bold italic border-l-2 border-primary/30 pl-4 mb-6">
+                            Во и́мя Отца́, и Сы́на, и Свята́го Ду́ха. Ами́нь.
+                        </p>
+<p class="leading-relaxed">
+                            Сла́ва Тебе́, Бо́же наш, сла́ва Тебе́.
+                        </p>
+<p class="leading-relaxed">
+                            Царю́ Небе́сный, Уте́шителю, Ду́ше и́стины, И́же везде́ сый и вся исполня́яй, Сокро́вище благи́х и жи́зни Пода́телю, прииди́ и всели́ся в ны, и очи́сти ны от вся́кия скве́рны, и спаси́, Бла́же, ду́ши на́ша.
+                        </p>
+</section>
+<!-- Section: Trisagion -->
+<section class="space-y-4">
+<div class="text-primary uppercase text-sm tracking-widest font-sans font-semibold text-center py-4">
+                            Трисвятое
+                        </div>
+<p class="leading-relaxed">
+                            Святы́й Бо́же, Святы́й Кре́пкий, Святы́й Безсме́ртный, поми́луй нас. <span class="text-primary/60 italic text-base">(Трижды)</span>
+</p>
+<p class="text-primary font-bold">
+                            Сла́ва Отцу́ и Сы́ну и Свято́му Ду́ху, и ны́не и при́сно и во ве́ки веко́в. Ами́нь.
+                        </p>
+</section>
+<!-- Section: Prayer 1 -->
+<section class="space-y-6 pt-6 border-t border-white/5">
+<h3 class="text-primary text-2xl font-bold leading-snug text-center">
+                            Моли́тва 1-я, Свята́го Мака́рия Вели́каго, к Бо́гу Отцу́
+                        </h3>
+<p class="leading-relaxed">
+                            Бо́же Ве́чный и Царю́ вся́каго созда́ния, сподо́бивый мя́ да́же в ча́с се́й дойти́, прости́ ми́ грехи́, я́же сотвори́х в се́й де́нь де́лом, сло́вом и помышле́нием, и очи́сти, Го́споди, смире́нную мою́ ду́шу от вся́кия скве́рны пло́ти и ду́ха. 
+                        </p>
+<p class="leading-relaxed">
+                            И да́ждь ми́, Го́споди, в нощи́ се́й со́н прейти́ в ми́ре, да воста́в от смире́ннаго ми́ ло́жа, благоугожду́ пресвято́му и́мени Твоему́, во вся́ дни́ живота́ моего́, и поперу́ борю́щия мя́ враги́ плотски́я и безпло́тныя. 
+                        </p>
+<p class="leading-relaxed">
+                            И изба́ви мя́, Го́споди, от помышле́ний су́етных, оскверня́ющих мя́, и по́хотей лука́вых. Я́ко Твое́ е́сть ца́рство, и си́ла и сла́ва, Отца́ и Сы́на и Свята́го Ду́ха, ны́не и при́сно и во ве́ки веко́в. Ами́нь.
+                        </p>
+</section>
+</div>
+</div><!-- Auto-scroll Control Panel -->
+<div class="fixed right-6 top-1/2 -translate-y-1/2 flex flex-col items-center gap-6 z-50">
+<div class="flex flex-col items-center gap-2">
+<span class="text-[10px] font-sans font-bold text-blue-400 uppercase tracking-widest bg-background-dark/60 backdrop-blur-md px-2 py-1 rounded">Старт / Пауза</span>
+<button class="size-16 rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)] flex items-center justify-center transition-all active:scale-95 group">
+<div class="flex gap-0.5">
+<span class="material-symbols-outlined text-3xl fill-1">play_arrow</span>
+<span class="material-symbols-outlined text-3xl">pause</span>
+</div>
+</button>
+</div>
+<div class="flex flex-col items-center gap-3">
+<div class="relative w-2 h-48 bg-white/10 rounded-full overflow-hidden border border-white/5 backdrop-blur-sm">
+<div class="absolute bottom-0 left-0 w-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]" style="height: 40%;"></div>
+</div>
+<span class="material-symbols-outlined text-blue-400 text-xl">speed</span>
+</div>
+</div>
+<!-- Footer Navigation / Controls -->
+<div class="flex items-center justify-between gap-4 px-2">
+<button class="flex-1 flex flex-col items-center py-4 glass-card rounded-lg group">
+<span class="material-symbols-outlined text-primary mb-1 group-active:scale-95 transition-transform">arrow_back</span>
+<span class="text-[10px] uppercase tracking-tighter text-white/50">Назад</span>
+</button>
+<button class="flex-1 flex flex-col items-center py-4 glass-card rounded-lg group">
+<span class="material-symbols-outlined text-primary mb-1 group-active:scale-95 transition-transform">settings</span>
+<span class="text-[10px] uppercase tracking-tighter text-white/50">Настройки</span>
+</button>
+<button class="flex-[2] flex flex-col items-center py-4 bg-primary rounded-lg shadow-lg shadow-primary/20 active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined text-background-dark mb-1">arrow_forward</span>
+<span class="text-[10px] uppercase tracking-tighter text-background-dark font-bold">Далее</span>
+</button>
+</div>
+</main>
+<!-- Floating Action for Quick Access -->
+<div class="fixed bottom-8 right-6 mb-20">
+<button class="size-14 rounded-full bg-primary flex items-center justify-center text-background-dark shadow-xl active:scale-90 transition-all">
+<span class="material-symbols-outlined text-2xl font-bold">format_size</span>
+</button>
+</div>
+</div>
+</body></html>
