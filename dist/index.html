@@ -13,8 +13,8 @@
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <meta name="theme-color" content="#121212">
     <link rel="apple-touch-icon" href="/icon.svg">
-  <script type="module" crossorigin src="/assets/index-CMQ4XmgF.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-8cp6iP0e.css">
+  <script type="module" crossorigin src="/assets/index-bOy6gmeu.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-DJ38IrbB.css">
 <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
 
 <body class="bg-background-dark font-display antialiased text-white min-h-screen flex flex-col overflow-hidden">
@@ -29,8 +29,85 @@
 
         <!-- MAIN CONTENT AREA -->
         <div class="flex-1 relative overflow-hidden">
+            <!-- CHURCH TODAY TAB (NEW MAIN) -->
+            <main id="tab-church-today" class="absolute inset-0 overflow-y-auto pt-24 pb-28 px-4 no-scrollbar">
+                <!-- Hero Card with Date -->
+                <div class="mb-6 mt-2">
+                    <div class="glass-panel rounded-[28px] p-6 border border-white/5 bg-gradient-to-br from-primary/20 to-transparent">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-xl bg-primary/30 flex items-center justify-center text-primary">
+                                    <span class="material-symbols-outlined text-2xl">calendar_today</span>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-bold text-[#ab9db8] uppercase tracking-wider" data-t="todayInChurch">Сегодня в Церкви</p>
+                                    <p id="church-today-date" class="text-lg font-bold text-white capitalize"></p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Fasting Info -->
+                        <div class="flex items-center gap-3 mb-4">
+                            <div id="church-today-fasting-icon" class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-lg text-primary">local_dining</span>
+                            </div>
+                            <div>
+                                <p class="text-xs text-[#ab9db8]" data-t="fastingType">Тип поста</p>
+                                <p id="church-today-fasting" class="text-sm font-bold text-white"></p>
+                            </div>
+                        </div>
+                        
+                        <!-- Saints Memory -->
+                        <div class="pt-4 border-t border-white/5">
+                            <p id="church-today-memory" class="text-sm text-[#ab9db8] leading-relaxed"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="mb-6">
+                    <h3 class="text-xs font-bold text-[#ab9db8] uppercase tracking-wider mb-3 px-2" data-t="quickActions">Быстрые действия</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button data-tab="catalog" class="quick-action-card glass-panel rounded-2xl p-4 flex flex-col items-center gap-2 active:scale-95 transition-all">
+                            <div class="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center text-primary">
+                                <span class="material-symbols-outlined text-xl">fact_check</span>
+                            </div>
+                            <span class="text-xs font-bold text-white" data-t="catalog">Исповедь</span>
+                        </button>
+                        <button data-tab="list" class="quick-action-card glass-panel rounded-2xl p-4 flex flex-col items-center gap-2 active:scale-95 transition-all">
+                            <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                                <span class="material-symbols-outlined text-xl">edit_note</span>
+                            </div>
+                            <span class="text-xs font-bold text-white" data-t="myList">Моя исповедь</span>
+                        </button>
+                        <button data-tab="preparation" class="quick-action-card glass-panel rounded-2xl p-4 flex flex-col items-center gap-2 active:scale-95 transition-all">
+                            <div class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400">
+                                <span class="material-symbols-outlined text-xl">menu_book</span>
+                            </div>
+                            <span class="text-xs font-bold text-white" data-t="preparation">Подготовка</span>
+                        </button>
+                        <button data-tab="settings" class="quick-action-card glass-panel rounded-2xl p-4 flex flex-col items-center gap-2 active:scale-95 transition-all">
+                            <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-400">
+                                <span class="material-symbols-outlined text-xl">settings</span>
+                            </div>
+                            <span class="text-xs font-bold text-white" data-t="settings">Настройки</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Prayers Quick Access -->
+                <div class="mb-6">
+                    <h3 class="text-xs font-bold text-[#ab9db8] uppercase tracking-wider mb-3 px-2" data-t="prayersBtn">Молитвы</h3>
+                    <div id="church-today-prayers" class="space-y-3">
+                        <!-- Prayer buttons injected by JS -->
+                    </div>
+                </div>
+
+                <div class="h-8"></div>
+            </main>
+
             <!-- CATALOG TAB -->
-            <main id="tab-catalog" class="absolute inset-0 overflow-y-auto pt-24 pb-28 px-4 no-scrollbar">
+            <main id="tab-catalog" class="absolute inset-0 overflow-y-auto pt-24 pb-28 px-4 no-scrollbar hidden">
                 <div class="mb-10 pt-4 flex flex-col items-center animate-fade-in-up">
                     <img src="/icon_cupola.png" alt="Icon" class="w-16 h-16 mx-auto mb-4 object-contain">
                     <h2 id="examinationTitle" data-t="examinationTitle"
@@ -144,6 +221,25 @@
 
             <!-- PREPARATION TAB -->
             <main id="tab-preparation" class="absolute inset-0 overflow-y-auto pt-28 pb-28 no-scrollbar hidden">
+                <!-- Today in Church Block -->
+                <div class="px-4 mb-6">
+                    <div class="glass-panel rounded-[24px] p-5 border border-white/5">
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center text-primary shrink-0">
+                                <span class="material-symbols-outlined text-2xl">calendar_today</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-sm font-bold text-[#ab9db8] uppercase tracking-wider mb-1" data-t="todayInChurch">Сегодня в Церкви</h3>
+                                <p id="calendar-date" class="text-base font-bold text-white mb-1 capitalize"></p>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span id="calendar-fasting" class="inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg bg-white/5"></span>
+                                </div>
+                                <p id="calendar-memory" class="text-xs text-[#ab9db8] mt-2 line-clamp-2"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <div id="preparation-container" class="px-4 space-y-3">
                     <!-- Rendered by JS -->
                 </div>
@@ -177,7 +273,8 @@
                                 class="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400">
                                 <span class="material-symbols-outlined">flare</span>
                             </div>
-                            <span class="font-bold text-white/90" data-t="guardianAngelCanon">Канон Ангелу-Хранителю</span>
+                            <span class="font-bold text-white/90" data-t="guardianAngelCanon">Канон
+                                Ангелу-Хранителю</span>
                             <span class="material-symbols-outlined ml-auto text-white/20">chevron_right</span>
                         </button>
                         <button data-prayer-id="beforeCommunion"
@@ -273,6 +370,18 @@
                         </div>
                     </section>
 
+                    <!-- Profile Section -->
+                    <section class="mb-8">
+                        <h2 class="px-2 text-sm font-semibold text-[#ab9db8] uppercase tracking-wider mb-3"
+                            data-t="sectionProfile">Профиль</h2>
+                        <div class="glass-panel rounded-[24px] p-2 grid grid-cols-2 gap-2">
+                            <button data-profile="adult"
+                                class="profile-btn w-full py-3 rounded-xl text-sm font-bold transition-all active:scale-95 bg-white/5 hover:bg-white/10 text-slate-300">Взрослый</button>
+                            <button data-profile="child"
+                                class="profile-btn w-full py-3 rounded-xl text-sm font-bold transition-all active:scale-95 bg-white/5 hover:bg-white/10 text-slate-300">Детский</button>
+                        </div>
+                    </section>
+
 
 
                     <!-- Language Section -->
@@ -280,23 +389,54 @@
                         <h2 class="px-2 text-sm font-semibold text-[#ab9db8] uppercase tracking-wider mb-3"
                             data-t="sectionLanguage">Язык</h2>
                         <div
-                            class="glass-panel rounded-[24px] p-2 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:flex sm:flex-row">
+                            class="glass-panel rounded-[24px] p-2 grid grid-cols-2 gap-2">
                             <button data-lang="ru"
-                                class="lang-btn py-2 rounded-xl text-xs font-bold transition-all active:scale-95">Русский</button>
+                                class="lang-btn w-full py-3 rounded-xl text-sm font-bold transition-all active:scale-95 bg-white/5 hover:bg-white/10">Русский</button>
                             <button data-lang="uk"
-                                class="lang-btn py-2 rounded-xl text-xs font-bold transition-all active:scale-95">Українська</button>
+                                class="lang-btn w-full py-3 rounded-xl text-sm font-bold transition-all active:scale-95 bg-white/5 hover:bg-white/10">Українська</button>
                             <button data-lang="en"
-                                class="lang-btn py-2 rounded-xl text-xs font-bold transition-all active:scale-95">English</button>
+                                class="lang-btn w-full py-3 rounded-xl text-sm font-bold transition-all active:scale-95 bg-white/5 hover:bg-white/10">English</button>
                             <button data-lang="cs"
-                                class="lang-btn py-2 px-2 rounded-xl text-[10px] font-bold transition-all active:scale-95"
+                                class="lang-btn w-full py-3 rounded-xl text-xs font-bold transition-all active:scale-95 bg-white/5 hover:bg-white/10"
                                 data-t="cs">Церковнославянскій</button>
                         </div>
                     </section>
 
-                    <!-- Privacy & Support Section -->
-                    <section>
+                    <!-- Privacy Section -->
+                    <section class="mb-8">
                         <h2 class="px-2 text-sm font-semibold text-[#ab9db8] uppercase tracking-wider mb-3"
-                            data-t="sectionPrivacySupport">Приватность и поддержка</h2>
+                            data-t="sectionPrivacy">Приватность</h2>
+                        <div class="glass-panel rounded-[24px] overflow-hidden">
+                            <!-- PIN Toggle -->
+                            <div class="flex items-center justify-between p-4 hover:bg-white/5 transition-colors">
+                                <div class="flex items-center gap-3 cursor-pointer" id="pin-toggle-label">
+                                    <span class="material-symbols-outlined text-primary">lock</span>
+                                    <span class="text-sm font-medium text-white" data-t="pinEntryTitle">Вход по
+                                        ПИН-коду</span>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input id="pin-toggle" type="checkbox" class="sr-only peer" />
+                                    <div
+                                        class="pointer-events-none w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary">
+                                    </div>
+                                </label>
+                            </div>
+
+                            <!-- Change PIN Button (visible only when PIN is enabled) -->
+                            <div id="change-pin-container" class="hidden border-t border-white/5 px-4 pb-4 pt-2">
+                                <button id="change-pin-btn"
+                                    class="w-full flex items-center gap-2 text-xs text-primary/80 hover:text-primary transition-colors">
+                                    <span class="material-symbols-outlined text-sm">key</span>
+                                    <span data-t="changePinBtn">Изменить ПИН-код</span>
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- App Section -->
+                    <section class="mb-8">
+                        <h2 class="px-2 text-sm font-semibold text-[#ab9db8] uppercase tracking-wider mb-3"
+                            data-t="sectionApp">Приложение</h2>
                         <div class="glass-panel rounded-[24px] overflow-hidden">
                             <button id="about-app-btn"
                                 class="w-full flex items-center gap-4 p-4 border-b border-white/5 hover:bg-white/5 transition-colors text-left group">
@@ -310,7 +450,7 @@
                                 </div>
                             </button>
                             <button id="contact-dev-btn"
-                                class="w-full flex items-center gap-4 p-4 border-b border-white/5 hover:bg-white/5 transition-colors text-left group">
+                                class="w-full flex items-center gap-4 p-4 hover:bg-white/5 transition-colors text-left group">
                                 <div
                                     class="flex items-center justify-center rounded-xl bg-pink-500/20 text-pink-400 w-10 h-10 shrink-0">
                                     <span class="material-symbols-outlined">mail</span>
@@ -320,110 +460,104 @@
                                         разработчикам</p>
                                 </div>
                             </button>
+                        </div>
+                    </section>
 
-                            <!-- Privacy Settings -->
-                            <div class="p-4 bg-white/5">
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 px-1" data-t="sectionPrivacySupport">Приватность</p>
-                                <div class="space-y-4">
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center gap-3">
-                                            <span class="material-symbols-outlined text-primary">lock</span>
-                                            <span class="text-sm font-medium text-white" data-t="pinEntryTitle">Вход по ПИН-коду</span>
-                                        </div>
-                                        <label class="relative inline-flex items-center cursor-pointer">
-                                            <input id="pin-toggle" type="checkbox" class="sr-only peer" />
-                                            <div class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                                        </label>
+                <!-- Experimental Features -->
+                <section class="mt-8 mb-4">
+                    <h2
+                        class="px-2 text-sm font-semibold text-pink-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[16px]">science</span>
+                        <span data-t="experimentalFeaturesTitle">Экспериментальные функции</span>
+                    </h2>
+                    <div class="glass-panel border-pink-500/20 rounded-[24px] overflow-hidden">
+                        <div class="flex items-start gap-4 p-4 hover:bg-white/5 transition-colors">
+                            <div
+                                class="flex items-center justify-center rounded-xl bg-pink-500/20 text-pink-400 w-10 h-10 shrink-0 mt-1">
+                                <span class="material-symbols-outlined">auto_awesome</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-base font-medium text-white mb-1" data-t="digitalMentor">Цифровой
+                                    наставник</p>
+                                <p class="text-xs text-[#ab9db8] leading-tight" data-t="digitalMentorDesc">
+                                    ИИ-помощник: поможет глубже осознать грехи (в разработке)</p>
+                            </div>
+                            <div class="shrink-0 mt-2">
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input id="toggle-digital-mentor" type="checkbox" class="sr-only peer" />
+                                    <div
+                                        class="w-12 h-7 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-pink-500">
                                     </div>
-                                </div>
+                                </label>
                             </div>
                         </div>
-                    </section>
-
-                    <!-- Experimental Features -->
-                    <section class="mt-8 mb-4">
-                        <h2
-                            class="px-2 text-sm font-semibold text-pink-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-                            <span class="material-symbols-outlined text-[16px]">science</span>
-                            <span data-t="experimentalFeaturesTitle">Экспериментальные функции</span>
-                        </h2>
-                        <div class="glass-panel border-pink-500/20 rounded-[24px] overflow-hidden">
-                            <div class="flex items-start gap-4 p-4 hover:bg-white/5 transition-colors">
-                                <div
-                                    class="flex items-center justify-center rounded-xl bg-pink-500/20 text-pink-400 w-10 h-10 shrink-0 mt-1">
-                                    <span class="material-symbols-outlined">auto_awesome</span>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-base font-medium text-white mb-1" data-t="digitalMentor">Цифровой
-                                        наставник</p>
-                                    <p class="text-xs text-[#ab9db8] leading-tight" data-t="digitalMentorDesc">
-                                        ИИ-помощник: поможет глубже осознать грехи (в разработке)</p>
-                                </div>
-                                <div class="shrink-0 mt-2">
-                                    <label class="relative inline-flex items-center cursor-pointer">
-                                        <input id="toggle-digital-mentor" type="checkbox" class="sr-only peer" />
-                                        <div
-                                            class="w-12 h-7 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-pink-500">
-                                        </div>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                </div>
-            </main>
+                    </div>
+                </section>
         </div>
+        </main>
+    </div>
 
-        <!-- BOTTOM NAVIGATION -->
-        <nav id="bottom-nav" class="fixed bottom-0 left-0 right-0 z-50 glass-header px-6 pt-2"
-            style="padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);">
-            <div class="flex items-center justify-around max-w-lg mx-auto">
-                <button data-tab="catalog"
-                    class="nav-btn group flex flex-col items-center gap-0.5 transition-all outline-none">
-                    <div
-                        class="w-10 h-6 rounded-xl flex items-center justify-center group-[.active]:bg-primary/20 transition-all">
-                        <span
-                            class="material-symbols-outlined text-[#ab9db8] group-[.active]:text-primary transition-colors text-xl">fact_check</span>
-                    </div>
+    <!-- BOTTOM NAVIGATION -->
+    <nav id="bottom-nav" class="fixed bottom-0 left-0 right-0 z-50 glass-header px-6 pt-2"
+        style="padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);">
+        <div class="flex items-center justify-around max-w-lg mx-auto">
+            <button data-tab="church-today"
+                class="nav-btn group flex flex-col items-center gap-0.5 transition-all outline-none">
+                <div
+                    class="w-10 h-6 rounded-xl flex items-center justify-center group-[.active]:bg-primary/20 transition-all">
                     <span
-                        class="text-[9px] font-bold tracking-wider uppercase text-[#ab9db8] group-[.active]:text-primary transition-colors"
-                        data-t="catalog"></span>
-                </button>
-                <button data-tab="list"
-                    class="nav-btn group flex flex-col items-center gap-0.5 transition-all outline-none">
-                    <div
-                        class="w-10 h-6 rounded-xl flex items-center justify-center group-[.active]:bg-primary/20 transition-all">
-                        <span
-                            class="material-symbols-outlined text-[#ab9db8] group-[.active]:text-primary transition-colors text-xl">edit_note</span>
-                    </div>
+                        class="material-symbols-outlined text-[#ab9db8] group-[.active]:text-primary transition-colors text-xl">church</span>
+                </div>
+                <span
+                    class="text-[9px] font-bold tracking-wider uppercase text-[#ab9db8] group-[.active]:text-primary transition-colors"
+                    data-t="churchToday">Церковь</span>
+            </button>
+            <button data-tab="catalog"
+                class="nav-btn group flex flex-col items-center gap-0.5 transition-all outline-none">
+                <div
+                    class="w-10 h-6 rounded-xl flex items-center justify-center group-[.active]:bg-primary/20 transition-all">
                     <span
-                        class="text-[9px] font-bold tracking-wider uppercase text-[#ab9db8] group-[.active]:text-primary transition-colors"
-                        data-t="myList"></span>
-                </button>
-                <button data-tab="preparation"
-                    class="nav-btn group flex flex-col items-center gap-0.5 transition-all outline-none">
-                    <div
-                        class="w-10 h-6 rounded-xl flex items-center justify-center group-[.active]:bg-primary/20 transition-all">
-                        <span
-                            class="material-symbols-outlined text-[#ab9db8] group-[.active]:text-primary transition-colors text-xl">menu_book</span>
-                    </div>
+                        class="material-symbols-outlined text-[#ab9db8] group-[.active]:text-primary transition-colors text-xl">fact_check</span>
+                </div>
+                <span
+                    class="text-[9px] font-bold tracking-wider uppercase text-[#ab9db8] group-[.active]:text-primary transition-colors"
+                    data-t="catalog"></span>
+            </button>
+            <button data-tab="list"
+                class="nav-btn group flex flex-col items-center gap-0.5 transition-all outline-none">
+                <div
+                    class="w-10 h-6 rounded-xl flex items-center justify-center group-[.active]:bg-primary/20 transition-all">
                     <span
-                        class="text-[9px] font-bold tracking-wider uppercase text-[#ab9db8] group-[.active]:text-primary transition-colors"
-                        data-t="preparation"></span>
-                </button>
-                <button data-tab="settings"
-                    class="nav-btn group flex flex-col items-center gap-0.5 transition-all outline-none">
-                    <div
-                        class="w-10 h-6 rounded-xl flex items-center justify-center group-[.active]:bg-primary/20 transition-all">
-                        <span
-                            class="material-symbols-outlined text-[#ab9db8] group-[.active]:text-primary transition-colors text-xl">settings</span>
-                    </div>
+                        class="material-symbols-outlined text-[#ab9db8] group-[.active]:text-primary transition-colors text-xl">edit_note</span>
+                </div>
+                <span
+                    class="text-[9px] font-bold tracking-wider uppercase text-[#ab9db8] group-[.active]:text-primary transition-colors"
+                    data-t="myList"></span>
+            </button>
+            <button data-tab="preparation"
+                class="nav-btn group flex flex-col items-center gap-0.5 transition-all outline-none">
+                <div
+                    class="w-10 h-6 rounded-xl flex items-center justify-center group-[.active]:bg-primary/20 transition-all">
                     <span
-                        class="text-[9px] font-bold tracking-wider uppercase text-[#ab9db8] group-[.active]:text-primary transition-colors"
-                        data-t="settings"></span>
-                </button>
-            </div>
-        </nav>
+                        class="material-symbols-outlined text-[#ab9db8] group-[.active]:text-primary transition-colors text-xl">menu_book</span>
+                </div>
+                <span
+                    class="text-[9px] font-bold tracking-wider uppercase text-[#ab9db8] group-[.active]:text-primary transition-colors"
+                    data-t="preparation"></span>
+            </button>
+            <button data-tab="settings"
+                class="nav-btn group flex flex-col items-center gap-0.5 transition-all outline-none">
+                <div
+                    class="w-10 h-6 rounded-xl flex items-center justify-center group-[.active]:bg-primary/20 transition-all">
+                    <span
+                        class="material-symbols-outlined text-[#ab9db8] group-[.active]:text-primary transition-colors text-xl">settings</span>
+                </div>
+                <span
+                    class="text-[9px] font-bold tracking-wider uppercase text-[#ab9db8] group-[.active]:text-primary transition-colors"
+                    data-t="settings"></span>
+            </button>
+        </div>
+    </nav>
     </div>
 
     <!-- MODALS -->
@@ -519,6 +653,11 @@
     <!-- Prayer Modal -->
     <div id="prayer-modal"
         class="fixed inset-0 z-[100] flex items-end justify-center p-0 bg-black/70 backdrop-blur-sm hidden">
+        <!-- Close Button (X) - Top Right Corner of Screen -->
+        <button id="prayer-modal-close-x-btn" class="fixed top-6 right-6 z-[110] w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md flex items-center justify-center text-white active:scale-90 transition-all">
+            <span class="material-symbols-outlined text-3xl">close</span>
+        </button>
+        
         <div
             class="bg-[#1a1025] w-full max-w-lg rounded-t-[36px] overflow-hidden shadow-2xl border-t border-white/10 animate-slide-up">
             <div class="flex justify-center pt-8 pb-2">
@@ -554,9 +693,17 @@
                 <!-- Sins and notes will be injected here with LARGE font -->
             </div>
             <div id="reading-mode-footer" class="max-w-xl mx-auto mt-12 mb-20 px-4 hidden">
-                <button id="complete-confession-btn"
-                    class="w-full py-5 rounded-[28px] bg-white text-primary font-bold text-lg flex items-center justify-center gap-3 shadow-xl active:scale-[0.98] transition-all"
-                    data-t="completeConfessionBtn">
+                <!-- Final Instruction -->
+                <div class="mb-6 p-6 bg-white/5 rounded-2xl border border-white/10">
+                    <p class="text-sm text-slate-300 italic text-center leading-relaxed" data-t="finalInstruction">
+                        По завершении прочтения священник возложит на вашу голову епитрахиль и прочтет разрешительную молитву. Подойдите, поцелуйте Крест и Евангелие.
+                    </p>
+                </div>
+                
+                <button id="finish-confession-btn"
+                    class="w-full py-4 rounded-2xl bg-primary/20 border border-primary/30 text-primary font-bold text-base flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all"
+                    data-t="finishConfessionBtn">
+                    <span class="material-symbols-outlined text-xl">check_circle</span>
                 </button>
             </div>
         </div>
@@ -594,7 +741,7 @@
                 <div id="preview-notes-section" class="pt-8 border-t-2 border-black hidden">
                     <p class="text-xs font-bold uppercase tracking-widest mb-4 opacity-60" data-t="personalReflections">
                         Личные заметки</p>
-                <p id="preview-notes" class="text-lg italic"></p>
+                    <p id="preview-notes" class="text-lg italic"></p>
                 </div>
             </div>
 
@@ -610,8 +757,7 @@
     </div>
 
     <!-- Prayers Reading Modal -->
-    <div id="prayers-reading-modal"
-        class="fixed inset-0 z-[400] bg-[#0F0F10] flex flex-col hidden overflow-x-hidden">
+    <div id="prayers-reading-modal" class="fixed inset-0 z-[400] bg-[#0F0F10] flex flex-col hidden overflow-x-hidden">
 
         <!-- Progress Bar -->
         <div class="fixed top-0 left-0 right-0 h-1 z-[450] bg-white/5">
@@ -620,98 +766,156 @@
             </div>
         </div>
 
-        <!-- Floating Close Button -->
+        <!-- Floating Close Button - Top Right Corner -->
         <button id="close-prayers-modal-btn"
-            class="fixed top-12 left-6 z-[450] w-10 h-10 rounded-full bg-[#0F0F10]/60 backdrop-blur-md border border-white/10 flex items-center justify-center text-[#E5E7EB] hover:bg-white/10 active:scale-90 transition-all">
-            <span class="material-symbols-outlined">close</span>
+            class="fixed top-6 right-6 z-[450] w-12 h-12 rounded-full bg-[#0F0F10]/60 backdrop-blur-md border border-white/10 flex items-center justify-center text-[#E5E7EB] hover:bg-white/10 active:scale-90 transition-all">
+            <span class="material-symbols-outlined text-3xl">close</span>
         </button>
 
         <!-- Scrollable Prayer Content -->
         <div id="prayer-scroll-area" class="flex-1 overflow-y-auto py-6 scrolling-touch no-scrollbar pb-32">
-            
+
             <div class="max-w-2xl mx-auto w-full">
                 <!-- Inner Glass Card -->
                 <div class="glass-card rounded-3xl p-6 sm:p-8 mb-12 shadow-2xl">
-                    
+
                     <!-- Hero Image -->
-                    <div class="mb-8 overflow-hidden rounded-2xl border border-white/5 bg-[#0F0F10] relative flex items-center justify-center h-48 sm:h-64">
-                        <img id="prayer-hero-image" src="/56456454.jpg" class="absolute inset-0 w-full h-full object-contain opacity-90 mix-blend-screen" alt="Hero" />
-                        <div class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0F0F10] to-transparent z-10"></div>
+                    <div
+                        class="mb-8 overflow-hidden rounded-2xl border border-white/5 bg-[#0F0F10] relative flex items-center justify-center h-48 sm:h-64">
+                        <img id="prayer-hero-image" src="/56456454.jpg"
+                            class="absolute inset-0 w-full h-full object-contain opacity-90 mix-blend-screen"
+                            alt="Hero" />
+                        <div
+                            class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0F0F10] to-transparent z-10">
+                        </div>
                     </div>
 
                     <!-- Prayer Text Container -->
-                    <div id="prayer-content-area"
-                        class="slavonic-text text-[#E5E7EB] space-y-8">
+                    <div id="prayer-content-area" class="slavonic-text text-[#E5E7EB] space-y-8">
                         <!-- Prayer text injected here -->
                     </div>
-                    
+
                 </div>
             </div>
         </div>
 
-    <!-- PIN PAD MODAL (LOCK SCREEN) -->
-    <div id="pin-pad-modal" class="fixed inset-0 z-[1000] bg-[#0F0F10] flex flex-col items-center justify-center hidden">
-        <div class="w-full max-w-xs flex flex-col items-center animate-fade-in-up">
-            <!-- Icon/Logo -->
-            <div class="w-20 h-20 bg-white/5 rounded-3xl border border-white/10 flex items-center justify-center mb-8 shadow-2xl">
-                <span class="material-symbols-outlined text-primary text-5xl">lock</span>
+        <!-- Teleprompter Pull-out Drawer -->
+        <div id="teleprompter-controls" class="teleprompter-drawer hidden" style="z-index: 500;">
+            <div id="tele-pull-handle" class="drawer-handle">
+                <div class="handle-bar"></div>
             </div>
-            
-            <h2 class="text-2xl font-bold text-white mb-2 font-serif tracking-tight" data-t="lockScreenTitle">Тайна исповеди</h2>
-            <p id="pin-pad-status" class="text-slate-400 text-sm mb-12" data-t="lockScreenNote">Введите ПИН-код</p>
-            
-            <!-- Dots -->
-            <div class="flex gap-6 mb-12">
-                <div class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-white/20 transition-all duration-300"></div>
-                <div class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-white/20 transition-all duration-300"></div>
-                <div class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-white/20 transition-all duration-300"></div>
-                <div class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-white/20 transition-all duration-300"></div>
-            </div>
-            
-            <!-- Grid -->
-            <div class="grid grid-cols-3 gap-6">
-                <button class="pin-btn w-16 h-16 rounded-full bg-white/5 active:bg-white/20 border border-white/10 text-white text-2xl flex items-center justify-center transition-all" data-value="1">1</button>
-                <button class="pin-btn w-16 h-16 rounded-full bg-white/5 active:bg-white/20 border border-white/10 text-white text-2xl flex items-center justify-center transition-all" data-value="2">2</button>
-                <button class="pin-btn w-16 h-16 rounded-full bg-white/5 active:bg-white/20 border border-white/10 text-white text-2xl flex items-center justify-center transition-all" data-value="3">3</button>
-                <button class="pin-btn w-16 h-16 rounded-full bg-white/5 active:bg-white/20 border border-white/10 text-white text-2xl flex items-center justify-center transition-all" data-value="4">4</button>
-                <button class="pin-btn w-16 h-16 rounded-full bg-white/5 active:bg-white/20 border border-white/10 text-white text-2xl flex items-center justify-center transition-all" data-value="5">5</button>
-                <button class="pin-btn w-16 h-16 rounded-full bg-white/5 active:bg-white/20 border border-white/10 text-white text-2xl flex items-center justify-center transition-all" data-value="6">6</button>
-                <button class="pin-btn w-16 h-16 rounded-full bg-white/5 active:bg-white/20 border border-white/10 text-white text-2xl flex items-center justify-center transition-all" data-value="7">7</button>
-                <button class="pin-btn w-16 h-16 rounded-full bg-white/5 active:bg-white/20 border border-white/10 text-white text-2xl flex items-center justify-center transition-all" data-value="8">8</button>
-                <button class="pin-btn w-16 h-16 rounded-full bg-white/5 active:bg-white/20 border border-white/10 text-white text-2xl flex items-center justify-center transition-all" data-value="9">9</button>
-                <div class="w-16 h-16"></div>
-                <button class="pin-btn w-16 h-16 rounded-full bg-white/5 active:bg-white/20 border border-white/10 text-white text-2xl flex items-center justify-center transition-all" data-value="0">0</button>
-                <button id="pin-backspace" class="w-16 h-16 rounded-full bg-transparent text-slate-500 active:text-white flex items-center justify-center transition-all">
-                    <span class="material-symbols-outlined text-3xl">backspace</span>
+            <div class="drawer-content">
+                <button id="toggle-autoscroll-btn" class="drawer-btn main-play-btn">
+                    <span id="autoscroll-icon" class="material-symbols-outlined">play_arrow</span>
                 </button>
+                <div class="speed-control-group">
+                    <button id="speed-up-btn" class="drawer-step-btn">
+                        <span class="material-symbols-outlined">add</span>
+                    </button>
+                    <div class="vertical-slider-container">
+                        <input type="range" id="autoscroll-speed" min="0" max="100" value="30" step="1"
+                            class="vertical-slider">
+                    </div>
+                    <button id="speed-down-btn" class="drawer-step-btn">
+                        <span class="material-symbols-outlined">remove</span>
+                    </button>
+                </div>
+                <div class="speed-label" data-t="readingSpeed">Скорость</div>
             </div>
-            
-            <button id="pin-cancel" class="mt-12 text-slate-500 hover:text-white text-xs font-bold uppercase tracking-widest transition-all" data-t="cancel">Отмена</button>
         </div>
     </div>
 
-    <!-- Teleprompter Pull-out Drawer -->
-    <div id="teleprompter-controls" class="teleprompter-drawer hidden" style="z-index: 500;">
-        <div id="tele-pull-handle" class="drawer-handle">
-            <div class="handle-bar"></div>
-        </div>
-        <div class="drawer-content">
-            <button id="toggle-autoscroll-btn" class="drawer-btn main-play-btn">
-                <span id="autoscroll-icon" class="material-symbols-outlined">play_arrow</span>
-            </button>
-            <div class="speed-control-group">
-                <button id="speed-up-btn" class="drawer-step-btn">
-                    <span class="material-symbols-outlined">add</span>
-                </button>
-                <div class="vertical-slider-container">
-                    <input type="range" id="autoscroll-speed" min="0" max="100" value="30" step="1"
-                        class="vertical-slider">
-                </div>
-                <button id="speed-down-btn" class="drawer-step-btn">
-                    <span class="material-symbols-outlined">remove</span>
+    <!-- PIN Pad Modal -->
+    <!-- Close Button (X) - Top Right Corner of Screen (placed BEFORE modal for proper z-index) -->
+    <button id="pin-pad-close-btn" class="fixed top-6 right-6 z-[100001] w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md flex items-center justify-center transition-all active:scale-90 hidden">
+        <span class="material-symbols-outlined text-white/80 text-3xl">close</span>
+    </button>
+    
+    <div id="pin-pad-modal" class="fixed inset-0 z-[9999] bg-[#0F0F10] hidden flex-col items-center justify-center" style="min-height: 100vh; min-width: 100vw;">
+        <div class="text-center w-full max-w-sm px-6">
+            <h2 id="pin-pad-title" class="text-2xl font-serif text-white mb-8">Введите ПИН-код</h2>
+
+            <!-- Индикаторы ввода -->
+            <div class="flex justify-center gap-4 mb-12" id="pin-indicators">
+                <div class="pin-cell w-4 h-4 rounded-full border-2 border-white/30"></div>
+                <div class="pin-cell w-4 h-4 rounded-full border-2 border-white/30"></div>
+                <div class="pin-cell w-4 h-4 rounded-full border-2 border-white/30"></div>
+                <div class="pin-cell w-4 h-4 rounded-full border-2 border-white/30"></div>
+            </div>
+
+            <!-- Клавиатура -->
+            <div class="grid grid-cols-3 gap-6" id="pin-keypad">
+                <button
+                    class="w-16 h-16 rounded-full bg-white/10 active:bg-white/30 text-white text-2xl font-medium pin-btn"
+                    data-val="1">1</button>
+                <button
+                    class="w-16 h-16 rounded-full bg-white/10 active:bg-white/30 text-white text-2xl font-medium pin-btn"
+                    data-val="2">2</button>
+                <button
+                    class="w-16 h-16 rounded-full bg-white/10 active:bg-white/30 text-white text-2xl font-medium pin-btn"
+                    data-val="3">3</button>
+                <button
+                    class="w-16 h-16 rounded-full bg-white/10 active:bg-white/30 text-white text-2xl font-medium pin-btn"
+                    data-val="4">4</button>
+                <button
+                    class="w-16 h-16 rounded-full bg-white/10 active:bg-white/30 text-white text-2xl font-medium pin-btn"
+                    data-val="5">5</button>
+                <button
+                    class="w-16 h-16 rounded-full bg-white/10 active:bg-white/30 text-white text-2xl font-medium pin-btn"
+                    data-val="6">6</button>
+                <button
+                    class="w-16 h-16 rounded-full bg-white/10 active:bg-white/30 text-white text-2xl font-medium pin-btn"
+                    data-val="7">7</button>
+                <button
+                    class="w-16 h-16 rounded-full bg-white/10 active:bg-white/30 text-white text-2xl font-medium pin-btn"
+                    data-val="8">8</button>
+                <button
+                    class="w-16 h-16 rounded-full bg-white/10 active:bg-white/30 text-white text-2xl font-medium pin-btn"
+                    data-val="9">9</button>
+
+                <!-- Нижний ряд: Удалить всё | 0 | Backspace -->
+                <button class="w-16 h-16 rounded-full bg-red-500/20 active:bg-red-500/40 border border-red-500/30 text-red-400 text-xs font-bold flex items-center justify-center transition-all"
+                    id="pin-clear-btn" data-t="clearPin">Clear</button>
+                <button
+                    class="w-16 h-16 rounded-full bg-white/10 active:bg-white/30 text-white text-2xl font-medium pin-btn"
+                    data-val="0">0</button>
+                <button class="w-16 h-16 rounded-full bg-white/10 active:bg-white/30 text-white/80 flex items-center justify-center transition-all"
+                    id="pin-delete-btn">
+                    <span class="material-symbols-outlined text-2xl">backspace</span>
                 </button>
             </div>
-            <div class="speed-label" data-t="readingSpeed">Скорость</div>
+        </div>
+    </div>
+
+    <!-- Custom Confirm Modal -->
+    <div id="confirm-modal" class="fixed inset-0 z-[100000] bg-black/60 backdrop-blur-sm hidden items-center justify-center">
+        <div class="bg-[#191121] border border-white/10 p-8 rounded-3xl w-[90%] max-w-sm animate-fade-in-up">
+            <!-- Icon -->
+            <div class="w-16 h-16 mx-auto mb-6 rounded-2xl bg-red-500/20 flex items-center justify-center">
+                <span class="material-symbols-outlined text-red-400 text-4xl">warning</span>
+            </div>
+
+            <!-- Title -->
+            <h3 class="text-xl font-bold text-white text-center mb-3 font-serif" data-t="confirmDialogTitle">
+                Подтверждение действия
+            </h3>
+
+            <!-- Message -->
+            <p id="confirm-message" class="text-slate-400 text-center mb-8 leading-relaxed">
+                ПИН-код уже установлен. Удалить старый и сбросить все данные исповеди?
+            </p>
+
+            <!-- Buttons -->
+            <div class="flex gap-4">
+                <button id="confirm-no-btn"
+                    class="flex-1 py-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold hover:bg-white/10 transition-all active:scale-95">
+                    <span data-t="no">Нет</span>
+                </button>
+                <button id="confirm-yes-btn"
+                    class="flex-1 py-4 rounded-2xl bg-red-500 text-white font-bold hover:bg-red-600 transition-all active:scale-95 shadow-lg shadow-red-500/30">
+                    <span data-t="yes">Да</span>
+                </button>
+            </div>
         </div>
     </div>
 

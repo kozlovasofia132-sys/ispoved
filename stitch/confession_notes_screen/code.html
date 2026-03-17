@@ -1,42 +1,56 @@
 <!DOCTYPE html>
-<html class="dark" lang="en"><head>
+
+<html class="dark" lang="ru"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Confession Notes Screen</title>
+<title>Как подготовиться</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#7f19e6",
-                        "background-light": "#f7f6f8",
-                        "background-dark": "#191121",
-                    },
-                    fontFamily: {
-                        "display": ["Inter", "sans-serif"]
-                    },
-                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
-                },
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#1111d4",
+              "background-light": "#f6f6f8",
+              "background-dark": "#101022",
+              "surface-dark": "rgba(255, 255, 255, 0.05)",
+              "surface-border": "rgba(255, 255, 255, 0.1)",
             },
-        }
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
     </script>
-<style>::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background-color: #4b5563;
-            border-radius: 20px;
-        }
-    </style>
 <style>
-        body {
-            min-height: max(884px, 100dvh);
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        details > summary {
+            list-style: none;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+        
+        /* Smooth details animation (basic) */
+        details[open] summary ~ * {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(-5px); }
+            100% { opacity: 1; transform: translateY(0); }
         }
     </style>
 <style>
@@ -44,124 +58,120 @@
       min-height: max(884px, 100dvh);
     }
   </style>
-  </head>
-<body class="bg-background-light dark:bg-background-dark font-display antialiased text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
-<header class="sticky top-0 z-20 flex flex-col pt-safe-top bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
-<div class="px-5 pb-4 pt-12 flex justify-between items-end">
-<div>
-<h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">My Confession</h1>
-<p class="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">4 items selected</p>
-</div>
-<button class="group flex items-center gap-1 px-3 py-1.5 rounded-full bg-slate-200 dark:bg-slate-800 hover:bg-red-100 dark:hover:bg-red-900/30 transition-all active:scale-95">
-<span class="material-symbols-outlined text-slate-600 dark:text-slate-400 group-hover:text-red-600 dark:group-hover:text-red-400 text-lg">delete_sweep</span>
-<span class="text-xs font-semibold text-slate-600 dark:text-slate-400 group-hover:text-red-600 dark:group-hover:text-red-400">Clear All</span>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen antialiased flex flex-col mx-auto max-w-md w-full shadow-2xl overflow-x-hidden relative">
+<!-- Header -->
+<header class="flex items-center px-4 py-4 sticky top-0 z-20 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200/20 dark:border-surface-border">
+<button aria-label="Назад" class="flex items-center justify-center size-10 rounded-full hover:bg-slate-200/50 dark:hover:bg-surface-dark transition-colors">
+<span class="material-symbols-outlined text-slate-700 dark:text-slate-300">arrow_back_ios_new</span>
 </button>
-</div>
+<h1 class="text-xl font-semibold flex-1 text-center pr-10 text-slate-900 dark:text-white tracking-tight">Как подготовиться</h1>
 </header>
-<main class="flex-1 overflow-y-auto px-4 py-6 pb-32">
-<div class="mb-6 px-1">
-<p class="text-slate-600 dark:text-slate-300 leading-relaxed text-sm">
-            Reflect on these items before your confession. You may add personal notes below for specific details.
-        </p>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto pb-24 px-4 py-6 space-y-6 relative z-10">
+<!-- Quick Actions Section -->
+<section class="space-y-3">
+<h3 class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-1">Быстрые действия</h3>
+<div class="grid grid-cols-3 gap-3">
+<!-- Tile 1: Confession -->
+<a class="glass-card flex flex-col items-center justify-center p-4 rounded-xl gap-2 hover:bg-white/5 transition-colors group text-center" href="#">
+<div class="size-10 rounded-full bg-primary/20 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-[24px]">church</span>
 </div>
-<section class="space-y-3 mb-8">
-<label class="group relative flex items-start gap-4 p-4 rounded-xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 shadow-sm transition-all hover:border-primary/50 dark:hover:border-primary/50 cursor-pointer">
-<div class="relative flex items-center pt-0.5">
-<input checked="" class="peer h-5 w-5 cursor-pointer rounded border-slate-300 dark:border-slate-600 text-primary focus:ring-primary/20 bg-transparent checked:bg-primary checked:border-primary transition-all" type="checkbox"/>
+<span class="text-[11px] font-medium text-slate-700 dark:text-slate-200">Исповедь</span>
+</a>
+<!-- Tile 2: My Confession -->
+<a class="glass-card flex flex-col items-center justify-center p-4 rounded-xl gap-2 hover:bg-white/5 transition-colors group text-center" href="#">
+<div class="size-10 rounded-full bg-primary/20 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-[24px]">history_edu</span>
 </div>
-<div class="flex-1">
-<p class="text-base font-medium text-slate-800 dark:text-slate-100 peer-checked:line-through peer-checked:text-slate-400 dark:peer-checked:text-slate-500 transition-colors">
-                    I was impatient with my children
-                </p>
-<p class="text-xs text-slate-500 dark:text-slate-400 mt-1">4th Commandment • Honor your father and mother</p>
+<span class="text-[11px] font-medium text-slate-700 dark:text-slate-200 leading-tight">Моя исповедь</span>
+</a>
+<!-- Tile 3: Preparation -->
+<a class="glass-card flex flex-col items-center justify-center p-4 rounded-xl gap-2 hover:bg-white/5 transition-colors group text-center" href="#">
+<div class="size-10 rounded-full bg-primary/20 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-[24px]">book_4</span>
 </div>
-</label>
-<label class="group relative flex items-start gap-4 p-4 rounded-xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 shadow-sm transition-all hover:border-primary/50 dark:hover:border-primary/50 cursor-pointer">
-<div class="relative flex items-center pt-0.5">
-<input checked="" class="peer h-5 w-5 cursor-pointer rounded border-slate-300 dark:border-slate-600 text-primary focus:ring-primary/20 bg-transparent checked:bg-primary checked:border-primary transition-all" type="checkbox"/>
+<span class="text-[11px] font-medium text-slate-700 dark:text-slate-200">Подготовка</span>
+</a>
 </div>
-<div class="flex-1">
-<p class="text-base font-medium text-slate-800 dark:text-slate-100">
-                    I missed Sunday Mass without a valid reason
-                </p>
-<p class="text-xs text-slate-500 dark:text-slate-400 mt-1">3rd Commandment • Keep holy the Lord's Day</p>
-</div>
-</label>
-<label class="group relative flex items-start gap-4 p-4 rounded-xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 shadow-sm transition-all hover:border-primary/50 dark:hover:border-primary/50 cursor-pointer">
-<div class="relative flex items-center pt-0.5">
-<input checked="" class="peer h-5 w-5 cursor-pointer rounded border-slate-300 dark:border-slate-600 text-primary focus:ring-primary/20 bg-transparent checked:bg-primary checked:border-primary transition-all" type="checkbox"/>
-</div>
-<div class="flex-1">
-<p class="text-base font-medium text-slate-800 dark:text-slate-100">
-                    I harbored grudges against a coworker
-                </p>
-<p class="text-xs text-slate-500 dark:text-slate-400 mt-1">5th Commandment • You shall not kill</p>
-</div>
-</label>
-<label class="group relative flex items-start gap-4 p-4 rounded-xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 shadow-sm transition-all hover:border-primary/50 dark:hover:border-primary/50 cursor-pointer">
-<div class="relative flex items-center pt-0.5">
-<input checked="" class="peer h-5 w-5 cursor-pointer rounded border-slate-300 dark:border-slate-600 text-primary focus:ring-primary/20 bg-transparent checked:bg-primary checked:border-primary transition-all" type="checkbox"/>
-</div>
-<div class="flex-1">
-<p class="text-base font-medium text-slate-800 dark:text-slate-100">
-                    I was dishonest in a small matter
-                </p>
-<p class="text-xs text-slate-500 dark:text-slate-400 mt-1">8th Commandment • You shall not bear false witness</p>
-</div>
-</label>
 </section>
-<section class="mt-8">
-<div class="flex items-center gap-2 mb-4 px-1">
-<span class="material-symbols-outlined text-primary text-xl">edit_note</span>
-<h3 class="text-lg font-bold text-slate-900 dark:text-white">Personal Reflections</h3>
-</div>
-<div class="relative rounded-xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 shadow-sm overflow-hidden focus-within:ring-2 focus-within:ring-primary/50 focus-within:border-primary transition-all">
-<textarea class="w-full h-48 p-4 bg-transparent border-none text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 resize-none focus:ring-0 text-base leading-relaxed" placeholder="Write any additional sins, specific details, or thoughts you wish to mention to the priest..."></textarea>
-<div class="absolute bottom-3 right-3 flex gap-2">
-<button class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-primary transition-colors" title="Voice Input">
-<span class="material-symbols-outlined text-xl">mic</span>
-</button>
-</div>
-</div>
-<p class="mt-2 px-1 text-xs text-slate-500 dark:text-slate-400">
-            These notes are stored locally and are for your eyes only during confession.
+<div class="space-y-4">
+<p class="text-slate-500 dark:text-slate-400 text-sm mb-6 leading-relaxed px-1">
+            Подготовка к Таинству Исповеди — это важный шаг. Ниже приведены основные этапы, которые помогут вам настроиться на духовное очищение.
         </p>
-</section>
+<!-- Card 1 -->
+<details class="group glass-card rounded-xl overflow-hidden transition-all duration-300" open="">
+<summary class="flex items-center gap-4 p-4 cursor-pointer select-none">
+<div class="flex items-center justify-center size-10 rounded-full bg-primary/20 text-primary shrink-0">
+<span class="material-symbols-outlined">psychology</span>
+</div>
+<div class="flex-1">
+<h2 class="text-base font-medium text-slate-900 dark:text-white">Осознание грехов</h2>
+</div>
+<span class="material-symbols-outlined text-slate-400 group-open:rotate-180 transition-transform duration-300">expand_more</span>
+</summary>
+<div class="px-4 pb-4 pt-1 text-sm text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-200/10 dark:border-surface-border mx-4 mt-2 pt-4">
+<p class="mb-3">Подробная инструкция и духовные советы о том, как осознать свои грехи перед исповедью.</p>
+<ul class="list-disc pl-5 space-y-2 opacity-90">
+<li>Вспомните свои поступки, слова и мысли.</li>
+<li>Используйте перечни грехов в молитвослове (например, по десяти заповедям).</li>
+<li>Не пытайтесь оправдать себя, будьте честны перед своей совестью.</li>
+<li>Главное — искреннее раскаяние и желание исправиться.</li>
+</ul>
+</div>
+</details>
+<!-- Card 2 -->
+<details class="group glass-card rounded-xl overflow-hidden transition-all duration-300">
+<summary class="flex items-center gap-4 p-4 cursor-pointer select-none">
+<div class="flex items-center justify-center size-10 rounded-full bg-primary/20 text-primary shrink-0">
+<span class="material-symbols-outlined">handshake</span>
+</div>
+<div class="flex-1">
+<h2 class="text-base font-medium text-slate-900 dark:text-white">Примирение с ближними</h2>
+</div>
+<span class="material-symbols-outlined text-slate-400 group-open:rotate-180 transition-transform duration-300">expand_more</span>
+</summary>
+<div class="px-4 pb-4 pt-1 text-sm text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-200/10 dark:border-surface-border mx-4 mt-2 pt-4">
+<p>Перед тем как просить прощения у Бога, необходимо примириться с людьми, которых вы обидели, и простить тех, кто обидел вас. Без этого исповедь не будет полной. Позвоните, напишите или встретьтесь с теми, с кем вы в ссоре.</p>
+</div>
+</details>
+<!-- Card 3 -->
+<details class="group glass-card rounded-xl overflow-hidden transition-all duration-300">
+<summary class="flex items-center gap-4 p-4 cursor-pointer select-none">
+<div class="flex items-center justify-center size-10 rounded-full bg-primary/20 text-primary shrink-0">
+<span class="material-symbols-outlined">menu_book</span>
+</div>
+<div class="flex-1">
+<h2 class="text-base font-medium text-slate-900 dark:text-white">Молитвенное правило</h2>
+</div>
+<span class="material-symbols-outlined text-slate-400 group-open:rotate-180 transition-transform duration-300">expand_more</span>
+</summary>
+<div class="px-4 pb-4 pt-1 text-sm text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-200/10 dark:border-surface-border mx-4 mt-2 pt-4">
+<p>Перед исповедью желательно прочитать Покаянный канон ко Господу нашему Иисусу Христу. Молитва помогает настроить душу на покаянный лад и просить у Бога помощи в осознании своих прегрешений.</p>
+</div>
+</details>
+</div>
 </main>
-<nav class="fixed bottom-0 left-0 w-full z-30 bg-background-light/95 dark:bg-[#1f1627]/95 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800 pb-safe-bottom">
-<div class="flex items-center justify-around px-2 pb-5 pt-3">
-<a class="flex flex-col items-center justify-center gap-1 min-w-[56px] group" href="#">
-<div class="flex items-center justify-center w-10 h-7 rounded-full transition-colors group-hover:bg-primary/10">
-<span class="material-symbols-outlined text-slate-400 dark:text-slate-500 group-hover:text-primary text-[22px]">fact_check</span>
-</div>
-<span class="text-[9px] font-medium text-slate-400 dark:text-slate-500 group-hover:text-primary">Examination</span>
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 left-0 right-0 z-50 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-xl border-t border-slate-200/20 dark:border-surface-border pb-safe max-w-md mx-auto">
+<div class="flex px-2 py-3">
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px]">home</span>
+<span class="text-[10px] font-medium tracking-wide">Главная</span>
 </a>
-<a class="flex flex-col items-center justify-center gap-1 min-w-[56px] group" href="#">
-<div class="flex items-center justify-center w-10 h-7 rounded-full bg-primary/10 dark:bg-primary/20">
-<span class="material-symbols-outlined text-primary dark:text-primary-300 text-[22px] font-variation-settings-'FILL'1">edit_note</span>
-</div>
-<span class="text-[9px] font-medium text-primary dark:text-primary-300">Notes</span>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">book_4</span>
+<span class="text-[10px] font-medium tracking-wide">Подготовка</span>
 </a>
-<a class="flex flex-col items-center justify-center gap-1 min-w-[56px] group" href="#">
-<div class="flex items-center justify-center w-10 h-7 rounded-full transition-colors group-hover:bg-primary/10">
-<span class="material-symbols-outlined text-slate-400 dark:text-slate-500 group-hover:text-primary text-[22px]">volcano</span>
-</div>
-<span class="text-[9px] font-medium text-slate-400 dark:text-slate-500 group-hover:text-primary">Prayers</span>
-</a>
-<a class="flex flex-col items-center justify-center gap-1 min-w-[56px] group" href="#">
-<div class="flex items-center justify-center w-10 h-7 rounded-full transition-colors group-hover:bg-primary/10">
-<span class="material-symbols-outlined text-slate-400 dark:text-slate-500 group-hover:text-primary text-[22px]">menu_book</span>
-</div>
-<span class="text-[9px] font-medium text-slate-400 dark:text-slate-500 group-hover:text-primary">Teachings</span>
-</a>
-<a class="flex flex-col items-center justify-center gap-1 min-w-[56px] group" href="#">
-<div class="flex items-center justify-center w-10 h-7 rounded-full transition-colors group-hover:bg-primary/10">
-<span class="material-symbols-outlined text-slate-400 dark:text-slate-500 group-hover:text-primary text-[22px]">settings</span>
-</div>
-<span class="text-[9px] font-medium text-slate-400 dark:text-slate-500 group-hover:text-primary">Settings</span>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px]">person</span>
+<span class="text-[10px] font-medium tracking-wide">Профиль</span>
 </a>
 </div>
 </nav>
-<div class="h-6 w-full fixed bottom-0 bg-transparent pointer-events-none z-50"></div>
-
+<!-- Safe area padding for newer iPhones -->
+<style>
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 1rem); }
+    </style>
 </body></html>

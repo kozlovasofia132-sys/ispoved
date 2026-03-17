@@ -1,4 +1,25 @@
-export const getSinsData = () => [
+// Profile type: 'adult' | 'child' | 'monastic'
+let currentProfile = localStorage.getItem('profile') || 'adult';
+
+/**
+ * Set current profile
+ * @param {string} profile - Profile type
+ */
+export function setProfile(profile) {
+    currentProfile = profile;
+    localStorage.setItem('profile', profile);
+}
+
+/**
+ * Get current profile
+ * @returns {string} Current profile type
+ */
+export function getProfile() {
+    return currentProfile;
+}
+
+// Adult sins (default, full list)
+const adultSins = [
     {
         id: 'god',
         titleKey: 'cat_god_title',
@@ -108,3 +129,69 @@ export const getSinsData = () => [
         ]
     }
 ];
+
+// Child sins (simplified, age-appropriate)
+const childSins = [
+    {
+        id: 'god',
+        titleKey: 'cat_god_title',
+        subtitleKey: 'cat_god_subtitle',
+        title: { ru: 'Против Бога', uk: 'Проти Бога', en: 'Against God' },
+        subtitle: { ru: 'I. ОТНОШЕНИЯ', uk: 'I. ВІДНОСИНИ', en: 'I. RELATIONSHIPS' },
+        icon: 'church',
+        image: '/bg-god.png',
+        sins: [
+            { id: 'god_1', text: { ru: 'Забыл помолиться утром или вечером', uk: 'Забув помолитися вранці або ввечері', en: 'Forgot to pray morning or evening' } },
+            { id: 'god_2', text: { ru: 'Не хотел идти в храм', uk: 'Не хотів йти до храму', en: 'Did not want to go to church' } },
+            { id: 'god_3', text: { ru: 'Божился или упоминал Бога всуе', uk: 'Божився або згадував Бога даремно', en: 'Took God\'s name in vain' } },
+            { id: 'god_4', text: { ru: 'Смеялся в церкви или разговаривал', uk: 'Сміявся в церкві або розмовляв', en: 'Laughed or talked in church' } },
+            { id: 'god_5', text: { ru: 'Боялся креститься или носить крестик', uk: 'Боявся хреститися або носити хрестик', en: 'Was afraid to cross myself or wear my cross' } }
+        ]
+    },
+    {
+        id: 'neighbors',
+        titleKey: 'cat_neighbors_title',
+        subtitleKey: 'cat_neighbors_subtitle',
+        title: { ru: 'Против ближнего', uk: 'Проти ближнього', en: 'Against neighbor' },
+        subtitle: { ru: 'II. БЛИЖНИЕ', uk: 'II. БЛИЖНІ', en: 'II. NEIGHBORS' },
+        icon: 'people',
+        image: '/bg-neighbor.png',
+        sins: [
+            { id: 'neighbor_1', text: { ru: 'Не слушался родителей', uk: 'Не слухався батьків', en: 'Did not obey parents' } },
+            { id: 'neighbor_2', text: { ru: 'Грубил или кричал на родителей', uk: 'Грубив або кричав на батьків', en: 'Was rude or yelled at parents' } },
+            { id: 'neighbor_3', text: { ru: 'Дрался или обзывал других', uk: 'Бився або обзивав інших', en: 'Fought or called others names' } },
+            { id: 'neighbor_4', text: { ru: 'Ябедничал или завидовал', uk: 'Ябедничав або заздрив', en: 'Tattled or was envious' } },
+            { id: 'neighbor_5', text: { ru: 'Не поделился с другими', uk: 'Не поділився з іншими', en: 'Did not share with others' } },
+            { id: 'neighbor_6', text: { ru: 'Обижал младших или слабых', uk: 'Ображав молодших або слабких', en: 'Bullied younger or weaker ones' } },
+            { id: 'neighbor_7', text: { ru: 'Врал или обманывал', uk: 'Брехав або обманював', en: 'Lied or deceived' } }
+        ]
+    },
+    {
+        id: 'self',
+        titleKey: 'cat_self_title',
+        subtitleKey: 'cat_self_subtitle',
+        title: { ru: 'Против себя', uk: 'Проти себе', en: 'Against self' },
+        subtitle: { ru: 'III. Я', uk: 'III. Я', en: 'III. SELF' },
+        icon: 'person',
+        image: '/bg-self.png',
+        sins: [
+            { id: 'self_1', text: { ru: 'Ленился делать уроки или помогать дома', uk: 'Лінувався робити уроки або допомагати вдома', en: 'Was lazy doing homework or helping at home' } },
+            { id: 'self_2', text: { ru: 'Много сидел в телефоне или компьютере', uk: 'Багато сидів у телефоні або комп\'ютері', en: 'Spent too much time on phone or computer' } },
+            { id: 'self_3', text: { ru: 'Грубо разговаривал или ругался матом', uk: 'Грубо розмовляв або лаявся матом', en: 'Talked rudely or used bad words' } },
+            { id: 'self_4', text: { ru: 'Жадничал или завидовал чужим вещам', uk: 'Жадібничав або заздрив чужим речам', en: 'Was greedy or envious of others\' things' } },
+            { id: 'self_5', text: { ru: 'Тратил деньги на ненужные вещи', uk: 'Тратив гроші на непотрібні речі', en: 'Spent money on unnecessary things' } }
+        ]
+    }
+];
+
+/**
+ * Get sins data based on current profile
+ * @returns {Array} Sins data for current profile
+ */
+export const getSinsData = () => {
+    if (currentProfile === 'child') {
+        return childSins;
+    }
+    // Default to adult (monastic uses same as adult for now)
+    return adultSins;
+};

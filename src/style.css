@@ -5,6 +5,22 @@
 @tailwind utilities;
 
 @layer utilities {
+
+  /* Screen reader only class - visually hidden but accessible */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+    pointer-events: auto;
+    /* Allow clicks to pass through */
+  }
+
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
@@ -267,6 +283,47 @@ body {
   border-color: rgba(0, 0, 0, 0.12) !important;
 }
 
+/* Specific text color overrides for light mode */
+.light .text-white\/90 {
+  color: #1a1a1a !important;
+}
+
+.light .text-white\/40 {
+  color: #6e6e73 !important;
+}
+
+.light .text-white\/20 {
+  color: #8e8e93 !important;
+}
+
+.light .text-slate-300 {
+  color: #334155 !important;
+}
+
+.light .text-amber-500\/80 {
+  color: #c2410c !important; /* amber-700 */
+}
+
+/* Prayer Menu Items in Light Mode */
+.light .prayer-menu-item {
+  background-color: white !important;
+  border-color: rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) !important;
+}
+
+.light .prayer-menu-item:active {
+  background-color: #f8fafc !important;
+  transform: scale(0.98);
+}
+
+.light .prayer-menu-item span[data-t] {
+  color: #1a1a1a !important;
+}
+
+.light .prayer-menu-item .material-symbols-outlined.text-white\/20 {
+  color: #cbd5e1 !important; /* slate-300 */
+}
+
 /* Theme toggle switch in light mode */
 .light #theme-toggle+div {
   background-color: #e5e7eb !important;
@@ -325,13 +382,23 @@ body {
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-10px); }
-  75% { transform: translateX(10px); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-10px);
+  }
+
+  75% {
+    transform: translateX(10px);
+  }
 }
 
 .animate-shake {
-  animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+  animation: shake 0.4s cubic-bezier(.36, .07, .19, .97) both;
 }
 
 #pin-pad-modal.setup-mode {
@@ -568,6 +635,24 @@ body {
   margin: 0 auto;
   border: none !important;
   text-align: left !important;
+}
+
+/* Force light text in prayers modal even in light mode */
+.light #prayer-content-area .troparion,
+.light #prayer-content-area .canon-text,
+.light #prayer-content-area .canon-text-bold,
+.light #prayer-content-area .irmos-label,
+.light #prayer-content-area p {
+  color: #f3f4f6 !important;
+}
+
+.light #prayer-content-area .irmos {
+  background: linear-gradient(90deg, rgba(225, 193, 110, 0.1) 0%, transparent 100%) !important;
+  border-left-color: rgba(225, 193, 110, 0.4) !important;
+}
+
+.light #prayer-content-area .irmos-text {
+  color: #E1C16E !important;
 }
 
 #prayer-content-area h2,
@@ -825,8 +910,17 @@ body {
 }
 
 @keyframes crossGlow {
-  0%, 100% { opacity: 0.8; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.05); }
+
+  0%,
+  100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
 }
 
 .canon-title {
@@ -868,9 +962,11 @@ body {
   font-family: 'EB Garamond', 'Lora', serif;
   font-size: clamp(24px, 6vw, 30px);
   font-weight: 700 !important;
-  color: #E1C16E !important; /* Золотистый */
+  color: #E1C16E !important;
+  /* Золотистый */
   text-align: center !important;
-  margin: 28px 0 16px !important; /* Отступы сверху и снизу */
+  margin: 28px 0 16px !important;
+  /* Отступы сверху и снизу */
   padding: 0;
   letter-spacing: 0.03em;
   text-transform: none;
@@ -935,7 +1031,8 @@ body {
   font-family: 'EB Garamond', 'Lora', serif;
   font-size: clamp(24px, 6vw, 30px);
   font-weight: 700 !important;
-  color: #E1C16E !important; /* Золотистый */
+  color: #E1C16E !important;
+  /* Золотистый */
   text-align: center !important;
   margin: 28px 0 16px !important;
   font-style: normal !important;
@@ -953,7 +1050,8 @@ body {
   font-family: 'EB Garamond', 'Lora', serif;
   font-size: clamp(24px, 6vw, 30px);
   font-weight: 700 !important;
-  color: #E1C16E !important; /* Золотистый */
+  color: #E1C16E !important;
+  /* Золотистый */
   text-align: center !important;
   margin: 28px 0 16px !important;
   font-style: normal !important;
@@ -972,7 +1070,8 @@ body {
   font-family: 'EB Garamond', 'Lora', serif;
   font-size: clamp(24px, 6vw, 30px);
   font-weight: 700 !important;
-  color: #E1C16E !important; /* Золотистый */
+  color: #E1C16E !important;
+  /* Золотистый */
   text-align: center !important;
   margin: 28px 0 16px !important;
   font-style: normal !important;
@@ -983,7 +1082,8 @@ body {
   font-family: 'EB Garamond', 'Lora', serif;
   font-size: clamp(18px, 5vw, 22px);
   font-weight: 700 !important;
-  color: #E1C16E !important; /* Золотистый */
+  color: #E1C16E !important;
+  /* Золотистый */
   text-align: center !important;
   margin: 24px 0 12px !important;
   letter-spacing: 0.05em;
@@ -1040,7 +1140,8 @@ body {
 .irmos-text-first {
   color: #e11d48 !important;
   font-weight: 700;
-  font-size: 1.25em !important; /* Чуть увеличена для заметности */
+  font-size: 1.25em !important;
+  /* Чуть увеличена для заметности */
   display: inline-block;
   vertical-align: baseline !important;
   line-height: 1;
@@ -1057,12 +1158,14 @@ body {
 .zapev,
 .slava-full,
 .i-nyne-full {
-  color: #ef4444 !important; /* red-500 */
+  color: #ef4444 !important;
+  /* red-500 */
   font-style: italic !important;
   font-family: 'EB Garamond', 'Lora', serif;
   font-size: clamp(20px, 5vw, 22px);
   line-height: 1.5;
-  margin: 0 0 4px 0 !important; /* mb-1 минимальный отступ снизу */
+  margin: 0 0 4px 0 !important;
+  /* mb-1 минимальный отступ снизу */
   padding: 0 0 !important;
 }
 
@@ -1085,7 +1188,8 @@ body {
 .slava-nyne-first {
   color: #ef4444 !important;
   font-weight: 700;
-  font-size: 1.25em !important; /* Чуть увеличена для заметности */
+  font-size: 1.25em !important;
+  /* Чуть увеличена для заметности */
   display: inline-block;
   vertical-align: baseline !important;
   line-height: 1;
@@ -1101,14 +1205,17 @@ body {
   color: #ffffff !important;
   font-style: normal !important;
   padding: 0 0 !important;
-  margin: 0 0 12px 0 !important; /* Отступ после тропаря до следующего запева */
+  margin: 0 0 12px 0 !important;
+  /* Отступ после тропаря до следующего запева */
 }
 
 /* Буквица (Киноварь) - первая буква тропаря КРАСНАЯ */
 .troparion::first-letter {
-  color: #ef4444 !important; /* red-500 */
+  color: #ef4444 !important;
+  /* red-500 */
   font-weight: 700;
-  font-size: 1.25em !important; /* Чуть увеличена для заметности */
+  font-size: 1.25em !important;
+  /* Чуть увеличена для заметности */
   display: inline-block;
   vertical-align: baseline !important;
   line-height: 1;

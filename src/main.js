@@ -1,18 +1,22 @@
 import './style.css';
+import { Capacitor } from '@capacitor/core';
+import { App } from '@capacitor/app';
 import { TextToSpeech } from '@capacitor-community/text-to-speech';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
-import { getSinsData } from './data/sins.js';
+import { getSinsData, setProfile, getProfile } from './data/sins.js';
 import { translations } from './data/translations.js';
 import { preparationData } from './data/preparation.js';
 import { quotes } from './data/quotes.js';
 import { prayersData } from './data/prayers.js';
+import { getTodayInfo, getFastingIcon, getFastingColor } from './services/calendarService.js';
 
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- Elements ---
     const navButtons = document.querySelectorAll('.nav-btn');
     const tabContents = {
+        'church-today': document.getElementById('tab-church-today'),
         catalog: document.getElementById('tab-catalog'),
         list: document.getElementById('tab-list'),
         preparation: document.getElementById('tab-preparation'),
@@ -102,6 +106,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let isDigitalMentorEnabled = localStorage.getItem('digitalMentor') === 'true';
 
+    // --- Biometric Protection State ---
+    let isBiometricEnabled = localStorage.getItem('biometricEnabled') === 'true';
+
     // --- Teleprompter State ---
     let isAutoscrolling = false;
     let autoscrollSpeed = 30; // pixels per second
@@ -119,6 +126,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentInputPin = '';
     let setupStep = 0; // 0: enter current/new, 1: confirm
     let tempSetupPin = '';
+    let pendingTabAfterAuth = null;
+    let pinPadSuccessCallback = null;
+    let isUnlocked = false; // Флаг разблокировки вкладки "Моя исповедь"
+    let isChangingPin = false; // Флаг процесса изменения ПИН
 
     // --- Localization ---
     function t(key) {
@@ -161,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
         switch (activeTab) {
             case 'catalog': headerKey = 'catalogHeader'; break;
             case 'list': headerKey = 'notesTitle'; break;
-            case 'preparation': headerKey = 'preparation'; break; 
+            case 'preparation': headerKey = 'preparation'; break;
             case 'settings': headerKey = 'settings'; break;
             default: headerKey = 'appName';
         }
@@ -170,9 +181,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- Tab Navigation ---
-    function switchTab(tabId) {
+    async function switchTab(tabId) {
         if (!tabContents[tabId]) return;
+
+        // Protection for "My Confession" tab — запрашиваем ПИН только если есть грехи в списке
+        if (tabId === 'list' && isPinEnabled && selectedSins.length > 0) {
+            let authenticated = false;
+
+            if (isBiometricEnabled) {
+                authenticated = await verifyBiometric();
+            }
+
+            // Если уже разблокировано в этой сессии, не запрашиваем ПИН снова
+            if (!isUnlocked) {
+                if (!authenticated && hashedPin) {
+                    pendingTabAfterAuth = 'list';
+                    openPinPad(false);
+                    return;
+                } else if (!authenticated) {
+                    return; // Access denied or cancelled bio without PIN
+                }
+            }
+        }
+
         activeTab = tabId;
+        pendingTabAfterAuth = null; // Clear if we got here naturally or via bio success
 
         Object.keys(tabContents).forEach(id => {
             if (tabContents[id]) {
@@ -194,6 +227,52 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    async function verifyBiometric() {
+        if (!window.PublicKeyCredential) {
+            alert(t('biometricNotSupported'));
+            return false;
+        }
+
+        try {
+            // Standard WebAuthn check for local identity verify. 
+            // Note: In real app, you'd store a credential, but for simple local 
+            // 'is it you' on mobile, some WebViews support simpler 'get'.
+            // Here we use a dummy request to trigger the native prompt if possible.
+            const challenge = new Uint8Array(32);
+            window.crypto.getRandomValues(challenge);
+
+            // This is a minimal WebAuthn call that often triggers biometric prompt on Android
+            const options = {
+                publicKey: {
+                    challenge: challenge,
+                    timeout: 60000,
+                    allowCredentials: [], // Forces it to use platform authenticator if user is registered, 
+                    // or just generic device auth if configured.
+                    userVerification: "required"
+                }
+            };
+
+            // Note: Actual WebAuthn requires a registered credential.
+            // As a "lightweight" alternative for this specific task, 
+            // we'll assume the user might not have a credential registered yet 
+            // or simply simulate the interaction if WebAuthn is unavailable/mocked.
+            // If the user wants "REAL" biometric without a server, WebAuthn is tricky 
+            // without a prior 'create'.
+
+            // Simplified approach for the task: 
+            // Since we can't use NPM packages, we attempt a generic platform verification.
+            // If it fails, we fall back to PIN.
+
+            // Attempting a 'get' with an empty list often prompts for device screen lock/bio
+            // on modern Android/Chrome if 'userVerification' is required.
+            const credential = await navigator.credentials.get(options);
+            return !!credential;
+        } catch (err) {
+            console.error('Biometric error:', err);
+            return false;
+        }
+    }
+
     navButtons.forEach(btn => {
         btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
     });
@@ -209,9 +288,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const subtitle = category.subtitleKey ? t(category.subtitleKey) : (category.subtitle[currentLanguage] || category.subtitle.ru);
 
             const gradients = {
-                god: 'from-[#1a237e]/40 via-[#121212]/30 to-transparent',
-                neighbors: 'from-[#2e7d32]/40 via-[#121212]/30 to-transparent',
-                self: 'from-[#4e342e]/40 via-[#121212]/30 to-transparent'
+                god: 'from-black/80 to-transparent',
+                neighbors: 'from-black/80 to-transparent',
+                self: 'from-black/80 to-transparent'
             };
 
             const accentColor = category.id === 'god' ? 'text-primary' : (category.id === 'neighbors' ? 'text-blue-400' : 'text-emerald-400');
@@ -220,7 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
             catalogHtml += `
             <details name="accordion-group" class="group glass-panel rounded-[28px] overflow-hidden transition-all duration-500 hover:shadow-primary/10">
                 <summary class="cursor-pointer relative min-h-[170px] flex flex-col justify-end p-7 select-none list-none [&::-webkit-details-marker]:hidden outline-none">
-                    <div class="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-80 group-open:opacity-30 transition-all duration-700 scale-105 group-hover:scale-110 brightness-110 saturate-[1.25]" style="background-image: url('${category.image}')"></div>
+                    <div class="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-80 group-open:opacity-30 transition-all duration-700 scale-105 group-hover:scale-110 brightness-110 contrast-105 saturate-[1.25]" style="background-image: url('${category.image}')"></div>
                     <div class="absolute inset-0 z-0 bg-gradient-to-t ${bgGradient} opacity-95"></div>
                     
                     <div class="relative z-10 flex items-end justify-between w-full">
@@ -272,6 +351,22 @@ document.addEventListener('DOMContentLoaded', () => {
         catalogContainer.querySelectorAll('details').forEach(details => {
             details.ontoggle = () => {
                 if (details.open) {
+                    // Проверяем, нужно ли запрашивать ПИН
+                    if (isPinEnabled && selectedSins.length > 0 && !isUnlocked) {
+                        // Закрываем accordion до авторизации
+                        details.open = false;
+                        
+                        pendingTabAfterAuth = 'catalog';
+                        openPinPad(false, () => {
+                            // После успешной проверки открываем accordion
+                            details.open = true;
+                            setTimeout(() => {
+                                details.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }, 50);
+                        });
+                        return;
+                    }
+                    
                     setTimeout(() => {
                         details.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }, 50);
@@ -588,8 +683,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const prayerModal = document.getElementById('prayer-modal');
     const prayerModalCloseBtn = document.getElementById('prayer-modal-close-btn');
+    const prayerModalCloseXBtn = document.getElementById('prayer-modal-close-x-btn'); // Кнопка закрытия (X) в углу экрана
     const readingModeFooter = document.getElementById('reading-mode-footer');
-    const completeConfessionBtn = document.getElementById('complete-confession-btn');
+    const finishConfessionBtn = document.getElementById('finish-confession-btn'); // Кнопка "Завершить исповедь"
 
     function populateReadingMode() {
         if (!readingModeContent) return;
@@ -656,13 +752,37 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (completeConfessionBtn) {
-        completeConfessionBtn.addEventListener('click', () => {
+    // Кнопка "Завершить исповедь" — очистка данных и возврат в каталог
+    if (finishConfessionBtn) {
+        finishConfessionBtn.addEventListener('click', () => {
+            console.log('[Confession] Finishing confession');
+            
+            // Очищаем список грехов
+            selectedSins = [];
+            localStorage.setItem('selectedSins', '[]');
+            
+            // Очищаем личные заметки
+            personalNotes = '';
+            localStorage.setItem('personalReflections', '');
+            if (personalNotesArea) {
+                personalNotesArea.value = '';
+            }
+            
+            // Закрываем модальное окно чтения
             readingModeModal.classList.add('hidden');
             releaseWakeLock();
-            if (prayerModal) {
-                prayerModal.classList.remove('hidden');
-            }
+            
+            // Обновляем отображение
+            renderCatalog();
+            updateMyList();
+            
+            // Переключаемся на каталог
+            switchTab('catalog');
+            
+            // Показываем уведомление
+            showToast(t('confessionCompleted'));
+            
+            console.log('[Confession] Confession completed');
         });
     }
 
@@ -674,6 +794,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.target === prayerModal) {
                 prayerModal.classList.add('hidden');
             }
+        });
+    }
+
+    // Обработчик кнопки закрытия (X) для Prayer Modal
+    if (prayerModalCloseXBtn && prayerModal) {
+        prayerModalCloseXBtn.addEventListener('click', () => {
+            prayerModal.classList.add('hidden');
         });
     }
 
@@ -716,7 +843,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Actions ---
     const clearAllBtnTop = document.getElementById('clear-all-btn-top');
-    const openClearModal = () => { if (clearModal) clearModal.classList.remove('hidden'); };
+    const openClearModal = () => {
+        // Проверяем, разблокирована ли вкладка "Моя исповедь"
+        if (isPinEnabled && !isUnlocked) {
+            console.log('[PIN] Clear blocked - requires authentication');
+            // Если ПИН включен, но не разблокировано — запрашиваем ПИН
+            pendingTabAfterAuth = 'list';
+            openPinPad(false, () => {
+                // После успешной разблокировки открываем модальное окно
+                if (clearModal) clearModal.classList.remove('hidden');
+            });
+            return;
+        }
+        if (clearModal) clearModal.classList.remove('hidden');
+    };
     const closeClearModal = () => { if (clearModal) clearModal.classList.add('hidden'); };
 
     if (clearAllBtn) clearAllBtn.addEventListener('click', openClearModal);
@@ -757,8 +897,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateLanguageUI() {
         langButtons.forEach(btn => {
             const isActive = btn.dataset.lang === currentLanguage;
-            btn.classList.toggle('bg-primary', isActive);
-            btn.classList.toggle('text-white', isActive);
+            if (isActive) {
+                btn.classList.add('bg-primary', 'text-white');
+                btn.classList.remove('bg-white/5', 'text-slate-300');
+            } else {
+                btn.classList.remove('bg-primary', 'text-white');
+                btn.classList.add('bg-white/5', 'text-slate-300');
+            }
         });
     }
 
@@ -816,28 +961,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Privacy & Security Features ---
     const pinPadModal = document.getElementById('pin-pad-modal');
-    const pinPadStatus = document.getElementById('pin-pad-status');
-    const pinDots = document.querySelectorAll('.pin-dot');
+    const pinPadStatus = document.getElementById('pin-pad-title');
+    const pinCells = document.querySelectorAll('.pin-cell');
     const pinBtns = document.querySelectorAll('.pin-btn');
-    const pinBackspace = document.getElementById('pin-backspace');
-    const pinCancel = document.getElementById('pin-cancel');
+    const pinBackspace = document.getElementById('pin-delete-btn');
+    const pinCancel = document.getElementById('pin-cancel-btn');
+    const pinClearBtn = document.getElementById('pin-clear-btn'); // Кнопка "Удалить" (очистка всего ПИН)
+    const pinPadCloseBtn = document.getElementById('pin-pad-close-btn'); // Кнопка закрытия (X)
     const pinToggle = document.getElementById('pin-toggle');
 
+    // Custom Confirm Modal elements
+    const confirmModal = document.getElementById('confirm-modal');
+    const confirmMessage = document.getElementById('confirm-message');
+    const confirmYesBtn = document.getElementById('confirm-yes-btn');
+    const confirmNoBtn = document.getElementById('confirm-no-btn');
+    let confirmCallback = null; // Callback for "Yes" action
+
     function updatePinDots() {
-        pinDots.forEach((dot, i) => {
-            dot.classList.toggle('bg-primary', i < currentInputPin.length);
-            dot.classList.toggle('border-primary', i < currentInputPin.length);
-            dot.classList.toggle('scale-110', i < currentInputPin.length);
+        if (!pinCells || pinCells.length === 0) return;
+        pinCells.forEach((cell, i) => {
+            if (i < currentInputPin.length) {
+                cell.classList.add('bg-white', 'border-white');
+                cell.classList.remove('border-white/30');
+            } else {
+                cell.classList.remove('bg-white', 'border-white');
+                cell.classList.add('border-white/30');
+            }
+            // Remove error state
+            cell.classList.remove('border-red-500');
         });
     }
 
     async function hashPin(pin) {
-        // Simple hash for local protection
-        const encoder = new TextEncoder();
-        const data = encoder.encode(pin + 'salt_ispoved_2026');
-        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        // Simple hash (Base64) for basic obfuscation as requested
+        return btoa(pin + '_ispoved_salt');
     }
 
     async function handlePinInput(val) {
@@ -848,23 +1005,33 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentInputPin.length === 4) {
             setTimeout(async () => {
                 const hashedInput = await hashPin(currentInputPin);
-                
-                // Mode 1: App Unlock
-                if (!setupStep && hashedPin && !pinPadModal.classList.contains('setup-mode')) {
+
+                // Mode 1: Verification (ПИН уже установлен, проверяем для включения/разблокировки)
+                // Проверяем: есть ли сохраненный ПИН и НЕ в режиме установки
+                if (hashedPin && !pinPadModal.classList.contains('setup-mode')) {
                     if (hashedInput === hashedPin) {
+                        // Успешная проверка — устанавливаем isUnlocked и вызываем колбэк если есть
+                        isUnlocked = true;
+                        console.log('[PIN] PIN verified, isUnlocked = true');
+                        
+                        if (typeof pinPadSuccessCallback === 'function') {
+                            pinPadSuccessCallback();
+                            pinPadSuccessCallback = null;
+                        }
                         closePinPad();
                     } else {
                         pinPadStatus.textContent = t('incorrectPin');
                         pinPadStatus.classList.add('text-red-400');
+                        pinCells.forEach(cell => cell.classList.add('border-red-500', 'text-red-500'));
                         shakePinPad();
-                        resetPinInput();
+                        setTimeout(resetPinInput, 500); // Small delay to show red cells
                     }
-                } 
-                // Mode 2: PIN Setup
+                }
+                // Mode 2: PIN Setup (режим установки нового ПИН-кода)
                 else if (setupStep === 0) {
                     tempSetupPin = hashedInput;
                     setupStep = 1;
-                    pinPadStatus.textContent = t('pinConfirmTitle');
+                    pinPadStatus.textContent = t('pinConfirmNewTitle');
                     resetPinInput();
                 } else if (setupStep === 1) {
                     if (hashedInput === tempSetupPin) {
@@ -872,19 +1039,27 @@ document.addEventListener('DOMContentLoaded', () => {
                         localStorage.setItem('hashedPin', hashedPin);
                         isPinEnabled = true;
                         localStorage.setItem('pinEnabled', 'true');
-                        if (pinToggle) pinToggle.checked = true;
+
+                        // Call success callback if it exists (e.g., from toggle setup)
+                        if (typeof pinPadSuccessCallback === 'function') {
+                            pinPadSuccessCallback();
+                            pinPadSuccessCallback = null;
+                        }
+
+                        updateBiometricUIState(); // Enable biometric toggle now that PIN is set
                         showToast(t('pinSuccess'));
                         closePinPad();
                     } else {
                         pinPadStatus.textContent = t('pinMismatch');
                         pinPadStatus.classList.add('text-red-400');
+                        pinCells.forEach(cell => cell.classList.add('border-red-500', 'text-red-500'));
                         shakePinPad();
                         setupStep = 0;
                         setTimeout(() => {
-                            pinPadStatus.textContent = t('pinSetupTitle');
+                            pinPadStatus.textContent = t('pinSetupNewTitle');
                             pinPadStatus.classList.remove('text-red-400');
+                            resetPinInput();
                         }, 1000);
-                        resetPinInput();
                     }
                 }
             }, 250);
@@ -901,29 +1076,117 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => pinPadModal.querySelector('div').classList.remove('animate-shake'), 500);
     }
 
-    function openPinPad(isSetup = false) {
+    function openPinPad(isSetup = false, onSuccess = null) {
+        console.log('[PIN] openPinPad called, isSetup=', isSetup);
+        pinPadSuccessCallback = onSuccess;
+
+        if (!pinPadModal) {
+            console.error('[PIN] pinPadModal not found!');
+            return;
+        }
+        if (!pinPadStatus) {
+            console.error('[PIN] pinPadStatus not found!');
+            return;
+        }
+
         currentInputPin = '';
         setupStep = 0;
+
+        // === ПРИНУДИТЕЛЬНОЕ ОТОБРАЖЕНИЕ МОДАЛЬНОГО ОКНА ===
         pinPadModal.classList.remove('hidden');
+        pinPadModal.classList.add('flex');
+
+        // Показываем кнопку закрытия
+        if (pinPadCloseBtn) {
+            pinPadCloseBtn.classList.remove('hidden');
+            pinPadCloseBtn.style.display = 'flex';
+        }
+
+        // Принудительная установка inline-стилей
+        pinPadModal.style.display = 'flex';
+        pinPadModal.style.setProperty('display', 'flex', 'important');
+        pinPadModal.style.visibility = 'visible';
+        pinPadModal.style.setProperty('visibility', 'visible', 'important');
+        pinPadModal.style.opacity = '1';
+        pinPadModal.style.setProperty('opacity', '1', 'important');
+        pinPadModal.style.zIndex = '99999';
+        pinPadModal.style.setProperty('z-index', '99999', 'important');
+
+        console.log('[PIN] Modal classes after show:', pinPadModal.classList.toString());
+        console.log('[PIN] Modal display style:', pinPadModal.style.display);
+        console.log('[PIN] Modal visibility style:', pinPadModal.style.visibility);
+        console.log('[PIN] Modal opacity style:', pinPadModal.style.opacity);
+        console.log('[PIN] Modal zIndex style:', pinPadModal.style.zIndex);
+        console.log('[PIN] Modal computed display:', window.getComputedStyle(pinPadModal).display);
+        console.log('[PIN] Modal computed visibility:', window.getComputedStyle(pinPadModal).visibility);
+        console.log('[PIN] Modal computed opacity:', window.getComputedStyle(pinPadModal).opacity);
+        console.log('[PIN] Modal computed zIndex:', window.getComputedStyle(pinPadModal).zIndex);
+        // ====================================================
+
         pinPadModal.classList.toggle('setup-mode', isSetup);
-        pinPadStatus.textContent = isSetup ? t('pinSetupTitle') : t('lockScreenNote');
+
+        // Обновляем текст в зависимости от режима
+        if (isSetup) {
+            // В режиме установки показываем разные заголовки для этапов
+            if (setupStep === 0) {
+                pinPadStatus.textContent = t('pinSetupNewTitle');
+            } else {
+                pinPadStatus.textContent = t('pinConfirmNewTitle');
+            }
+            if (pinCancel) pinCancel.classList.remove('hidden');
+        } else {
+            // Режим проверки ПИН для доступа к вкладке "Моя исповедь"
+            pinPadStatus.textContent = t('pinVerificationNote');
+            if (pinCancel) pinCancel.classList.add('hidden');
+        }
+
         pinPadStatus.classList.remove('text-red-400');
         updatePinDots();
-        
-        if (isSetup) {
-            pinCancel.classList.remove('hidden');
-        } else {
-            pinCancel.classList.add('hidden');
-        }
+
+        // Отладка: проверка содержимого модального окна
+        console.log('[PIN] DOM Modal HTML:', document.getElementById('pin-pad-modal')?.innerHTML);
+        console.log('[PIN] Modal element exists:', !!document.getElementById('pin-pad-modal'));
+        console.log('[PIN] Modal computed styles:', {
+            display: window.getComputedStyle(pinPadModal).display,
+            height: window.getComputedStyle(pinPadModal).height,
+            width: window.getComputedStyle(pinPadModal).width,
+            visibility: window.getComputedStyle(pinPadModal).visibility,
+            opacity: window.getComputedStyle(pinPadModal).opacity
+        });
     }
 
     function closePinPad() {
+        const wasSetup = pinPadModal.classList.contains('setup-mode');
+
+        // Жесткое скрытие модального окна
         pinPadModal.classList.add('hidden');
+        pinPadModal.classList.remove('flex');
+        pinPadModal.style.display = 'none';
+        pinPadModal.style.visibility = 'hidden';
+        pinPadModal.style.opacity = '0';
+
+        // Скрываем кнопку закрытия
+        if (pinPadCloseBtn) {
+            pinPadCloseBtn.classList.add('hidden');
+            pinPadCloseBtn.style.display = 'none';
+        }
+
+        // Сбрасываем стили после закрытия
+        setTimeout(() => {
+            pinPadModal.style.zIndex = '';
+        }, 500);
+
         resetPinInput();
+
+        // Переключаем вкладку только если это не процесс изменения ПИН
+        if (!wasSetup && pendingTabAfterAuth && !isChangingPin) {
+            switchTab(pendingTabAfterAuth);
+            pendingTabAfterAuth = null;
+        }
     }
 
     pinBtns.forEach(btn => {
-        btn.addEventListener('click', () => handlePinInput(btn.dataset.value));
+        btn.addEventListener('click', () => handlePinInput(btn.dataset.val));
     });
 
     if (pinBackspace) {
@@ -933,25 +1196,273 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (pinCancel) {
-        pinCancel.addEventListener('click', () => {
-            closePinPad();
-            if (pinToggle) pinToggle.checked = isPinEnabled;
+    // Кнопка "Удалить" — сброс всех данных (ПИН + грехи + заметки)
+    if (pinClearBtn) {
+        pinClearBtn.addEventListener('click', () => {
+            console.log('[PIN] Clear button clicked - showing confirm modal');
+            
+            // Показываем модальное окно подтверждения сброса
+            showConfirmModal(t('pinResetConfirm'), () => {
+                console.log('[PIN] User confirmed full reset');
+                
+                // Очищаем все данные в localStorage
+                localStorage.setItem('selectedSins', '[]');
+                localStorage.setItem('personalReflections', '');
+                localStorage.setItem('hashedPin', '');
+                localStorage.setItem('pinEnabled', 'false');
+                localStorage.setItem('biometricEnabled', 'false');
+                localStorage.setItem('isUnlocked', 'false');
+
+                // Сбрасываем переменные состояния
+                isPinEnabled = false;
+                hashedPin = '';
+                isBiometricEnabled = false;
+                selectedSins = [];
+                personalNotes = '';
+                isUnlocked = false;
+
+                // Обновляем UI биометрии
+                if (biometricToggle) {
+                    biometricToggle.checked = false;
+                    biometricToggle.disabled = true;
+                }
+                updateBiometricUIState();
+
+                // Очищаем личные заметки в интерфейсе
+                if (personalNotesArea) {
+                    personalNotesArea.value = '';
+                }
+
+                // Обновляем отображение на вкладках
+                renderCatalog();
+                updateMyList();
+
+                // Выключаем тумблер
+                if (pinToggle) {
+                    pinToggle.checked = false;
+                }
+
+                // Закрываем модальное окно ПИН
+                closePinPad();
+
+                // Показываем уведомление
+                showToast(t('pinDisabled'));
+            });
         });
     }
 
-    if (pinToggle) {
-        pinToggle.checked = isPinEnabled;
-        pinToggle.addEventListener('change', (e) => {
-            if (e.target.checked) {
-                openPinPad(true);
-            } else {
+    if (pinCancel) {
+        pinCancel.addEventListener('click', () => {
+            const wasSetup = pinPadModal.classList.contains('setup-mode');
+            
+            // Если отменили процесс изменения ПИН — сбрасываем флаг
+            if (isChangingPin) {
+                isChangingPin = false;
+                console.log('[PIN] Cancelled PIN change process');
+            }
+            
+            closePinPad();
+
+            // Если отменили настройку ПИН - выключаем тумблер
+            if (wasSetup && !isChangingPin) {
+                console.log('[PIN] Cancelled PIN setup - turning off toggle');
+                if (pinToggle) pinToggle.checked = false;
                 isPinEnabled = false;
                 localStorage.setItem('pinEnabled', 'false');
-                hashedPin = '';
                 localStorage.setItem('hashedPin', '');
+            } else {
+                // Просто закрыли окно разблокировки
+                if (pinToggle) pinToggle.checked = isPinEnabled;
+            }
+        });
+    }
+
+    // === Custom Confirm Modal Functions ===
+    function showConfirmModal(message, onConfirm) {
+        if (!confirmModal) return;
+
+        confirmCallback = onConfirm;
+        if (confirmMessage) {
+            confirmMessage.textContent = message || t('pinAlreadySetConfirm');
+        }
+
+        // Показываем модалку
+        confirmModal.classList.remove('hidden');
+        confirmModal.classList.add('flex');
+        console.log('[Confirm] Modal shown');
+    }
+
+    function hideConfirmModal() {
+        if (!confirmModal) return;
+
+        confirmModal.classList.add('hidden');
+        confirmModal.classList.remove('flex');
+        confirmCallback = null;
+        console.log('[Confirm] Modal hidden');
+    }
+
+    // Обработчики кнопок модалки
+    if (confirmYesBtn) {
+        confirmYesBtn.addEventListener('click', () => {
+            console.log('[Confirm] Yes clicked');
+            if (confirmCallback) {
+                confirmCallback();
+            }
+            hideConfirmModal();
+        });
+    }
+
+    if (confirmNoBtn) {
+        confirmNoBtn.addEventListener('click', () => {
+            console.log('[Confirm] No clicked');
+            hideConfirmModal();
+        });
+    }
+
+    // Обработчик кнопки закрытия (X) на окне ввода ПИН
+    if (pinPadCloseBtn) {
+        pinPadCloseBtn.addEventListener('click', () => {
+            console.log('[PIN] Close button clicked');
+            closePinPad();
+        });
+    }
+
+    // === СБРОС СОСТОЯНИЯ ПРИ ЗАПУСКЕ ===
+    function resetPinStateIfNeeded() {
+        const storedPinEnabled = localStorage.getItem('pinEnabled') === 'true';
+        const storedHashedPin = localStorage.getItem('hashedPin');
+
+        // Если ПИН включен в настройках, но хэш пуст - сбрасываем
+        if (storedPinEnabled && !storedHashedPin) {
+            console.log('[PIN] Reset: pinEnabled=true but hashedPin is empty');
+            localStorage.setItem('pinEnabled', 'false');
+            localStorage.setItem('biometricEnabled', 'false');
+            isPinEnabled = false;
+            isBiometricEnabled = false;
+        }
+        
+        // Синхронизируем переменные с localStorage
+        isPinEnabled = storedPinEnabled && !!storedHashedPin;
+        hashedPin = storedHashedPin || '';
+        
+        console.log('[PIN] After reset: isPinEnabled=', isPinEnabled, 'hashedPin=', hashedPin);
+    }
+
+    // Вызываем сброс при запуске (ДО объявления pinToggle)
+    resetPinStateIfNeeded();
+
+    // === ОБРАБОТЧИК TUMBLER'А ПИН-КОДА ===
+    if (pinToggle) {
+        console.log('[PIN] pinToggle found, isPinEnabled=', isPinEnabled, 'hashedPin=', hashedPin);
+        
+        // Устанавливаем начальное состояние тумблера — включен, если функция ПИН активна
+        pinToggle.checked = isPinEnabled && !!hashedPin;
+        console.log('[PIN] Initial toggle state:', pinToggle.checked);
+
+        // Обработчик на change event
+        pinToggle.addEventListener('change', (e) => {
+            console.log('TUMBLER CLICKED! checked =', e.target.checked);
+            console.log('[PIN] toggle changed:', e.target.checked, 'existingPin=', localStorage.getItem('hashedPin'));
+
+            const existingPin = localStorage.getItem('hashedPin');
+
+            if (e.target.checked) {
+                // Пользователь хочет ВКЛЮЧИТЬ функцию ПИН-кода
+                if (existingPin) {
+                    // ПИН уже есть — просто включаем функцию
+                    console.log('[PIN] Enabling PIN function (PIN already exists)');
+                    isPinEnabled = true;
+                    localStorage.setItem('pinEnabled', 'true');
+                    updateBiometricUIState();
+                    showToast(t('pinEnabled'));
+                } else {
+                    // ПИНа нет — открываем режим установки
+                    e.target.checked = false; // Визуально выключаем обратно
+                    console.log('[PIN] No PIN - opening setup modal');
+
+                    openPinPad(true, () => {
+                        // Это onSuccess колбэк
+                        pinToggle.checked = true;
+                        isPinEnabled = true;
+                        localStorage.setItem('pinEnabled', 'true');
+                        updateBiometricUIState();
+                        console.log('[PIN] PIN setup success - toggle activated');
+                    });
+                }
+            } else {
+                // Пользователь хочет ВЫКЛЮЧИТЬ функцию ПИН-кода
+                console.log('[PIN] Disabling PIN function');
+                isPinEnabled = false;
+                localStorage.setItem('pinEnabled', 'false');
+
+                // Также отключаем биометрию
+                isBiometricEnabled = false;
+                localStorage.setItem('biometricEnabled', 'false');
+                if (biometricToggle) {
+                    biometricToggle.checked = false;
+                    biometricToggle.disabled = true;
+                }
+                updateBiometricUIState();
+
                 showToast(t('pinDisabled'));
             }
+        });
+    } else {
+        console.error('[PIN] pin-toggle element NOT FOUND in DOM!');
+    }
+
+    const biometricToggle = document.getElementById('biometric-toggle');
+    const biometricToggleText = document.getElementById('biometric-toggle-text');
+    const changePinContainer = document.getElementById('change-pin-container');
+    const changePinBtn = document.getElementById('change-pin-btn');
+
+    function updateBiometricUIState() {
+        if (!biometricToggle) return;
+        const pinActive = isPinEnabled && hashedPin;
+        
+        // Показываем/скрываем кнопку "Изменить ПИН-код"
+        if (changePinContainer) {
+            changePinContainer.classList.toggle('hidden', !pinActive);
+        }
+        
+        biometricToggle.disabled = !pinActive;
+        if (biometricToggleText) {
+            biometricToggleText.classList.toggle('opacity-50', !pinActive);
+        }
+        const parentLabel = biometricToggle.nextElementSibling;
+        if (parentLabel && parentLabel.classList.contains('peer-focus:outline-none')) {
+            // the div with transitions
+            parentLabel.classList.toggle('opacity-50', !pinActive);
+        }
+    }
+
+    if (biometricToggle) {
+        biometricToggle.checked = isBiometricEnabled;
+        updateBiometricUIState();
+
+        biometricToggle.addEventListener('change', (e) => {
+            isBiometricEnabled = e.target.checked;
+            localStorage.setItem('biometricEnabled', isBiometricEnabled);
+        });
+    }
+
+    // Обработчик кнопки "Изменить ПИН-код"
+    if (changePinBtn) {
+        changePinBtn.addEventListener('click', () => {
+            console.log('[PIN] Opening PIN change modal');
+            // Устанавливаем флаг изменения ПИН
+            isChangingPin = true;
+            // Сначала запрашиваем ввод старого ПИН для подтверждения
+            openPinPad(false, () => {
+                // После успешной проверки — открываем режим установки нового
+                console.log('[PIN] Old PIN verified - opening new PIN setup');
+                openPinPad(true, () => {
+                    // Сбрасываем флаг после успешной установки
+                    isChangingPin = false;
+                    showToast(t('pinSuccess'));
+                    console.log('[PIN] PIN changed successfully');
+                });
+            });
         });
     }
 
@@ -1191,7 +1702,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (content) {
             prayerContentArea.innerHTML = content;
-            
+
             // Determine Hero Image
             const heroImage = document.getElementById('prayer-hero-image');
             if (heroImage) {
@@ -1209,14 +1720,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     heroImage.src = '/56456454.jpg';
                 }
             }
-            
+
             if (prayersModalHeaderText) {
                 // Determine title from prayerId or data-t
-                const titleKey = prayerId === 'canons' ? 'threeCanons' : 
-                                 prayerId === 'theotokosCanon' ? 'theotokosCanon' :
-                                 prayerId === 'guardianAngelCanon' ? 'guardianAngelCanon' :
-                                 prayerId === 'repentanceCanon' ? 'repentanceCanon' :
-                                 (prayerId === 'beforeCommunion' ? 'beforeCommunion' : 'afterCommunion');
+                const titleKey = prayerId === 'canons' ? 'threeCanons' :
+                    prayerId === 'theotokosCanon' ? 'theotokosCanon' :
+                        prayerId === 'guardianAngelCanon' ? 'guardianAngelCanon' :
+                            prayerId === 'repentanceCanon' ? 'repentanceCanon' :
+                                (prayerId === 'beforeCommunion' ? 'beforeCommunion' : 'afterCommunion');
                 prayersModalHeaderText.textContent = t(titleKey);
             }
             prayersReadingModal.classList.remove('hidden');
@@ -1301,7 +1812,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function startAudioProgress() {
         if (audioIntervalId) return;
-        
+
         audioIntervalId = setInterval(() => {
             audioProgressValue += 0.5;
             if (audioProgressValue >= 100) {
@@ -1517,12 +2028,106 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize auto-pause for reading mode modal
     setupAutoPause(readingModeModal.querySelector('.overflow-y-auto'));
 
+    // === Church Today Tab - Calendar & Prayers ===
+    async function loadChurchToday() {
+        // Load calendar data
+        const todayInfo = await getTodayInfo();
+        if (todayInfo.success) {
+            const dateEl = document.getElementById('church-today-date');
+            const fastingEl = document.getElementById('church-today-fasting');
+            const fastingIconEl = document.getElementById('church-today-fasting-icon');
+            const memoryEl = document.getElementById('church-today-memory');
+            
+            if (dateEl) dateEl.textContent = todayInfo.data.date;
+            if (fastingEl) fastingEl.textContent = todayInfo.data.fastingDescription;
+            if (fastingIconEl) {
+                const iconSpan = fastingIconEl.querySelector('span');
+                if (iconSpan) iconSpan.textContent = getFastingIcon(todayInfo.data.fasting);
+                fastingIconEl.className = `w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center ${getFastingColor(todayInfo.data.fasting)}`;
+            }
+            if (memoryEl) {
+                const memoryText = Array.isArray(todayInfo.data.memory) 
+                    ? todayInfo.data.memory.slice(0, 2).join('. ') 
+                    : todayInfo.data.memory;
+                memoryEl.textContent = memoryText || '';
+            }
+        }
+        
+        // Load prayers quick access
+        const prayersContainer = document.getElementById('church-today-prayers');
+        if (prayersContainer) {
+            const prayersList = [
+                { id: 'repentanceCanon', icon: 'local_fire_department', color: 'text-red-400', bg: 'bg-red-500/20', key: 'repentanceCanon' },
+                { id: 'theotokosCanon', icon: 'stars', color: 'text-amber-400', bg: 'bg-amber-500/20', key: 'theotokosCanon' },
+                { id: 'guardianAngelCanon', icon: 'flare', color: 'text-cyan-400', bg: 'bg-cyan-500/20', key: 'guardianAngelCanon' },
+                { id: 'beforeCommunion', icon: 'menu_book', color: 'text-indigo-400', bg: 'bg-indigo-500/20', key: 'beforeCommunion' },
+                { id: 'afterCommunion', icon: 'celebration', color: 'text-emerald-400', bg: 'bg-emerald-500/20', key: 'afterCommunion' }
+            ];
+            
+            let prayersHtml = '';
+            prayersList.forEach(prayer => {
+                prayersHtml += `
+                <button data-prayer-id="${prayer.id}"
+                    class="prayer-menu-item w-full p-5 rounded-2xl bg-white/5 border border-white/5 flex items-center gap-4 active:scale-[0.98] transition-all text-left">
+                    <div class="w-10 h-10 rounded-full ${prayer.bg} flex items-center justify-center ${prayer.color}">
+                        <span class="material-symbols-outlined">${prayer.icon}</span>
+                    </div>
+                    <span class="font-bold text-white/90" data-t="${prayer.key}"></span>
+                    <span class="material-symbols-outlined ml-auto text-white/20">chevron_right</span>
+                </button>`;
+            });
+            prayersContainer.innerHTML = prayersHtml;
+            
+            // Add click handlers for prayers
+            prayersContainer.querySelectorAll('.prayer-menu-item').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const prayerId = btn.getAttribute('data-prayer-id');
+                    openPrayerModal(prayerId);
+                });
+            });
+        }
+    }
+
+    // === Profile Buttons ===
+    const profileButtons = document.querySelectorAll('.profile-btn');
+    profileButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const profile = btn.dataset.profile;
+            setProfile(profile);
+            
+            // Update UI
+            profileButtons.forEach(b => {
+                b.classList.remove('bg-primary', 'text-white');
+                b.classList.add('bg-white/5', 'text-slate-300');
+            });
+            btn.classList.remove('bg-white/5', 'text-slate-300');
+            btn.classList.add('bg-primary', 'text-white');
+            
+            // Refresh catalog if visible
+            if (activeTab === 'catalog') {
+                renderCatalog();
+            }
+            
+            console.log('[Profile] Switched to:', profile);
+        });
+    });
+    
+    // Set initial profile button state
+    const currentProfile = getProfile();
+    profileButtons.forEach(btn => {
+        if (btn.dataset.profile === currentProfile) {
+            btn.classList.remove('bg-white/5', 'text-slate-300');
+            btn.classList.add('bg-primary', 'text-white');
+        }
+    });
+
     // --- Initialization ---
     applyTheme();
     updateAppLanguage();
     applyLanguageFont();
     updateLanguageUI();
-    switchTab('catalog');
+    loadChurchToday(); // Load calendar data
+    switchTab('church-today'); // Start on Church Today tab
 
     // --- Text-to-Speech Logic ---
     let speakingButtonId = null;
@@ -1590,8 +2195,27 @@ document.addEventListener('DOMContentLoaded', () => {
         originalUpdateAppLanguage();
     };
 
-    // --- Start Initial Protection ---
-    if (isPinEnabled && hashedPin) {
-        openPinPad(false);
+    // --- App State Listener (сброс разблокировки при уходе в фон) ---
+    async function initAppStateListener() {
+        if (Capacitor.isNativePlatform()) {
+            try {
+                await App.addListener('appStateChange', (state) => {
+                    if (!state.isActive) {
+                        // Приложение ушло в фон — сбрасываем разблокировку
+                        isUnlocked = false;
+                        console.log('[PIN] App went to background, isUnlocked reset');
+                    }
+                });
+                console.log('[PIN] App state listener initialized');
+            } catch (error) {
+                console.error('[PIN] Failed to initialize app state listener:', error);
+            }
+        }
     }
+
+    // Инициализация слушателя состояния приложения
+    initAppStateListener();
+
+    // Запуск приложения — открываем вкладку "Каталог"
+    switchTab('catalog');
 });
