@@ -333,6 +333,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const isSelected = selectedSins.some(s => s.id === sin.id);
                 const hasExplanation = sin.explanation && (sin.explanation[currentLanguage] || sin.explanation.ru);
                 const isSerious = sin.severity === 'serious';
+                
+                // Найти заметку для этого греха
+                const selectedSin = selectedSins.find(s => s.id === sin.id);
+                const itemNote = selectedSin ? selectedSin.note || '' : '';
 
                 catalogHtml += `
                 <div class="relative p-0.5 mb-2 rounded-2xl transition-all ${isSerious ? 'bg-gradient-to-r from-amber-500/30 to-transparent' : ''}">
@@ -344,6 +348,11 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <div id="expl-${sin.id}" class="hidden mt-2 p-3 bg-white/50 dark:bg-black/30 rounded-lg text-xs italic text-slate-600 dark:text-slate-400 border border-black/5 dark:border-white/5">
                                     ${sin.explanation[currentLanguage] || sin.explanation.ru}
                                 </div>
+                                ` : ''}
+                                ${isDetailedView ? `
+                                <textarea class="sin-note-input mt-2 w-full bg-white/5 border border-white/10 rounded-lg p-2 text-xs text-white placeholder:text-gray-500 focus:ring-[#7f19e6] focus:border-[#7f19e6]" 
+                                    placeholder="Добавить детали..." 
+                                    data-sin-id="${sin.id}">${itemNote}</textarea>
                                 ` : ''}
                             </div>
                             ${hasExplanation ? `
@@ -411,6 +420,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (explDiv) {
                     explDiv.classList.toggle('hidden');
                 }
+            });
+        });
+
+        // Обработчик для textarea заметок в режиме "С деталями"
+        catalogContainer.querySelectorAll('.sin-note-input').forEach(textarea => {
+            textarea.addEventListener('input', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const sinId = textarea.getAttribute('data-sin-id');
+                const noteText = textarea.value;
+                
+                const selectedSin = selectedSins.find(s => s.id === sinId);
+                if (selectedSin) {
+                    selectedSin.note = noteText;
+                } else {
+                    selectedSins.push({ id: sinId, type: 'predefined', note: noteText });
+                }
+                
+                localStorage.setItem('selectedSins', JSON.stringify(selectedSins));
+                console.log('Заметка сохранена:', sinId, noteText);
             });
         });
     }
@@ -947,6 +976,7 @@ document.addEventListener('DOMContentLoaded', () => {
             isDetailedView = btn.dataset.view === 'detailed';
             localStorage.setItem('viewMode', isDetailedView ? 'detailed' : 'simple');
             applyViewMode();
+            renderCatalog();
             updateMyList();
         });
     });
