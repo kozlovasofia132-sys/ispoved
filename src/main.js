@@ -337,6 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Найти заметку для этого греха
                 const selectedSin = selectedSins.find(s => s.id === sin.id);
                 const itemNote = selectedSin ? selectedSin.note || '' : '';
+                const hasNote = itemNote.trim().length > 0;
 
                 catalogHtml += `
                 <div class="relative p-0.5 mb-2 rounded-2xl transition-all ${isSerious ? 'bg-gradient-to-r from-amber-500/30 to-transparent' : ''}">
@@ -350,9 +351,16 @@ document.addEventListener('DOMContentLoaded', () => {
                                 </div>
                                 ` : ''}
                                 ${isDetailedView ? `
-                                <textarea class="sin-note-input mt-2 w-full bg-white/5 border border-white/10 rounded-lg p-2 text-xs text-white placeholder:text-gray-500 focus:ring-[#7f19e6] focus:border-[#7f19e6]" 
-                                    placeholder="Добавить детали..." 
-                                    data-sin-id="${sin.id}">${itemNote}</textarea>
+                                <div class="mt-2">
+                                    <button type="button" class="note-toggle flex items-center gap-1 text-xs text-gray-400 hover:text-primary transition-colors" data-sin-id="${sin.id}">
+                                        <span class="material-symbols-outlined text-sm transition-transform ${hasNote ? 'rotate-180' : ''}" id="note-arrow-${sin.id}">expand_more</span>
+                                        <span>Заметки</span>
+                                        ${hasNote ? '<span class="w-1.5 h-1.5 rounded-full bg-primary ml-1"></span>' : ''}
+                                    </button>
+                                    <textarea class="sin-note-input mt-2 w-full bg-white/5 border border-white/10 rounded-lg p-2 text-xs text-white placeholder:text-gray-500 focus:ring-[#7f19e6] focus:border-[#7f19e6] ${hasNote ? '' : 'hidden'}" 
+                                        placeholder="Добавить детали..." 
+                                        data-sin-id="${sin.id}">${itemNote}</textarea>
+                                </div>
                                 ` : ''}
                             </div>
                             ${hasExplanation ? `
@@ -430,16 +438,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.stopPropagation();
                 const sinId = textarea.getAttribute('data-sin-id');
                 const noteText = textarea.value;
-                
+
                 const selectedSin = selectedSins.find(s => s.id === sinId);
                 if (selectedSin) {
                     selectedSin.note = noteText;
                 } else {
                     selectedSins.push({ id: sinId, type: 'predefined', note: noteText });
                 }
-                
+
                 localStorage.setItem('selectedSins', JSON.stringify(selectedSins));
                 console.log('Заметка сохранена:', sinId, noteText);
+            });
+        });
+
+        // Обработчик для кнопки сворачивания/разворачивания заметок
+        catalogContainer.querySelectorAll('.note-toggle').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const sinId = btn.getAttribute('data-sin-id');
+                const textarea = document.querySelector(`.sin-note-input[data-sin-id="${sinId}"]`);
+                const arrow = document.getElementById(`note-arrow-${sinId}`);
+                
+                if (textarea && arrow) {
+                    textarea.classList.toggle('hidden');
+                    arrow.classList.toggle('rotate-180');
+                }
             });
         });
     }
