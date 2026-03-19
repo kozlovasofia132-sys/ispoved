@@ -87,7 +87,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleAllBtn = document.getElementById('toggle-all-btn');
     const formulaContainer = document.getElementById('formula-container');
 
-
+    // Quote Elements
+    const quoteTextEl = document.getElementById('confession-quote-text');
+    const quoteAuthorEl = document.getElementById('confession-quote-author');
+    const refreshQuoteBtn = document.getElementById('refresh-confession-quote-btn');
 
     // --- State ---
     let activeTab = 'church-empty';
@@ -174,6 +177,19 @@ document.addEventListener('DOMContentLoaded', () => {
             default: headerKey = 'appName';
         }
         headerTitle.textContent = headerKey ? t(headerKey) : '';
+    }
+
+    // --- Random Quote Function ---
+    function renderRandomQuote() {
+        if (!quoteTextEl || !quoteAuthorEl || quotes.length === 0) return;
+        
+        const randomIndex = Math.floor(Math.random() * quotes.length);
+        const quote = quotes[randomIndex];
+        
+        quoteTextEl.textContent = `«${quote.text}»`;
+        quoteAuthorEl.textContent = quote.author;
+        
+        console.log('Цитата обновлена:', quote);
     }
 
 
@@ -482,14 +498,18 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         });
 
-        // Initialize Refresh Quote if present in the tab
-        const refreshBtn = document.getElementById('refresh-quote-btn');
-        if (refreshBtn) {
-            refreshBtn.addEventListener('click', (e) => {
+        // Initialize Refresh Quote Button
+        if (refreshQuoteBtn) {
+            refreshQuoteBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                const icon = refreshBtn.querySelector('.material-symbols-outlined');
-                if (icon) icon.style.transform = (icon.style.transform === 'rotate(360deg)') ? 'rotate(0deg)' : 'rotate(360deg)';
-                renderPreparation();
+                console.log('Кнопка "Другая цитата" нажата');
+                const icon = refreshQuoteBtn.querySelector('.material-symbols-outlined');
+                if (icon) {
+                    icon.style.transition = 'transform 0.3s ease';
+                    icon.style.transform = 'rotate(360deg)';
+                    setTimeout(() => { icon.style.transform = 'rotate(0deg)'; }, 300);
+                }
+                renderRandomQuote();
             });
         }
     }
@@ -2099,5 +2119,6 @@ document.addEventListener('DOMContentLoaded', () => {
     applyLanguageFont();
     updateLanguageUI();
     loadChurchToday(); // Load calendar data
+    renderRandomQuote(); // Load random quote on startup
     switchTab('church-empty'); // Start on Church Today tab
 });
