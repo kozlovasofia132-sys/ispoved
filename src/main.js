@@ -16,10 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Elements ---
     const navButtons = document.querySelectorAll('.nav-btn');
     const tabContents = {
+        'church-empty': document.getElementById('tab-church-empty'),
         'church-today': document.getElementById('tab-church-today'),
-        catalog: document.getElementById('tab-catalog'),
-        list: document.getElementById('tab-list'),
-        preparation: document.getElementById('tab-preparation'),
         settings: document.getElementById('tab-settings'),
     };
 
@@ -92,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- State ---
-    let activeTab = 'catalog';
+    let activeTab = 'church-empty';
     let selectedSins = JSON.parse(localStorage.getItem('selectedSins')) || [];
     let isLargeFont = localStorage.getItem('isLargeFont') === 'true';
     let currentTheme = localStorage.getItem('theme') || 'dark';
@@ -170,9 +168,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!headerTitle) return;
         let headerKey = '';
         switch (activeTab) {
-            case 'catalog': headerKey = 'catalogHeader'; break;
-            case 'list': headerKey = 'notesTitle'; break;
-            case 'preparation': headerKey = 'preparation'; break;
+            case 'church-empty': headerKey = 'churchToday'; break;
+            case 'church-today': headerKey = 'catalog'; break;
             case 'settings': headerKey = 'settings'; break;
             default: headerKey = 'appName';
         }
@@ -222,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (tabId === 'list' && typeof window.autoResizeNotes === 'function') {
             window.autoResizeNotes();
         }
-        if (tabId === 'preparation') {
+        if (tabId === 'church-today') {
             renderPreparation();
         }
     }
@@ -404,8 +401,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Render Preparation ---
     function renderPreparation() {
-        const container = document.getElementById('preparation-container');
-        if (!container) return;
+        const container = document.getElementById('preparation-intro-container');
+        if (!container) {
+            console.error('CRITICAL: preparation-intro-container not found!');
+            return;
+        }
+
+        // 1. Clear container
+        container.innerHTML = '';
+        
+        console.log('Starting renderPreparation. Items count:', preparationData.length);
 
         const accentColors = {
             indigo: { bg: 'bg-indigo-500/15', border: 'border-indigo-500/20', icon: 'text-indigo-400' },
@@ -415,45 +420,28 @@ document.addEventListener('DOMContentLoaded', () => {
             sky: { bg: 'bg-sky-500/15', border: 'border-sky-500/20', icon: 'text-sky-400' },
         };
 
-        let html = '';
+        let resultHtml = '';
 
-        // Add Dynamic Wisdom Block
-        const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-        html += `
-        <div class="mb-8 animate-fade-in-up">
-            <p class="text-[11px] font-bold tracking-[0.2em] text-primary uppercase mb-4 text-center" data-t="wisdomTitle">${t('wisdomTitle')}</p>
-            <div class="quote-card">
-                <span class="quote-icon quote-icon-start">“</span>
-                <p class="quote-text">${randomQuote.text}</p>
-                <span class="quote-icon quote-icon-end">”</span>
-                <span class="quote-author author-font">— ${randomQuote.author}</span>
-            </div>
-            <button id="refresh-quote-btn" class="refresh-quote-btn">
-                <span class="material-symbols-outlined">refresh</span>
-                <span data-t="refreshQuote">${t('refreshQuote')}</span>
-            </button>
-        </div>
-        `;
-
-        preparationData.forEach(card => {
+        // 2. Loop through ALL data
+        preparationData.forEach((card, index) => {
+            console.log(`Rendering card ${index + 1}: ${card.id}`);
+            
             const title = t(card.titleKey);
             const body = t(card.bodyKey);
             const c = accentColors[card.color] || accentColors.indigo;
 
-            // Extra pieces of content
             const scripture = card.scriptureKey ? t(card.scriptureKey) : '';
             const scripture2 = card.scriptureKey2 ? t(card.scriptureKey2) : '';
             const saints = card.saintsKey ? t(card.saintsKey) : '';
             const advice = card.adviceKey ? t(card.adviceKey) : '';
             const setup = card.setupKey ? t(card.setupKey) : '';
 
-            let speechParts = [body, scripture, scripture2, saints, advice, setup].filter(p => p && p.trim().length > 0);
-            let fullSpeechText = speechParts.join('. ');
-
+            const speechParts = [body, scripture, scripture2, saints, advice, setup].filter(p => p && p.trim().length > 0);
+            const fullSpeechText = speechParts.join('. ');
             const quoteClass = "italic text-slate-300 border-l-4 border-primary pl-4 my-4 leading-relaxed text-sm";
 
-            html += `
-            <details name="accordion-group" class="group glass-panel rounded-2xl overflow-hidden transition-all duration-500">
+            resultHtml += `
+            <details name="accordion-group" class="group glass-panel rounded-2xl overflow-hidden transition-all duration-500 mb-4">
                 <summary class="cursor-pointer flex items-center gap-4 p-5 select-none list-none [&::-webkit-details-marker]:hidden outline-none">
                     <div class="w-10 h-10 rounded-xl ${c.bg} border ${c.border} flex items-center justify-center shrink-0">
                         <span class="material-symbols-outlined ${c.icon} text-xl">${card.icon}</span>
@@ -478,9 +466,12 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         });
 
-        container.innerHTML = html;
+        // 3. Update DOM once
+        container.innerHTML = resultHtml;
+        
+        console.log('renderPreparation finished. Current container children:', container.children.length);
 
-        // Auto-scroll logic for Preparation
+        // Auto-scroll logic
         container.querySelectorAll('details').forEach(details => {
             details.ontoggle = () => {
                 if (details.open) {
@@ -491,27 +482,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         });
 
-        const footerTitle = t('prep_footer_title');
-        const footerBody = t('prep_footer_body');
-        html += `
-        <div class="glass-panel rounded-2xl p-6 border-t-2 border-t-primary/30 mt-4 overflow-hidden relative">
-            <div class="absolute -right-4 -bottom-4 opacity-10">
-                <span class="material-symbols-outlined text-8xl text-white">menu_book</span>
-            </div>
-            <div class="flex items-start justify-between mb-2">
-                <h3 class="text-xl font-bold text-white">${footerTitle}</h3>
-                <button class="w-8 h-8 rounded-full flex items-center justify-center text-white/30 hover:text-primary transition-all active:scale-90"
-                        onclick="window.toggleSpeech(\`${(footerBody).replace(/"/g, '&quot;').replace(/'/g, "\\'")}\`, 'tts-icon-footer')">
-                    <span id="tts-icon-footer" class="material-symbols-outlined text-xl">volume_up</span>
-                </button>
-            </div>
-            <p class="text-base text-slate-300 leading-relaxed relative z-10">${footerBody}</p>
-        </div>
-        `;
-
-        container.innerHTML = html;
-
-        // Refresh quote logic
+        // Initialize Refresh Quote if present in the tab
         const refreshBtn = document.getElementById('refresh-quote-btn');
         if (refreshBtn) {
             refreshBtn.addEventListener('click', (e) => {
@@ -522,6 +493,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     }
+
 
     function updateMyList() {
         if (!myListContainer) return;
@@ -2127,95 +2099,5 @@ document.addEventListener('DOMContentLoaded', () => {
     applyLanguageFont();
     updateLanguageUI();
     loadChurchToday(); // Load calendar data
-    switchTab('church-today'); // Start on Church Today tab
-
-    // --- Text-to-Speech Logic ---
-    let speakingButtonId = null;
-
-    async function stopSpeaking() {
-        try {
-            await TextToSpeech.stop();
-        } catch (e) {
-            console.error('Error stopping speech:', e);
-        }
-
-        if (speakingButtonId) {
-            const btn = document.getElementById(speakingButtonId);
-            if (btn) btn.classList.remove('pulse-tts');
-        }
-        speakingButtonId = null;
-    }
-
-    window.toggleSpeech = async function (text, buttonId) {
-        if (speakingButtonId === buttonId) {
-            await stopSpeaking();
-            return;
-        }
-
-        await stopSpeaking();
-
-        try {
-            const langMap = { ru: 'ru-RU', uk: 'uk-UA', en: 'en-US' };
-            const targetLang = langMap[currentLanguage] || 'ru-RU';
-
-            speakingButtonId = buttonId;
-            const btn = document.getElementById(buttonId);
-            if (btn) btn.classList.add('pulse-tts');
-
-            await TextToSpeech.speak({
-                text: text,
-                lang: targetLang,
-                rate: 1.0,
-                pitch: 1.0,
-                volume: 1.0,
-                category: 'ambient'
-            });
-
-            // If we reach here, speech finished normally
-            if (speakingButtonId === buttonId) {
-                await stopSpeaking();
-            }
-        } catch (e) {
-            console.error('Speech error:', e);
-            await stopSpeaking();
-        }
-    };
-
-    // --- Tab Switching Update ---
-    const originalSwitchTab = switchTab;
-    window.switchTab = function (tabId) {
-        stopSpeaking();
-        originalSwitchTab(tabId);
-    };
-
-    // --- Language Update ---
-    const originalUpdateAppLanguage = updateAppLanguage;
-    window.updateAppLanguage = function () {
-        stopSpeaking();
-        originalUpdateAppLanguage();
-    };
-
-    // --- App State Listener (сброс разблокировки при уходе в фон) ---
-    async function initAppStateListener() {
-        if (Capacitor.isNativePlatform()) {
-            try {
-                await App.addListener('appStateChange', (state) => {
-                    if (!state.isActive) {
-                        // Приложение ушло в фон — сбрасываем разблокировку
-                        isUnlocked = false;
-                        console.log('[PIN] App went to background, isUnlocked reset');
-                    }
-                });
-                console.log('[PIN] App state listener initialized');
-            } catch (error) {
-                console.error('[PIN] Failed to initialize app state listener:', error);
-            }
-        }
-    }
-
-    // Инициализация слушателя состояния приложения
-    initAppStateListener();
-
-    // Запуск приложения — открываем вкладку "Каталог"
-    switchTab('catalog');
+    switchTab('church-empty'); // Start on Church Today tab
 });

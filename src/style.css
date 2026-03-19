@@ -5,6 +5,9 @@
 @tailwind utilities;
 
 @layer utilities {
+  .hidden {
+    display: none !important;
+  }
 
   /* Screen reader only class - visually hidden but accessible */
   .sr-only {

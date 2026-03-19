@@ -51,10 +51,10 @@ const fastingTranslations = {
  */
 export async function getTodayInfo() {
     try {
-        const response = await fetch(`${API_BASE_URL}/today.json`);
+        const response = await fetch(`${API_BASE_URL}/today.json`).catch(() => ({ ok: false }));
         
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            return getFallbackData();
         }
         
         const data = await response.json();

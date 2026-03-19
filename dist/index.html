@@ -13,292 +13,332 @@
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <meta name="theme-color" content="#121212">
     <link rel="apple-touch-icon" href="/icon.svg">
-  <script type="module" crossorigin src="/assets/index-bOy6gmeu.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-DJ38IrbB.css">
+  <script type="module" crossorigin src="/assets/index-DrJTiAV2.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-BOcvB-gv.css">
 <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
 
 <body class="bg-background-dark font-display antialiased text-white min-h-screen flex flex-col overflow-hidden">
     <div class="w-full h-full flex flex-col relative overflow-hidden">
-        <!-- GLOBAL HEADER -->
-        <header class="fixed top-0 left-0 right-0 z-50 glass-header px-4 pb-2 flex items-center justify-center"
-            style="padding-top: calc(env(safe-area-inset-top, 24px) + 30px);">
-            <h1 id="header-title"
-                class="text-xs font-bold text-white truncate text-center opacity-90 uppercase tracking-widest">
-            </h1>
-        </header>
-
         <!-- MAIN CONTENT AREA -->
         <div class="flex-1 relative overflow-hidden">
-            <!-- CHURCH TODAY TAB (NEW MAIN) -->
-            <main id="tab-church-today" class="absolute inset-0 overflow-y-auto pt-24 pb-28 px-4 no-scrollbar">
-                <!-- Hero Card with Date -->
-                <div class="mb-6 mt-2">
-                    <div class="glass-panel rounded-[28px] p-6 border border-white/5 bg-gradient-to-br from-primary/20 to-transparent">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center gap-3">
-                                <div class="w-12 h-12 rounded-xl bg-primary/30 flex items-center justify-center text-primary">
-                                    <span class="material-symbols-outlined text-2xl">calendar_today</span>
-                                </div>
-                                <div>
-                                    <p class="text-xs font-bold text-[#ab9db8] uppercase tracking-wider" data-t="todayInChurch">Сегодня в Церкви</p>
-                                    <p id="church-today-date" class="text-lg font-bold text-white capitalize"></p>
-                                </div>
+            <!-- CHURCH (LITURGICAL INFO) TAB -->
+            <main id="tab-church-empty" class="absolute inset-0 overflow-y-auto pb-32 no-scrollbar bg-[#0D0D0D]">
+                <!-- Top Bar with Title -->
+                <div class="fixed top-0 left-0 right-0 z-[60] bg-[#0D0D0D]/90 backdrop-blur-md border-b border-white/5 px-4 py-2">
+                    <div class="flex items-center justify-between max-w-2xl mx-auto">
+                        <div></div>
+                        <h1 class="font-serif text-base font-bold text-white">Церковный календарь</h1>
+                        <button id="today-btn" class="bg-[#4A0404]/30 text-[#D4AF37] px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border border-[#D4AF37]/30 hover:bg-[#4A0404]/50 active:bg-[#D4AF37] active:text-[#0D0D0D] transition-all">
+                            Сегодня
+                        </button>
+                    </div>
+                </div>
+                <!-- Date Navigation -->
+                <div class="fixed top-[40px] left-0 right-0 z-[59] bg-[#0D0D0D]/90 backdrop-blur-md border-b border-white/5 px-4 py-2">
+                    <div class="flex items-center justify-center gap-4 max-w-2xl mx-auto">
+                        <button id="prev-date-btn" class="text-gray-500 hover:text-[#D4AF37] transition-colors">
+                            <span class="material-symbols-outlined text-sm">chevron_left</span>
+                        </button>
+                        <button id="date-display-btn" class="font-serif text-base font-medium text-white hover:text-[#D4AF37] transition-colors flex items-center gap-1">
+                            <span id="nav-date-display">18 марта</span>
+                            <span class="material-symbols-outlined text-sm">calendar_month</span>
+                        </button>
+                        <button id="next-date-btn" class="text-gray-500 hover:text-[#D4AF37] transition-colors">
+                            <span class="material-symbols-outlined text-sm">chevron_right</span>
+                        </button>
+                    </div>
+                </div>
+                <!-- Spacer -->
+                <div class="h-[calc(40px+48px)]"></div>
+
+                <!-- Icon of the Day -->
+                <div id="icon-of-day-block" class="px-4 pull-reveal-container" style="animation-delay: 0.05s">
+                    <div class="glass-panel rounded-3xl p-4 overflow-hidden border border-white/5">
+                        <div class="flex items-center gap-3 mb-4 px-2">
+                            <div class="w-7 h-7 rounded-lg bg-[#D4AF37]/10 flex items-center justify-center border border-[#D4AF37]/15">
+                                <span class="material-symbols-outlined text-[#D4AF37] text-md">image</span>
                             </div>
+                            <h3 class="text-[10px] font-bold text-[#ab9db8] uppercase tracking-[0.2em]" data-t="iconOfDay">Икона дня</h3>
                         </div>
-                        
-                        <!-- Fasting Info -->
-                        <div class="flex items-center gap-3 mb-4">
-                            <div id="church-today-fasting-icon" class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center">
-                                <span class="material-symbols-outlined text-lg text-primary">local_dining</span>
-                            </div>
-                            <div>
-                                <p class="text-xs text-[#ab9db8]" data-t="fastingType">Тип поста</p>
-                                <p id="church-today-fasting" class="text-sm font-bold text-white"></p>
-                            </div>
-                        </div>
-                        
-                        <!-- Saints Memory -->
-                        <div class="pt-4 border-t border-white/5">
-                            <p id="church-today-memory" class="text-sm text-[#ab9db8] leading-relaxed"></p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Quick Actions -->
-                <div class="mb-6">
-                    <h3 class="text-xs font-bold text-[#ab9db8] uppercase tracking-wider mb-3 px-2" data-t="quickActions">Быстрые действия</h3>
-                    <div class="grid grid-cols-2 gap-3">
-                        <button data-tab="catalog" class="quick-action-card glass-panel rounded-2xl p-4 flex flex-col items-center gap-2 active:scale-95 transition-all">
-                            <div class="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center text-primary">
-                                <span class="material-symbols-outlined text-xl">fact_check</span>
-                            </div>
-                            <span class="text-xs font-bold text-white" data-t="catalog">Исповедь</span>
-                        </button>
-                        <button data-tab="list" class="quick-action-card glass-panel rounded-2xl p-4 flex flex-col items-center gap-2 active:scale-95 transition-all">
-                            <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400">
-                                <span class="material-symbols-outlined text-xl">edit_note</span>
-                            </div>
-                            <span class="text-xs font-bold text-white" data-t="myList">Моя исповедь</span>
-                        </button>
-                        <button data-tab="preparation" class="quick-action-card glass-panel rounded-2xl p-4 flex flex-col items-center gap-2 active:scale-95 transition-all">
-                            <div class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400">
-                                <span class="material-symbols-outlined text-xl">menu_book</span>
-                            </div>
-                            <span class="text-xs font-bold text-white" data-t="preparation">Подготовка</span>
-                        </button>
-                        <button data-tab="settings" class="quick-action-card glass-panel rounded-2xl p-4 flex flex-col items-center gap-2 active:scale-95 transition-all">
-                            <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-400">
-                                <span class="material-symbols-outlined text-xl">settings</span>
-                            </div>
-                            <span class="text-xs font-bold text-white" data-t="settings">Настройки</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Prayers Quick Access -->
-                <div class="mb-6">
-                    <h3 class="text-xs font-bold text-[#ab9db8] uppercase tracking-wider mb-3 px-2" data-t="prayersBtn">Молитвы</h3>
-                    <div id="church-today-prayers" class="space-y-3">
-                        <!-- Prayer buttons injected by JS -->
-                    </div>
-                </div>
-
-                <div class="h-8"></div>
-            </main>
-
-            <!-- CATALOG TAB -->
-            <main id="tab-catalog" class="absolute inset-0 overflow-y-auto pt-24 pb-28 px-4 no-scrollbar hidden">
-                <div class="mb-10 pt-4 flex flex-col items-center animate-fade-in-up">
-                    <img src="/icon_cupola.png" alt="Icon" class="w-16 h-16 mx-auto mb-4 object-contain">
-                    <h2 id="examinationTitle" data-t="examinationTitle"
-                        class="text-white text-3xl font-bold mb-4 tracking-tight"></h2>
-                    <div class="space-y-1.5 max-w-[280px]">
-                        <p id="psalmQuote" data-t="psalmQuote"
-                            class="text-[#ab9db8] italic text-sm text-center leading-relaxed"></p>
-                        <p id="psalmRef" data-t="psalmRef"
-                            class="text-[#ab9db8]/60 text-[11px] font-bold tracking-widest text-center uppercase"></p>
-                    </div>
-                </div>
-                <div id="sins-container" class="space-y-4">
-                    <!-- Data will be injected here -->
-                </div>
-                <div class="h-8"></div>
-            </main>
-
-            <!-- LIST TAB -->
-            <main id="tab-list" class="absolute inset-0 overflow-y-auto pt-24 pb-32 px-4 no-scrollbar hidden">
-                <!-- Starting Formula -->
-                <div id="formula-container"
-                    class="mb-6 p-4 rounded-2xl bg-white/5 border border-white/5 animate-fade-in-up">
-                    <p class="text-sm italic text-slate-400 leading-relaxed text-center" data-t="formulaText">
-                        Господи, помоги мне исповедать грехи мои искренне и без утайки. Батюшка, я каюсь в том, что...
-                    </p>
-                </div>
-
-                <div class="flex items-center justify-between mb-6 px-2">
-                    <p class="text-[13px] font-medium text-[#ab9db8]">
-                        <span id="selected-count-value">0</span>
-                        <span data-t="itemsSelectedText">выбрано</span>
-                    </p>
-                    <div class="flex items-center gap-4">
-                        <button id="toggle-all-btn"
-                            class="flex items-center gap-1.5 text-[11px] font-bold tracking-widest text-primary uppercase active:scale-95 transition-all hidden">
-                            <span class="material-symbols-outlined text-lg">unfold_more</span>
-                            <span data-t="expandAllBtn">Показать всё</span>
-                        </button>
-                        <button id="print-pdf-btn"
-                            class="flex items-center gap-1.5 text-[11px] font-bold tracking-widest text-primary uppercase active:scale-95 transition-all">
-                            <span class="material-symbols-outlined text-lg">picture_as_pdf</span>
-                            <span data-t="printBtn">Распечатать листок</span>
-                        </button>
-                        <button id="clear-all-btn-top"
-                            class="flex items-center gap-1.5 text-[11px] font-bold tracking-widest text-red-400/80 uppercase active:scale-95 transition-all">
-                            <span class="material-symbols-outlined text-lg">delete_sweep</span>
-                            <span data-t="clearAll">Очистить</span>
-                        </button>
-                    </div>
-                </div>
-
-
-                <div id="my-list-container" class="space-y-4 mb-10">
-                    <!-- Selected sins will be injected here as interactive cards -->
-                </div>
-
-                <!-- Add Custom Sin -->
-                <div class="flex items-center gap-2 mb-8 w-full animate-fade-in-up">
-                    <input type="text" id="custom-sin-input"
-                        class="flex-1 min-w-0 bg-white dark:bg-white/5 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white rounded-xl px-4 py-3 outline-none transition-all placeholder-slate-500 dark:placeholder-white/30 focus:border-primary focus:ring-1 focus:ring-primary/50"
-                        data-t-placeholder="addCustomPlaceholder">
-                    <button id="add-custom-sin-btn"
-                        class="flex-none w-12 h-12 flex items-center justify-center rounded-xl bg-primary text-white hover:bg-[#6c15c4] transition-all active:scale-95 shadow-lg shadow-primary/20">
-                        <span class="material-symbols-outlined text-xl">add</span>
-                    </button>
-                </div>
-
-                <!-- Personal Reflections -->
-                <section class="mt-8 animate-fade-in-up">
-                    <div class="flex items-center gap-2.5 mb-5">
-                        <div
-                            class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/30">
-                            <span class="material-symbols-outlined text-primary text-lg">edit_note</span>
-                        </div>
-                        <h3 class="text-lg font-bold text-white tracking-tight" data-t="personalReflections">Личные
-                            заметки</h3>
-                    </div>
-                    <div class="glass-panel rounded-3xl overflow-hidden">
-                        <textarea id="personal-notes"
-                            class="w-full min-h-[60px] h-auto p-4 bg-transparent border-none text-white placeholder-[#ab9db8]/40 resize-none focus:ring-0 text-base leading-relaxed overflow-hidden"
-                            data-t-placeholder="reflectionPlaceholder"></textarea>
-                        <div class="px-6 py-4 bg-white/5 border-t border-white/5 flex justify-between items-center">
-                            <p class="text-[10px] font-medium text-[#ab9db8]/50 uppercase tracking-widest"
-                                data-t="reflectionNote">Только для вас</p>
-                            <button
-                                class="w-10 h-10 rounded-full hover:bg-white/10 text-white/40 hover:text-primary transition-all flex items-center justify-center">
-                                <span class="material-symbols-outlined text-xl">mic</span>
-                            </button>
+                        <div id="icon-of-day-container">
+                            <!-- Icon will be injected here -->
                         </div>
                     </div>
-                </section>
-
-                <div id="empty-state" class="hidden flex-col items-center justify-center pt-24 text-[#ab9db8]">
-                    <div class="w-24 h-24 mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-                        <span class="material-symbols-outlined text-[48px] text-primary opacity-80">list_alt</span>
-                    </div>
-                    <p class="text-xl font-medium text-white" data-t="emptyTitle">Пусто</p>
-                    <p id="empty-list-msg" class="text-base mt-2 text-center px-8 opacity-60" data-t="emptyList"></p>
                 </div>
 
-                <!-- Read Mode Button -->
-                <div id="read-mode-container" class="mt-12 mb-8 hidden animate-fade-in-up">
-                    <button id="open-read-mode-btn"
-                        class="w-full py-5 rounded-[28px] bg-primary text-white font-bold text-lg flex items-center justify-center gap-3 shadow-xl shadow-primary/30 active:scale-[0.98] transition-all">
-                        <span class="material-symbols-outlined text-2xl">visibility</span>
-                        <span data-t="readModeBtn">Читать на исповеди</span>
-                    </button>
-                </div>
-            </main>
-
-
-            <!-- PREPARATION TAB -->
-            <main id="tab-preparation" class="absolute inset-0 overflow-y-auto pt-28 pb-28 no-scrollbar hidden">
-                <!-- Today in Church Block -->
-                <div class="px-4 mb-6">
-                    <div class="glass-panel rounded-[24px] p-5 border border-white/5">
-                        <div class="flex items-start gap-4">
-                            <div class="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center text-primary shrink-0">
-                                <span class="material-symbols-outlined text-2xl">calendar_today</span>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <h3 class="text-sm font-bold text-[#ab9db8] uppercase tracking-wider mb-1" data-t="todayInChurch">Сегодня в Церкви</h3>
-                                <p id="calendar-date" class="text-base font-bold text-white mb-1 capitalize"></p>
-                                <div class="flex items-center gap-2 flex-wrap">
-                                    <span id="calendar-fasting" class="inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg bg-white/5"></span>
-                                </div>
-                                <p id="calendar-memory" class="text-xs text-[#ab9db8] mt-2 line-clamp-2"></p>
-                            </div>
+                <!-- Hero / Day Card Section -->
+                <div class="px-4 animate-fade-in-up">
+                    <div class="relative overflow-hidden rounded-[24px] p-5 glass-card border border-[#D4AF37]/20 shadow-2xl bg-[#1A1A1A] flex flex-col min-h-[220px]">
+                        <!-- Church Icon Watermark -->
+                        <div class="absolute top-4 right-4 opacity-10">
+                            <span class="material-symbols-outlined text-8xl text-[#D4AF37]">church</span>
                         </div>
+                        <!-- Top Tags Row -->
+                        <div class="flex items-start gap-3 mb-4 relative z-10">
+                            <span id="fasting-tag" class="px-3 py-1.5 rounded bg-[#4A0404] text-white text-[10px] font-bold uppercase tracking-wider border border-white/10 text-left">
+                                <span id="fasting-tag-text">Успенский пост</span>
+                            </span>
+                            <span id="tone-tag" class="px-3 py-1.5 rounded bg-[#D4AF37]/20 text-[#D4AF37] text-[10px] font-bold uppercase tracking-wider border border-[#D4AF37]/30 whitespace-nowrap">
+                                <span id="tone-tag-text">Глас 8</span>
+                            </span>
+                        </div>
+
+                        <!-- Main Holiday / Title - LARGE GOLD with line breaks -->
+                        <h1 id="calendar-main-title" class="text-3xl font-serif font-bold leading-tight golden-text relative z-10">
+                            Происхождение<br/>Честных Древ<br/>Животворящего<br/>Креста Господня
+                        </h1>
+
+                        <div class="mt-4 pt-2 flex items-center text-gray-400 text-sm gap-2 relative z-10">
+                             <span class="material-symbols-outlined text-[#D4AF37] text-lg">calendar_today</span>
+                            <span id="calendar-date-full"></span>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+
+                <!-- Scripture Readings -->
+                <div class="px-4 mt-6 animate-fade-in-up" style="animation-delay: 0.1s">
+                    <div class="flex items-center justify-between px-1 mb-3">
+                        <h3 class="text-sm font-bold uppercase tracking-widest text-gray-500">Чтения дня</h3>
+                        <span class="material-symbols-outlined text-[#D4AF37] text-xl">menu_book</span>
+                    </div>
+                    <div id="readings-container" class="space-y-2">
+                        <!-- Readings will be injected here -->
                     </div>
                 </div>
                 
-                <div id="preparation-container" class="px-4 space-y-3">
-                    <!-- Rendered by JS -->
-                </div>
 
-                <!-- Prayers Menu -->
-                <div class="px-5 mt-8 mb-12">
-                    <h3 class="text-sm font-bold text-amber-500/80 uppercase tracking-widest mb-4 px-2"
-                        data-t="prayersBtn">Молитвы</h3>
-                    <div class="space-y-3">
-                        <button data-prayer-id="repentanceCanon"
-                            class="prayer-menu-item w-full p-5 rounded-2xl bg-white/5 border border-white/5 flex items-center gap-4 active:scale-[0.98] transition-all text-left">
-                            <div
-                                class="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center text-red-400">
-                                <span class="material-symbols-outlined">local_fire_department</span>
-                            </div>
-                            <span class="font-bold text-white/90" data-t="repentanceCanon">Покаянный канон</span>
-                            <span class="material-symbols-outlined ml-auto text-white/20">chevron_right</span>
-                        </button>
-                        <button data-prayer-id="theotokosCanon"
-                            class="prayer-menu-item w-full p-5 rounded-2xl bg-white/5 border border-white/5 flex items-center gap-4 active:scale-[0.98] transition-all text-left">
-                            <div
-                                class="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-500">
-                                <span class="material-symbols-outlined">stars</span>
-                            </div>
-                            <span class="font-bold text-white/90" data-t="theotokosCanon">Канон Богородице</span>
-                            <span class="material-symbols-outlined ml-auto text-white/20">chevron_right</span>
-                        </button>
-                        <button data-prayer-id="guardianAngelCanon"
-                            class="prayer-menu-item w-full p-5 rounded-2xl bg-white/5 border border-white/5 flex items-center gap-4 active:scale-[0.98] transition-all text-left">
-                            <div
-                                class="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400">
-                                <span class="material-symbols-outlined">flare</span>
-                            </div>
-                            <span class="font-bold text-white/90" data-t="guardianAngelCanon">Канон
-                                Ангелу-Хранителю</span>
-                            <span class="material-symbols-outlined ml-auto text-white/20">chevron_right</span>
-                        </button>
-                        <button data-prayer-id="beforeCommunion"
-                            class="prayer-menu-item w-full p-5 rounded-2xl bg-white/5 border border-white/5 flex items-center gap-4 active:scale-[0.98] transition-all text-left">
-                            <div
-                                class="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400">
-                                <span class="material-symbols-outlined">menu_book</span>
-                            </div>
-                            <span class="font-bold text-white/90" data-t="beforeCommunion">Последование</span>
-                            <span class="material-symbols-outlined ml-auto text-white/20">chevron_right</span>
-                        </button>
-                        <button data-prayer-id="afterCommunion"
-                            class="prayer-menu-item w-full p-5 rounded-2xl bg-white/5 border border-white/5 flex items-center gap-4 active:scale-[0.98] transition-all text-left">
-                            <div
-                                class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
-                                <span class="material-symbols-outlined">celebration</span>
-                            </div>
-                            <span class="font-bold text-white/90" data-t="afterCommunion">Благодарственные</span>
-                            <span class="material-symbols-outlined ml-auto text-white/20">chevron_right</span>
-                        </button>
+
+                <!-- Saints Memory -->
+                <div class="px-4 mt-6 mb-8 animate-fade-in-up" style="animation-delay: 0.2s">
+                    <div class="flex items-center justify-between px-1 mb-3">
+                        <h3 class="text-sm font-bold uppercase tracking-widest text-gray-500">Память святых</h3>
+                        <span class="material-symbols-outlined text-[#D4AF37] text-xl">brightness_7</span>
+                    </div>
+                    <div id="saints-memory-container" class="glass-card rounded-xl overflow-hidden">
+                        <!-- Saints will be injected here -->
                     </div>
                 </div>
-                <div class="h-4"></div>
+
+
+
+
             </main>
+
+            <!-- CONFESSION TAB (OLD CHURCH TODAY) -->
+            <main id="tab-church-today" class="absolute inset-0 overflow-y-auto pt-12 pb-32 no-scrollbar hidden">
+                <div class="px-4 pt-2 animate-fade-in-up">
+                    <h1 class="text-2xl font-serif font-bold text-[#D4AF37] leading-tight text-center">
+                        ТАИНСТВО ИСПОВЕДИ
+                    </h1>
+                </div>
+
+                <!-- Saint Quote Card (Wisdom) -->
+                <div class="px-4 mb-6 mt-4 animate-fade-in-up" style="animation-delay: 0.1s">
+                    <div class="glass-card rounded-2xl p-6 mb-6 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-2 opacity-20">
+                            <svg class="text-[#D4AF37]" fill="currentColor" height="40" viewbox="0 0 24 24" width="40"><path d="M14.017 21L14.017 18C14.017 16.8954 14.9124 16 16.017 16H19.017V14H15.017C13.3601 14 12.017 12.6569 12.017 11V5C12.017 3.34315 13.3601 2 15.017 2H21.017V11C21.017 14.866 17.883 18 14.017 21ZM5.017 21L5.017 18C5.017 16.8954 5.91243 16 7.017 16H10.017V14H6.017C4.36015 14 3.017 12.6569 3.017 11V5C3.017 3.34315 4.36015 2 6.017 2H12.017V11C12.017 14.866 8.883 18 5.017 21Z"></path></svg>
+                        </div>
+                        <div class="flex items-center gap-2 mb-4">
+                            <div class="w-7 h-7 rounded-lg bg-[#D4AF37]/10 flex items-center justify-center border border-[#D4AF37]/15">
+                                <span class="material-symbols-outlined text-[#D4AF37] text-md">auto_stories</span>
+                            </div>
+                            <h3 class="text-[10px] font-bold text-[#ab9db8] uppercase tracking-[0.2em]" data-t="wisdomTitle">Мудрость святых</h3>
+                        </div>
+                        <p id="confession-quote-text" class="text-sm italic leading-relaxed mb-4 text-gray-200">
+                            «Исповедь — это второе крещение, в котором омываются грехи, содеянные после первого...»
+                        </p>
+                        <div class="flex justify-between items-center">
+                            <span id="confession-quote-author" class="text-xs font-semibold text-[#D4AF37] tracking-widest uppercase">Св. Иоанн Лествичник</span>
+                            <button id="refresh-confession-quote-btn" class="text-xs bg-[#7f19e6]/20 hover:bg-[#7f19e6]/40 text-[#7f19e6] px-3 py-1 rounded-full border border-[#7f19e6]/30 transition-all">
+                                Другая цитата
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Psalm 50 Snippet -->
+                <div class="px-4 mb-10 animate-fade-in-up" style="animation-delay: 0.2s">
+                    <p class="text-xs text-gray-500 text-center mb-3 italic">Если вам трудно начать, прочитайте Псалом 50</p>
+                    <details class="group cursor-pointer">
+                        <summary class="list-none">
+                            <p class="text-sm italic text-gray-400 font-serif leading-relaxed text-left line-clamp-3 group-open:line-clamp-none">
+                                Помилуй мя, Боже, по велицей милости Твоей, и по множеству щедрот Твоих очисти беззаконие мое. Наипаче омый мя от беззакония моего, и от греха моего очисти мя; яко беззаконие мое аз знаю, и грех мой предо мною есть выну. Тебе Единому согреших и лукавое пред Тобою сотворих, яко да оправдишися во словесех Твоих, и победиши внегда судити Ти. Се бо, в беззакониях зачат есмь, и во гресех роди мя мати моя. Се бо, истину возлюбил еси; безвестная и тайная премудрости Твоея явил ми еси. Окропиши мя иссопом, и очищуся; омыеши мя, и паче снега убелюся. Слуху моему даси радость и веселие; возрадуются кости смиренныя. Отврати лице Твое от грех моих и вся беззакония моя очисти. Сердце чисто созижди во мне, Боже, и дух прав обнови во утробе моей. Не отвержи мене от лица Твоего и Духа Твоего Святаго не отыми от мене. Воздаждь ми радость спасения Твоего и Духом владычним утверди мя. Научу беззаконыя путем Твоим, и нечестивии к Тебе обратятся. Избави мя от кровей, Боже, Боже спасения моего; возрадуется язык мой правде Твоей. Господи, устне мои отверзеши, и уста моя возвестят хвалу Твою. Яко аще бы восхотел еси жертвы, дал бых убо: всесожжения не благоволиши. Жертва Богу дух сокрушен; сердце сокрушенно и смиренно Бог не уничижит. Ублажи, Господи, благоволением Твоим Сиона, и да созиждутся стены Иерусалимския. Тогда благоволиши жертву правды, возношение и всесожегаемая; тогда возложат на олтарь Твой тельцы.
+                            </p>
+                        </summary>
+                    </details>
+                </div>
+
+                <!-- Preparation Section -->
+                <div class="px-4 mt-8 mb-6 animate-fade-in-up" style="animation-delay: 0.1s">
+                    <h2 class="text-lg font-serif flex items-center gap-2">
+                        <span class="w-8 h-[1px] bg-[#D4AF37]/50"></span>
+                        <span data-t="prepSectionTitle">Подготовка</span>
+                        <span class="w-8 h-[1px] bg-[#D4AF37]/50"></span>
+                    </h2>
+                </div>
+                    <div id="preparation-intro-container" class="space-y-4 mb-10">
+                        <!-- First 2 blocks rendered here -->
+                    </div>
+                    <div id="sins-container" class="space-y-4">
+                        <!-- Data will be injected here -->
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="px-4 mt-12 mb-6 animate-fade-in-up" style="animation-delay: 0.1s">
+                        <h2 class="text-lg font-serif flex items-center gap-2">
+                            <span class="w-8 h-[1px] bg-[#D4AF37]/50"></span>
+                            <span data-t="myList">Моя исповедь</span>
+                            <span class="w-8 h-[1px] bg-[#D4AF37]/50"></span>
+                        </h2>
+                    </div>
+
+                    <!-- Starting Formula -->
+                    <div id="formula-container"
+                        class="mb-6 p-4 rounded-2xl bg-white/5 border border-white/5 animate-fade-in-up">
+                        <p class="text-sm italic text-slate-400 leading-relaxed text-center" data-t="formulaText">
+                            Господи, помоги мне исповедать грехи мои искренне и без утайки. Батюшка, я каюсь в том, что...
+                        </p>
+                    </div>
+
+                    <div class="flex items-center justify-between mb-6 px-2">
+                        <p class="text-[13px] font-medium text-[#ab9db8]">
+                            <span id="selected-count-value">0</span>
+                            <span data-t="itemsSelectedText">выбрано</span>
+                        </p>
+                        <div class="flex items-center gap-4">
+                            <button id="toggle-all-btn"
+                                class="flex items-center gap-1.5 text-[11px] font-bold tracking-widest text-primary uppercase active:scale-95 transition-all hidden">
+                                <span class="material-symbols-outlined text-lg">unfold_more</span>
+                                <span data-t="expandAllBtn">Показать всё</span>
+                            </button>
+                            <button id="print-pdf-btn"
+                                class="flex items-center gap-1.5 text-[11px] font-bold tracking-widest text-primary uppercase active:scale-95 transition-all">
+                                <span class="material-symbols-outlined text-lg">picture_as_pdf</span>
+                                <span data-t="printBtn">Распечатать листок</span>
+                            </button>
+                            <button id="clear-all-btn-top"
+                                class="flex items-center gap-1.5 text-[11px] font-bold tracking-widest text-red-400/80 uppercase active:scale-95 transition-all">
+                                <span class="material-symbols-outlined text-lg">delete_sweep</span>
+                                <span data-t="clearAll">Очистить</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="my-list-container" class="space-y-4 mb-10">
+                        <!-- Selected sins will be injected here as interactive cards -->
+                    </div>
+
+                    <!-- Add Custom Sin -->
+                    <div class="mt-4 relative">
+                        <input class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-sm focus:ring-[#7f19e6] focus:border-[#7f19e6] pr-10 text-white" placeholder="Добавить свой грех..." type="text" id="custom-sin-input"/>
+                        <button class="absolute right-3 top-1/2 -translate-y-1/2 text-[#D4AF37]" id="add-custom-sin-btn">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+                        </button>
+                    </div>
+
+                    <!-- Notes Area -->
+                    <div class="relative mt-6">
+                        <textarea id="personal-notes" class="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm focus:ring-[#7f19e6] focus:border-[#7f19e6] placeholder:text-gray-600 text-white" placeholder="Заметки для священника..." rows="4"></textarea>
+                        <button class="absolute bottom-3 right-3 p-2 bg-[#7f19e6]/20 rounded-full text-[#7f19e6] hover:bg-[#7f19e6]/40 transition-all shadow-lg">
+                            <svg class="w-5 h-5" fill="currentColor" viewbox="0 0 20 20"><path d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z"></path></svg>
+                        </button>
+                    </div>
+
+                    <div id="empty-state" class="hidden flex-col items-center justify-center pt-24 text-[#ab9db8]">
+                        <div class="w-24 h-24 mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[48px] text-primary opacity-80">list_alt</span>
+                        </div>
+                        <p class="text-xl font-medium text-white" data-t="emptyTitle">Пусто</p>
+                        <p id="empty-list-msg" class="text-base mt-2 text-center px-8 opacity-60" data-t="emptyList"></p>
+                    </div>
+
+                    <!-- Read Mode Button -->
+                    <div id="read-mode-container" class="mt-12 mb-8 hidden animate-fade-in-up">
+                        <button id="open-read-mode-btn"
+                            class="w-full py-5 rounded-[28px] bg-primary text-white font-bold text-lg flex items-center justify-center gap-3 shadow-xl shadow-primary/30 active:scale-[0.98] transition-all">
+                            <span class="material-symbols-outlined text-2xl">visibility</span>
+                            <span data-t="readModeBtn">Читать на исповеди</span>
+                        </button>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="px-4 mt-12 mb-6 animate-fade-in-up" style="animation-delay: 0.1s">
+                        <h2 class="text-lg font-serif flex items-center gap-2">
+                            <span class="w-8 h-[1px] bg-[#D4AF37]/50"></span>
+                            <span data-t="communionPrepShort">К Причастию</span>
+                            <span class="w-8 h-[1px] bg-[#D4AF37]/50"></span>
+                        </h2>
+                    </div>
+
+                    <div id="preparation-container" class="space-y-4">
+                        <!-- Rendered by JS -->
+                    </div>
+
+                    <!-- Prayers Menu -->
+                    <div class="px-5 mt-12 mb-20 text-center">
+                        <h3 class="text-sm font-bold text-amber-500/80 uppercase tracking-widest mb-6 px-2"
+                            data-t="prayersBtn">Молитвы перед Причастием</h3>
+                        <div class="space-y-3">
+                            <button data-prayer-id="repentanceCanon"
+                                class="prayer-menu-item w-full p-5 rounded-2xl bg-white/5 border border-white/5 flex items-center gap-4 active:scale-[0.98] transition-all text-left">
+                                <div
+                                    class="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center text-red-400">
+                                    <span class="material-symbols-outlined">local_fire_department</span>
+                                </div>
+                                <span class="font-bold text-white/90" data-t="repentanceCanon">Покаянный канон</span>
+                                <span class="material-symbols-outlined ml-auto text-white/20">chevron_right</span>
+                            </button>
+                            <button data-prayer-id="theotokosCanon"
+                                class="prayer-menu-item w-full p-5 rounded-2xl bg-white/5 border border-white/5 flex items-center gap-4 active:scale-[0.98] transition-all text-left">
+                                <div
+                                    class="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-500">
+                                    <span class="material-symbols-outlined">stars</span>
+                                </div>
+                                <span class="font-bold text-white/90" data-t="theotokosCanon">Канон Богородице</span>
+                                <span class="material-symbols-outlined ml-auto text-white/20">chevron_right</span>
+                            </button>
+                            <button data-prayer-id="guardianAngelCanon"
+                                class="prayer-menu-item w-full p-5 rounded-2xl bg-white/5 border border-white/5 flex items-center gap-4 active:scale-[0.98] transition-all text-left">
+                                <div
+                                    class="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400">
+                                    <span class="material-symbols-outlined">flare</span>
+                                </div>
+                                <span class="font-bold text-white/90" data-t="guardianAngelCanon">Канон Ангелу-Хранителю</span>
+                                <span class="material-symbols-outlined ml-auto text-white/20">chevron_right</span>
+                            </button>
+                            <button data-prayer-id="beforeCommunion"
+                                class="prayer-menu-item w-full p-5 rounded-2xl bg-white/5 border border-white/5 flex items-center gap-4 active:scale-[0.98] transition-all text-left">
+                                <div
+                                    class="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400">
+                                    <span class="material-symbols-outlined">menu_book</span>
+                                </div>
+                                <span class="font-bold text-white/90" data-t="beforeCommunion">Последование</span>
+                                <span class="material-symbols-outlined ml-auto text-white/20">chevron_right</span>
+                            </button>
+                            <button data-prayer-id="afterCommunion"
+                                class="prayer-menu-item w-full p-5 rounded-2xl bg-white/5 border border-white/5 flex items-center gap-4 active:scale-[0.98] transition-all text-left">
+                                <div
+                                    class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                                    <span class="material-symbols-outlined">celebration</span>
+                                </div>
+                                <span class="font-bold text-white/90" data-t="afterCommunion">Благодарственные</span>
+                                <span class="material-symbols-outlined ml-auto text-white/20">chevron_right</span>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="h-12"></div>
+            </main>
+
+
+
+
 
 
             <main id="tab-settings" class="absolute inset-0 overflow-y-auto pt-24 pb-28 px-4 no-scrollbar hidden">
@@ -373,12 +413,14 @@
                     <!-- Profile Section -->
                     <section class="mb-8">
                         <h2 class="px-2 text-sm font-semibold text-[#ab9db8] uppercase tracking-wider mb-3"
-                            data-t="sectionProfile">Профиль</h2>
-                        <div class="glass-panel rounded-[24px] p-2 grid grid-cols-2 gap-2">
-                            <button data-profile="adult"
-                                class="profile-btn w-full py-3 rounded-xl text-sm font-bold transition-all active:scale-95 bg-white/5 hover:bg-white/10 text-slate-300">Взрослый</button>
-                            <button data-profile="child"
-                                class="profile-btn w-full py-3 rounded-xl text-sm font-bold transition-all active:scale-95 bg-white/5 hover:bg-white/10 text-slate-300">Детский</button>
+                            data-t="sectionProfile">Мой возраст</h2>
+                        <div class="glass-panel rounded-[24px] p-2 grid grid-cols-3 gap-2">
+                            <button data-profile="adult" data-t="profileAdult"
+                                class="profile-btn w-full py-3 rounded-xl text-xs font-bold transition-all active:scale-95 bg-white/5 hover:bg-white/10 text-slate-300">Взрослый</button>
+                            <button data-profile="teen" data-t="profileTeen"
+                                class="profile-btn w-full py-3 rounded-xl text-xs font-bold transition-all active:scale-95 bg-white/5 hover:bg-white/10 text-slate-300">Подросток</button>
+                            <button data-profile="child" data-t="profileChild"
+                                class="profile-btn w-full py-3 rounded-xl text-xs font-bold transition-all active:scale-95 bg-white/5 hover:bg-white/10 text-slate-300">Ребенок</button>
                         </div>
                     </section>
 
@@ -399,6 +441,26 @@
                             <button data-lang="cs"
                                 class="lang-btn w-full py-3 rounded-xl text-xs font-bold transition-all active:scale-95 bg-white/5 hover:bg-white/10"
                                 data-t="cs">Церковнославянскій</button>
+                        </div>
+                    </section>
+
+                    <!-- Support Project Section -->
+                    <section class="mb-8">
+                        <h2 class="px-2 text-sm font-semibold text-[#ab9db8] uppercase tracking-wider mb-3"
+                            data-t="sectionSupport">Поддержать проект</h2>
+                        <div class="glass-panel rounded-[24px] overflow-hidden">
+                            <button id="donate-btn"
+                                class="w-full flex items-center gap-4 p-5 hover:bg-white/5 transition-colors text-left group">
+                                <div
+                                    class="flex items-center justify-center rounded-xl bg-[#D4AF37]/20 text-[#D4AF37] w-12 h-12 shrink-0">
+                                    <span class="material-symbols-outlined text-2xl">favorite</span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-base font-medium text-white mb-0.5" data-t="donateTitle">Внести пожертвование</p>
+                                    <p class="text-xs text-[#ab9db8] leading-tight" data-t="donateDesc">Приложение создается и развивается силами энтузиастов</p>
+                                </div>
+                                <span class="material-symbols-outlined text-[#ab9db8] group-hover:text-white transition-colors">chevron_right</span>
+                            </button>
                         </div>
                     </section>
 
@@ -498,62 +560,31 @@
     </div>
 
     <!-- BOTTOM NAVIGATION -->
-    <nav id="bottom-nav" class="fixed bottom-0 left-0 right-0 z-50 glass-header px-6 pt-2"
-        style="padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);">
-        <div class="flex items-center justify-around max-w-lg mx-auto">
+    <nav id="bottom-nav" class="fixed bottom-0 left-0 right-0 z-50 bg-gray-900/95 backdrop-blur-md border-t border-white/5 px-6 pt-2"
+        style="padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);">
+        <div class="flex items-center justify-around max-w-sm mx-auto">
+            <button data-tab="church-empty"
+                class="nav-btn group flex flex-col items-center justify-center gap-1 p-2 text-xs font-medium border-t-2 border-transparent text-gray-500 hover:text-amber-200/70 transition-all outline-none">
+                <span
+                    class="material-symbols-outlined w-6 h-6 text-gray-500 group-[.active]:text-amber-200 transition-colors">church</span>
+                <span
+                    class="text-xs font-medium text-gray-500 group-[.active]:text-amber-200 transition-colors"
+                    data-t="churchTab">Церковь</span>
+            </button>
             <button data-tab="church-today"
-                class="nav-btn group flex flex-col items-center gap-0.5 transition-all outline-none">
-                <div
-                    class="w-10 h-6 rounded-xl flex items-center justify-center group-[.active]:bg-primary/20 transition-all">
-                    <span
-                        class="material-symbols-outlined text-[#ab9db8] group-[.active]:text-primary transition-colors text-xl">church</span>
-                </div>
+                class="nav-btn group flex flex-col items-center justify-center gap-1 p-2 text-xs font-medium border-t-2 border-transparent text-gray-500 hover:text-amber-200/70 transition-all outline-none">
                 <span
-                    class="text-[9px] font-bold tracking-wider uppercase text-[#ab9db8] group-[.active]:text-primary transition-colors"
-                    data-t="churchToday">Церковь</span>
-            </button>
-            <button data-tab="catalog"
-                class="nav-btn group flex flex-col items-center gap-0.5 transition-all outline-none">
-                <div
-                    class="w-10 h-6 rounded-xl flex items-center justify-center group-[.active]:bg-primary/20 transition-all">
-                    <span
-                        class="material-symbols-outlined text-[#ab9db8] group-[.active]:text-primary transition-colors text-xl">fact_check</span>
-                </div>
+                    class="material-symbols-outlined w-6 h-6 text-gray-500 group-[.active]:text-amber-200 transition-colors">menu_book</span>
                 <span
-                    class="text-[9px] font-bold tracking-wider uppercase text-[#ab9db8] group-[.active]:text-primary transition-colors"
-                    data-t="catalog"></span>
-            </button>
-            <button data-tab="list"
-                class="nav-btn group flex flex-col items-center gap-0.5 transition-all outline-none">
-                <div
-                    class="w-10 h-6 rounded-xl flex items-center justify-center group-[.active]:bg-primary/20 transition-all">
-                    <span
-                        class="material-symbols-outlined text-[#ab9db8] group-[.active]:text-primary transition-colors text-xl">edit_note</span>
-                </div>
-                <span
-                    class="text-[9px] font-bold tracking-wider uppercase text-[#ab9db8] group-[.active]:text-primary transition-colors"
-                    data-t="myList"></span>
-            </button>
-            <button data-tab="preparation"
-                class="nav-btn group flex flex-col items-center gap-0.5 transition-all outline-none">
-                <div
-                    class="w-10 h-6 rounded-xl flex items-center justify-center group-[.active]:bg-primary/20 transition-all">
-                    <span
-                        class="material-symbols-outlined text-[#ab9db8] group-[.active]:text-primary transition-colors text-xl">menu_book</span>
-                </div>
-                <span
-                    class="text-[9px] font-bold tracking-wider uppercase text-[#ab9db8] group-[.active]:text-primary transition-colors"
-                    data-t="preparation"></span>
+                    class="text-xs font-medium text-gray-500 group-[.active]:text-amber-200 transition-colors"
+                    data-t="confessionTab"></span>
             </button>
             <button data-tab="settings"
-                class="nav-btn group flex flex-col items-center gap-0.5 transition-all outline-none">
-                <div
-                    class="w-10 h-6 rounded-xl flex items-center justify-center group-[.active]:bg-primary/20 transition-all">
-                    <span
-                        class="material-symbols-outlined text-[#ab9db8] group-[.active]:text-primary transition-colors text-xl">settings</span>
-                </div>
+                class="nav-btn group flex flex-col items-center justify-center gap-1 p-2 text-xs font-medium border-t-2 border-transparent text-gray-500 hover:text-amber-200/70 transition-all outline-none">
                 <span
-                    class="text-[9px] font-bold tracking-wider uppercase text-[#ab9db8] group-[.active]:text-primary transition-colors"
+                    class="material-symbols-outlined w-6 h-6 text-gray-500 group-[.active]:text-amber-200 transition-colors">settings</span>
+                <span
+                    class="text-xs font-medium text-gray-500 group-[.active]:text-amber-200 transition-colors"
                     data-t="settings"></span>
             </button>
         </div>
@@ -567,12 +598,12 @@
         <div
             class="bg-white dark:bg-[#1c1c1e] w-full max-w-[270px] rounded-[24px] overflow-hidden flex flex-col items-center text-center shadow-2xl">
             <div class="p-6">
-                <div
-                    class="w-12 h-12 rounded-full bg-red-100 dark:bg-red-500/10 flex items-center justify-center mb-4 mx-auto">
-                    <span class="material-symbols-outlined text-red-500 text-2xl">warning</span>
+                <div class="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-6 mx-auto border border-red-500/20">
+                    <span id="clear-modal-fire" class="text-4xl transition-all duration-500">🔥</span>
                 </div>
-                <h3 class="text-xl font-bold text-black dark:text-white mb-2" data-t="confirmClearTitle">Очистить?</h3>
-                <p class="text-sm text-gray-500 dark:text-[#8e8e93]" data-t="confirmClearText">Все грехи будут удалены.
+                <h3 class="text-xl font-bold text-black dark:text-white mb-3 font-serif" data-t="confirmClearTitle">Сжечь грехи?</h3>
+                <p class="text-sm text-gray-500 dark:text-[#8e8e93] leading-relaxed px-2" data-t="confirmClearText">
+                    Господи, попали огнем любви Твоей грехи мои и очисти душу мою от скверны.
                 </p>
             </div>
             <div class="w-full flex border-t border-gray-100 dark:border-white/5">
@@ -678,7 +709,58 @@
         </div>
     </div>
 
-
+    <!-- Donation Modal -->
+    <div id="donate-modal"
+        class="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm hidden">
+        <div
+            class="bg-[#1a1025] w-full max-w-md rounded-[32px] overflow-hidden shadow-2xl border border-white/10 animate-fade-in-up">
+            <!-- Header -->
+            <div class="flex justify-center pt-8 pb-2">
+                <div
+                    class="w-16 h-16 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/30 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[#D4AF37] text-4xl">favorite</span>
+                </div>
+            </div>
+            
+            <!-- Title -->
+            <div class="px-6 pb-4 pt-3 text-center">
+                <h3 class="text-2xl font-bold text-white mb-2 font-serif" data-t="donateModalTitle">Спаси Господи за ваше желание помочь!</h3>
+                <p class="text-sm text-[#ab9db8] leading-relaxed" data-t="donateModalText">Ваша поддержка помогает нам развивать приложение и делать его лучше</p>
+            </div>
+            
+            <!-- Amount Buttons -->
+            <div class="px-6 py-4">
+                <div class="grid grid-cols-3 gap-3 mb-3">
+                    <button class="donate-amount-btn py-3 px-4 rounded-xl border-2 border-[#7f19e6]/50 text-white font-bold text-sm hover:bg-[#7f19e6]/20 transition-all" data-amount="100">
+                        100 ₽
+                    </button>
+                    <button class="donate-amount-btn py-3 px-4 rounded-xl border-2 border-[#7f19e6]/50 text-white font-bold text-sm hover:bg-[#7f19e6]/20 transition-all" data-amount="300">
+                        300 ₽
+                    </button>
+                    <button class="donate-amount-btn py-3 px-4 rounded-xl border-2 border-[#7f19e6]/50 text-white font-bold text-sm hover:bg-[#7f19e6]/20 transition-all" data-amount="500">
+                        500 ₽
+                    </button>
+                </div>
+                <button class="donate-amount-btn w-full py-3 px-4 rounded-xl border-2 border-[#7f19e6]/50 text-white font-bold text-sm hover:bg-[#7f19e6]/20 transition-all" data-amount="custom">
+                    Другая сумма
+                </button>
+            </div>
+            
+            <!-- Custom Amount Input (hidden by default) -->
+            <div id="custom-amount-container" class="px-6 pb-4 hidden">
+                <input type="number" id="custom-amount-input" 
+                    class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-[#7f19e6] focus:ring-1 focus:ring-[#7f19e6] placeholder-slate-500"
+                    placeholder="Введите сумму (₽)" min="10" />
+            </div>
+            
+            <!-- Donate Button -->
+            <div class="px-6 pt-2 pb-8">
+                <button id="donate-submit-btn"
+                    class="w-full py-4 rounded-2xl bg-[#7f19e6] text-white font-bold text-lg tracking-wide shadow-lg shadow-[#7f19e6]/40 active:scale-95 transition-all"
+                    data-t="donateSubmitBtn">Пожертвовать</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Reading Mode Modal -->
     <div id="reading-mode-modal" class="fixed inset-0 z-[200] bg-black flex flex-col hidden overflow-hidden">
@@ -701,9 +783,9 @@
                 </div>
                 
                 <button id="finish-confession-btn"
-                    class="w-full py-4 rounded-2xl bg-primary/20 border border-primary/30 text-primary font-bold text-base flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all"
-                    data-t="finishConfessionBtn">
-                    <span class="material-symbols-outlined text-xl">check_circle</span>
+                    class="w-full py-4 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-500 font-bold text-base flex items-center justify-center gap-3 shadow-lg active:scale-95 transition-all">
+                    <span id="finish-fire-icon" class="text-xl transition-all duration-500">🔥</span>
+                    <span data-t="finishConfessionBtn">Завершить исповедь</span>
                 </button>
             </div>
         </div>
@@ -914,6 +996,58 @@
                 <button id="confirm-yes-btn"
                     class="flex-1 py-4 rounded-2xl bg-red-500 text-white font-bold hover:bg-red-600 transition-all active:scale-95 shadow-lg shadow-red-500/30">
                     <span data-t="yes">Да</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Date Picker Modal (Orthodox Calendar) -->
+    <div id="date-picker-modal" class="fixed inset-0 z-[1000] bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="bg-[#1A1A1A] border border-[#D4AF37]/20 rounded-3xl p-6 w-full max-w-sm animate-fade-in-up">
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-6 px-1">
+                <button id="date-picker-prev-month" class="text-[#D4AF37] hover:scale-110 active:scale-95 transition-transform p-1">
+                    <span class="material-symbols-outlined text-2xl">chevron_left</span>
+                </button>
+                <h3 id="date-picker-month-year" class="font-serif text-lg font-bold text-white italic"></h3>
+                <button id="date-picker-next-month" class="text-[#D4AF37] hover:scale-110 active:scale-95 transition-transform p-1">
+                    <span class="material-symbols-outlined text-2xl">chevron_right</span>
+                </button>
+            </div>
+
+            <!-- Weekdays -->
+            <div class="grid grid-cols-7 gap-1 text-center mb-3 text-[10px] font-bold text-gray-600 uppercase tracking-tighter">
+                <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div>Вс</div>
+            </div>
+
+            <!-- Days Grid -->
+            <div id="date-picker-days" class="grid grid-cols-7 gap-y-3 gap-x-1">
+                <!-- Cells injected here -->
+            </div>
+
+            <!-- Legend -->
+            <div class="mt-8 pt-5 border-t border-white/5 grid grid-cols-3 gap-y-3">
+                 <div class="flex items-center gap-2 text-[9px] text-gray-500 uppercase tracking-wider font-bold">
+                     <div class="w-2.5 h-2.5 rounded-full bg-purple-600"></div> 
+                     <span>Пост</span>
+                 </div>
+                 <div class="flex items-center gap-2 text-[9px] text-gray-500 uppercase tracking-wider font-bold justify-center">
+                     <div class="w-2.5 h-2.5 border-2 border-red-500/80 rounded-lg"></div> 
+                     <span>Праздник</span>
+                 </div>
+                 <div class="flex items-center gap-2 text-[9px] text-gray-500 uppercase tracking-wider font-bold justify-end">
+                     <div class="w-2.5 h-2.5 border-2 border-amber-500/80 rounded-lg"></div> 
+                     <span>За упокой</span>
+                 </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="mt-8 flex gap-3">
+                <button id="date-picker-today-btn" class="flex-1 py-3 rounded-xl bg-[#D4AF37]/10 text-[#D4AF37] font-bold text-sm hover:bg-[#D4AF37]/20 transition-all">
+                    Сегодня
+                </button>
+                <button id="date-picker-close-btn" class="flex-1 py-3 rounded-xl bg-white/5 text-white font-bold text-sm hover:bg-white/10 transition-all border border-white/5">
+                    Закрыть
                 </button>
             </div>
         </div>
