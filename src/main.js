@@ -351,23 +351,23 @@ document.addEventListener('DOMContentLoaded', () => {
                                         <p id="desc-${sin.id}" class="description-text hidden text-xs text-slate-400 mt-1 leading-relaxed" data-sin-id="${sin.id}">${sin.explanation[currentLanguage] || sin.explanation.ru}</p>
                                         ` : ''}
                                     </div>
-                                    ${hasDescription ? `
-                                    <button type="button" class="description-toggle shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-slate-400 hover:bg-primary/10 hover:text-primary transition-all" data-sin-id="${sin.id}">
-                                        <span class="material-symbols-outlined text-lg">help</span>
-                                    </button>
-                                    ` : ''}
+                                    <div class="flex items-center gap-1 shrink-0">
+                                        ${isDetailedView ? `
+                                        <button type="button" class="note-toggle flex items-center gap-0.5 text-xs text-gray-400 hover:text-primary transition-colors px-2 py-1 rounded-full hover:bg-primary/10" data-sin-id="${sin.id}">
+                                            <span class="material-symbols-outlined text-sm transition-transform ${hasNote ? 'rotate-180' : ''}" id="note-arrow-${sin.id}">expand_more</span>
+                                        </button>
+                                        ` : ''}
+                                        ${hasDescription ? `
+                                        <button type="button" class="description-toggle w-7 h-7 rounded-full flex items-center justify-center text-slate-400 hover:bg-primary/10 hover:text-primary transition-all" data-sin-id="${sin.id}">
+                                            <span class="material-symbols-outlined text-lg">help</span>
+                                        </button>
+                                        ` : ''}
+                                    </div>
                                 </div>
                                 ${isDetailedView ? `
-                                <div class="mt-2">
-                                    <button type="button" class="note-toggle flex items-center gap-1 text-xs text-gray-400 hover:text-primary transition-colors" data-sin-id="${sin.id}">
-                                        <span class="material-symbols-outlined text-sm transition-transform ${hasNote ? 'rotate-180' : ''}" id="note-arrow-${sin.id}">expand_more</span>
-                                        <span>Заметки</span>
-                                        ${hasNote ? '<span class="w-1.5 h-1.5 rounded-full bg-primary ml-1"></span>' : ''}
-                                    </button>
-                                    <textarea class="sin-note-input mt-2 w-full bg-white/5 border border-white/10 rounded-lg p-2 text-xs text-white placeholder:text-gray-500 focus:ring-[#7f19e6] focus:border-[#7f19e6] ${hasNote ? '' : 'hidden'}"
-                                        placeholder="Добавить детали..."
-                                        data-sin-id="${sin.id}">${itemNote}</textarea>
-                                </div>
+                                <textarea class="sin-note-input mt-2 w-full bg-white/5 border border-white/10 rounded-lg p-2 text-xs text-white placeholder:text-gray-500 focus:ring-[#7f19e6] focus:border-[#7f19e6] ${hasNote ? '' : 'hidden'}"
+                                    placeholder="Добавить детали..."
+                                    data-sin-id="${sin.id}">${itemNote}</textarea>
                                 ` : ''}
                             </div>
                     </label>
