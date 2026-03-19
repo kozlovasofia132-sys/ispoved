@@ -331,9 +331,9 @@ document.addEventListener('DOMContentLoaded', () => {
             category.sins.forEach((sin) => {
                 const sinText = sin.text[currentLanguage] || sin.text.ru;
                 const isSelected = selectedSins.some(s => s.id === sin.id);
-                const hasExplanation = sin.explanation && (sin.explanation[currentLanguage] || sin.explanation.ru);
+                const hasDescription = sin.explanation && (sin.explanation[currentLanguage] || sin.explanation.ru);
                 const isSerious = sin.severity === 'serious';
-                
+
                 // Найти заметку для этого греха
                 const selectedSin = selectedSins.find(s => s.id === sin.id);
                 const itemNote = selectedSin ? selectedSin.note || '' : '';
@@ -344,12 +344,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     <label class="flex items-start gap-4 p-4 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer group/item ${isSerious ? 'border-l-4 border-amber-500 pl-3' : ''}">
                             <input class="sin-checkbox mt-0.5 transition-all cursor-pointer" type="checkbox" value="${sin.id}" ${isSelected ? 'checked' : ''}/>
                             <div class="flex-1">
-                                <p class="text-sm text-slate-900 dark:text-slate-200 font-bold group-hover/item:text-black dark:group-hover/item:text-white transition-colors leading-[1.4]">${sinText}</p>
-                                ${hasExplanation ? `
-                                <div id="expl-${sin.id}" class="hidden mt-2 p-3 bg-white/50 dark:bg-black/30 rounded-lg text-xs italic text-slate-600 dark:text-slate-400 border border-black/5 dark:border-white/5">
-                                    ${sin.explanation[currentLanguage] || sin.explanation.ru}
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="flex-1">
+                                        <p class="text-sm text-slate-900 dark:text-slate-200 font-bold group-hover/item:text-black dark:group-hover/item:text-white transition-colors leading-[1.4]">${sinText}</p>
+                                        ${hasDescription ? `
+                                        <p id="desc-${sin.id}" class="description-text hidden text-xs text-slate-400 mt-1 leading-relaxed" data-sin-id="${sin.id}">${sin.explanation[currentLanguage] || sin.explanation.ru}</p>
+                                        ` : ''}
+                                    </div>
+                                    ${hasDescription ? `
+                                    <button type="button" class="description-toggle shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-slate-400 hover:bg-primary/10 hover:text-primary transition-all" data-sin-id="${sin.id}">
+                                        <span class="material-symbols-outlined text-lg">help</span>
+                                    </button>
+                                    ` : ''}
                                 </div>
-                                ` : ''}
                                 ${isDetailedView ? `
                                 <div class="mt-2">
                                     <button type="button" class="note-toggle flex items-center gap-1 text-xs text-gray-400 hover:text-primary transition-colors" data-sin-id="${sin.id}">
@@ -357,17 +364,12 @@ document.addEventListener('DOMContentLoaded', () => {
                                         <span>Заметки</span>
                                         ${hasNote ? '<span class="w-1.5 h-1.5 rounded-full bg-primary ml-1"></span>' : ''}
                                     </button>
-                                    <textarea class="sin-note-input mt-2 w-full bg-white/5 border border-white/10 rounded-lg p-2 text-xs text-white placeholder:text-gray-500 focus:ring-[#7f19e6] focus:border-[#7f19e6] ${hasNote ? '' : 'hidden'}" 
-                                        placeholder="Добавить детали..." 
+                                    <textarea class="sin-note-input mt-2 w-full bg-white/5 border border-white/10 rounded-lg p-2 text-xs text-white placeholder:text-gray-500 focus:ring-[#7f19e6] focus:border-[#7f19e6] ${hasNote ? '' : 'hidden'}"
+                                        placeholder="Добавить детали..."
                                         data-sin-id="${sin.id}">${itemNote}</textarea>
                                 </div>
                                 ` : ''}
                             </div>
-                            ${hasExplanation ? `
-                            <button type="button" class="explanation-toggle w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:bg-primary/10 hover:text-primary transition-all" data-sin-id="${sin.id}">
-                                <span class="material-symbols-outlined text-xl">help</span>
-                            </button>
-                            ` : ''}
                     </label>
                 </div>
                 `;
@@ -419,18 +421,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        catalogContainer.querySelectorAll('.explanation-toggle').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const sinId = btn.getAttribute('data-sin-id');
-                const explDiv = document.getElementById(`expl-${sinId}`);
-                if (explDiv) {
-                    explDiv.classList.toggle('hidden');
-                }
-            });
-        });
-
         // Обработчик для textarea заметок в режиме "С деталями"
         catalogContainer.querySelectorAll('.sin-note-input').forEach(textarea => {
             textarea.addEventListener('input', (e) => {
@@ -459,10 +449,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 const sinId = btn.getAttribute('data-sin-id');
                 const textarea = document.querySelector(`.sin-note-input[data-sin-id="${sinId}"]`);
                 const arrow = document.getElementById(`note-arrow-${sinId}`);
-                
+
                 if (textarea && arrow) {
                     textarea.classList.toggle('hidden');
                     arrow.classList.toggle('rotate-180');
+                }
+            });
+        });
+
+        // Обработчик для кнопки показа/скрытия описания греха
+        catalogContainer.querySelectorAll('.description-toggle').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const sinId = btn.getAttribute('data-sin-id');
+                const descText = document.getElementById(`desc-${sinId}`);
+                const icon = btn.querySelector('.material-symbols-outlined');
+
+                if (descText) {
+                    descText.classList.toggle('hidden');
+                    if (icon) {
+                        icon.textContent = descText.classList.contains('hidden') ? 'help' : 'check_circle';
+                    }
                 }
             });
         });
