@@ -2148,7 +2148,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.addEventListener('click', () => {
             const profile = btn.dataset.profile;
             setProfile(profile);
-            
+
             // Update UI
             profileButtons.forEach(b => {
                 b.classList.remove('bg-primary', 'text-white');
@@ -2156,12 +2156,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             btn.classList.remove('bg-white/5', 'text-slate-300');
             btn.classList.add('bg-primary', 'text-white');
-            
+
             // Refresh catalog if visible
-            if (activeTab === 'catalog') {
+            if (activeTab === 'church-today') {
                 renderCatalog();
             }
-            
+
             console.log('[Profile] Switched to:', profile);
         });
     });
