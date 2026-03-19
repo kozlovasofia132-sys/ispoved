@@ -130,6 +130,9 @@ const adultSins = [
     }
 ];
 
+// Teen sins (same as child for now)
+const teenSins = childSins;
+
 // Child sins (simplified, age-appropriate)
 const childSins = [
     {
@@ -191,6 +194,9 @@ const childSins = [
 export const getSinsData = () => {
     if (currentProfile === 'child') {
         return childSins;
+    }
+    if (currentProfile === 'teen') {
+        return teenSins;
     }
     // Default to adult (monastic uses same as adult for now)
     return adultSins;
