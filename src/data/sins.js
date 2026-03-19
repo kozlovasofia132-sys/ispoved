@@ -130,10 +130,7 @@ const adultSins = [
     }
 ];
 
-// Teen sins (same as child for now)
-const teenSins = childSins;
-
-// Child sins (simplified, age-appropriate)
+// Child sins (age-appropriate for children 7-12 years old)
 const childSins = [
     {
         id: 'god',
@@ -144,11 +141,18 @@ const childSins = [
         icon: 'church',
         image: '/bg-god.png',
         sins: [
-            { id: 'god_1', text: { ru: 'Забыл помолиться утром или вечером', uk: 'Забув помолитися вранці або ввечері', en: 'Forgot to pray morning or evening' } },
-            { id: 'god_2', text: { ru: 'Не хотел идти в храм', uk: 'Не хотів йти до храму', en: 'Did not want to go to church' } },
-            { id: 'god_3', text: { ru: 'Божился или упоминал Бога всуе', uk: 'Божився або згадував Бога даремно', en: 'Took God\'s name in vain' } },
-            { id: 'god_4', text: { ru: 'Смеялся в церкви или разговаривал', uk: 'Сміявся в церкві або розмовляв', en: 'Laughed or talked in church' } },
-            { id: 'god_5', text: { ru: 'Боялся креститься или носить крестик', uk: 'Боявся хреститися або носити хрестик', en: 'Was afraid to cross myself or wear my cross' } }
+            { id: 'child_god_1', text: { ru: 'Забывал молиться утром и вечером', uk: 'Забував молитися вранці і ввечері', en: 'Forgot to pray morning and evening' }, explanation: { ru: 'Поленился встать на молитву, забыл поблагодарить Бога за день.', uk: 'Полінувався встати на молитву, забув подякувати Богові за день.', en: 'Was too lazy to pray, forgot to thank God for the day.' } },
+            { id: 'child_god_2', text: { ru: 'Баловался в храме на службе', uk: 'Балакав у храмі на службі', en: 'Was restless in church during service' }, explanation: { ru: 'Бегал, шептался, смеялся, когда все молились.', uk: 'Бігав, шептався, сміявся, коли всі молилися.', en: 'Ran around, whispered, laughed when everyone was praying.' } },
+            { id: 'child_god_3', text: { ru: 'Стеснялся носить крестик', uk: 'Соромився носити хрестик', en: 'Was embarrassed to wear my cross' }, explanation: { ru: 'Снимал крестик, чтобы друзья не смеялись.', uk: 'Знімав хрестик, щоб друзі не сміялися.', en: 'Took off my cross so friends would not laugh.' } },
+            { id: 'child_god_4', text: { ru: 'Произносил имя Бога просто так', uk: 'Вимовляв ім Боже дарма', en: 'Said God name for no reason' }, explanation: { ru: 'Говорил Боже мой в шутку или когда испугался.', uk: 'Казав Боже мій жартма або коли злякався.', en: 'Said Oh my God as a joke or when scared.' } },
+            { id: 'child_god_5', text: { ru: 'Не хотел идти в храм', uk: 'Не хотів йти до храму', en: 'Did not want to go to church' }, explanation: { ru: 'Капризничал, говорил, что устал или скучно.', uk: 'Капризував, казав, що втомився або нудно.', en: 'Was fussy, said I was tired or bored.' } },
+            { id: 'child_god_6', text: { ru: 'Не благодарил Бога за еду', uk: 'Не дякував Богові за їжу', en: 'Did not thank God for food' }, explanation: { ru: 'Забыл сказать спасибо Богу перед обедом.', uk: 'Забув сказати дякую Богові перед обідом.', en: 'Forgot to say thank you to God before dinner.' } },
+            { id: 'child_god_7', text: { ru: 'Разговаривал в церкви с друзьями', uk: 'Розмовляв у церкві з друзями', en: 'Talked with friends in church' }, explanation: { ru: 'Шептался, смеялся, мешал другим молиться.', uk: 'Шептався, сміявся, заважав іншим молитися.', en: 'Whispered, laughed, disturbed others praying.' } },
+            { id: 'child_god_8', text: { ru: 'Верил в приметы и гороскопы', uk: 'Вірив у прикмети і гороскопи', en: 'Believed in omens and horoscopes' }, explanation: { ru: 'Боялся черной кошки, верил в счастливые числа.', uk: 'Боявся чорної кішки, вірив у щасливі числа.', en: 'Feared black cats, believed in lucky numbers.' } },
+            { id: 'child_god_9', text: { ru: 'Молился без внимания, торопился', uk: 'Молився без уваги, поспішав', en: 'Prayed without attention, rushed' }, explanation: { ru: 'Читал молитву быстро, думая об игре или мультиках.', uk: 'Читав молитву швидко, думаючи про гру чи мультики.', en: 'Read prayer quickly, thinking about games or cartoons.' } },
+            { id: 'child_god_10', text: { ru: 'Скрывал от друзей, что ходишь в храм', uk: 'Приховував від друзів, що ходиш до храму', en: 'Hid from friends that I go to church' }, explanation: { ru: 'Боялся, что друзья будут смеяться надо мной.', uk: 'Боявся, що друзі будуть сміятися з мене.', en: 'Feared friends would laugh at me.' } },
+            { id: 'child_god_11', text: { ru: 'Не читал Евангелие или Библию', uk: 'Не читав Євангеліє або Біблію', en: 'Did not read Gospel or Bible' }, explanation: { ru: 'Ленился читать святые книги, предпочитал игры.', uk: 'Лінувався читати святі книги, віддавав перевагу іграм.', en: 'Was too lazy to read holy books, preferred games.' } },
+            { id: 'child_god_12', text: { ru: 'Завидовал, что другие ходят в храм', uk: 'Зазидав, що інші ходять до храму', en: 'Envied others who go to church' }, explanation: { ru: 'Сердился, когда братья или сестры молились лучше.', uk: 'Сердився, коли брати чи сестри молилися краще.', en: 'Got angry when brothers or sisters prayed better.' } }
         ]
     },
     {
@@ -160,13 +164,20 @@ const childSins = [
         icon: 'people',
         image: '/bg-neighbor.png',
         sins: [
-            { id: 'neighbor_1', text: { ru: 'Не слушался родителей', uk: 'Не слухався батьків', en: 'Did not obey parents' } },
-            { id: 'neighbor_2', text: { ru: 'Грубил или кричал на родителей', uk: 'Грубив або кричав на батьків', en: 'Was rude or yelled at parents' } },
-            { id: 'neighbor_3', text: { ru: 'Дрался или обзывал других', uk: 'Бився або обзивав інших', en: 'Fought or called others names' } },
-            { id: 'neighbor_4', text: { ru: 'Ябедничал или завидовал', uk: 'Ябедничав або заздрив', en: 'Tattled or was envious' } },
-            { id: 'neighbor_5', text: { ru: 'Не поделился с другими', uk: 'Не поділився з іншими', en: 'Did not share with others' } },
-            { id: 'neighbor_6', text: { ru: 'Обижал младших или слабых', uk: 'Ображав молодших або слабких', en: 'Bullied younger or weaker ones' } },
-            { id: 'neighbor_7', text: { ru: 'Врал или обманывал', uk: 'Брехав або обманював', en: 'Lied or deceived' } }
+            { id: 'child_neighbor_1', text: { ru: 'Не слушался маму и папу', uk: 'Не слухався маму і тата', en: 'Did not obey mom and dad' }, explanation: { ru: 'Игнорировал просьбы, делал по-своему.', uk: 'Ігнорував прохання, робив по-своєму.', en: 'Ignored requests, did things my own way.' } },
+            { id: 'child_neighbor_2', text: { ru: 'Грубил родителям и старшим', uk: 'Грубив батькам і старшим', en: 'Was rude to parents and elders' }, explanation: { ru: 'Отвечал грубо, кричал, хлопал дверью.', uk: 'Відповідав грубо, кричав, грюкав дверима.', en: 'Answered rudely, yelled, slammed doors.' } },
+            { id: 'child_neighbor_3', text: { ru: 'Обижал младших братьев или сестер', uk: 'Ображав молодших братів чи сестер', en: 'Hurt younger brothers or sisters' }, explanation: { ru: 'Толкал, отбирал игрушки, дразнил их.', uk: 'Штовхав, відбирав іграшки, дражнив їх.', en: 'Pushed, took toys, teased them.' } },
+            { id: 'child_neighbor_4', text: { ru: 'Дрался или обзывал других детей', uk: 'Бився або обзивав інших дітей', en: 'Fought or called other kids names' }, explanation: { ru: 'Использовал кулаки или плохие слова.', uk: 'Використовував кулаки або погані слова.', en: 'Used fists or bad words.' } },
+            { id: 'child_neighbor_5', text: { ru: 'Жадина — не делился игрушками', uk: 'Жадібний — не ділився іграшками', en: 'Greedy — did not share toys' }, explanation: { ru: 'Не хотел давать свои вещи другим детям.', uk: 'Не хотів давати свої речі іншим дітям.', en: 'Did not want to share my things with other kids.' } },
+            { id: 'child_neighbor_6', text: { ru: 'Ябедничал на других детей', uk: 'Ябедничав на інших дітей', en: 'Tattled on other kids' }, explanation: { ru: 'Жаловался взрослым, чтобы других наказали.', uk: 'Скаржився дорослим, щоб інших покарали.', en: 'Complained to adults to get others in trouble.' } },
+            { id: 'child_neighbor_7', text: { ru: 'Врал родителям или учителям', uk: 'Брехав батькам чи вчителям', en: 'Lied to parents or teachers' }, explanation: { ru: 'Говорил неправду, чтобы избежать наказания.', uk: 'Говорив неправду, щоб уникнути покарання.', en: 'Told lies to avoid punishment.' } },
+            { id: 'child_neighbor_8', text: { ru: 'Брал чужое без спроса', uk: 'Брав чуже без дозволу', en: 'Took others things without asking' }, explanation: { ru: 'Брал игрушки или деньги без разрешения.', uk: 'Брав іграшки або гроші без дозволу.', en: 'Took toys or money without permission.' } },
+            { id: 'child_neighbor_9', text: { ru: 'Дразнился и обзывал других', uk: 'Дражнився і обзивав інших', en: 'Teased and called others names' }, explanation: { ru: 'Придумывал обидные прозвища друзьям.', uk: 'Придумував образливі прізвиська друзям.', en: 'Made up mean nicknames for friends.' } },
+            { id: 'child_neighbor_10', text: { ru: 'Не уважал учителей в школе', uk: 'Не поважав учителів у школі', en: 'Disrespected teachers at school' }, explanation: { ru: 'Перебивал, не слушал, грубил учителю.', uk: 'Перебивав, не слухав, грубив учителю.', en: 'Interrupted, did not listen, was rude to teacher.' } },
+            { id: 'child_neighbor_11', text: { ru: 'Завидовал вещам других детей', uk: 'Зазидав речам інших дітей', en: 'Envied other kids things' }, explanation: { ru: 'Расстраивался, что у других игрушки лучше.', uk: 'Засмучувався, що в інших іграшки кращі.', en: 'Got upset that others had better toys.' } },
+            { id: 'child_neighbor_12', text: { ru: 'Не помогал дома по хозяйству', uk: 'Не допомагав удома по господарству', en: 'Did not help at home with chores' }, explanation: { ru: 'Ленился убирать комнату, мыть посуд.', uk: 'Лінувався прибирати кімнату, мити посуд.', en: 'Was too lazy to clean room, wash dishes.' } },
+            { id: 'child_neighbor_13', text: { ru: 'Не заступился за слабого', uk: 'Не заступився за слабкого', en: 'Did not stand up for someone weak' }, explanation: { ru: 'Молчал, когда обижали другого ребенка.', uk: 'Мовчав, коли ображали іншу дитину.', en: 'Stayed quiet when another kid was bullied.' } },
+            { id: 'child_neighbor_14', text: { ru: 'Не благодарил за помощь и подарки', uk: 'Не дякував за допомогу і подарунки', en: 'Did not thank for help and gifts' }, explanation: { ru: 'Забыл сказать спасибо за подарок.', uk: 'Забув сказати дякую за подарунок.', en: 'Forgot to say thank you for a gift.' } }
         ]
     },
     {
@@ -178,14 +189,26 @@ const childSins = [
         icon: 'person',
         image: '/bg-self.png',
         sins: [
-            { id: 'self_1', text: { ru: 'Ленился делать уроки или помогать дома', uk: 'Лінувався робити уроки або допомагати вдома', en: 'Was lazy doing homework or helping at home' } },
-            { id: 'self_2', text: { ru: 'Много сидел в телефоне или компьютере', uk: 'Багато сидів у телефоні або комп\'ютері', en: 'Spent too much time on phone or computer' } },
-            { id: 'self_3', text: { ru: 'Грубо разговаривал или ругался матом', uk: 'Грубо розмовляв або лаявся матом', en: 'Talked rudely or used bad words' } },
-            { id: 'self_4', text: { ru: 'Жадничал или завидовал чужим вещам', uk: 'Жадібничав або заздрив чужим речам', en: 'Was greedy or envious of others\' things' } },
-            { id: 'self_5', text: { ru: 'Тратил деньги на ненужные вещи', uk: 'Тратив гроші на непотрібні речі', en: 'Spent money on unnecessary things' } }
+            { id: 'child_self_1', text: { ru: 'Капризничал и устраивал истерики', uk: 'Капризував і влаштовував істерики', en: 'Was fussy and had tantrums' }, explanation: { ru: 'Плакал и кричал, когда не получал желаемого.', uk: 'Плакав і кричав, коли не отримував бажаного.', en: 'Cried and yelled when I did not get my way.' } },
+            { id: 'child_self_2', text: { ru: 'Ленился делать уроки', uk: 'Лінувався робити уроки', en: 'Was lazy doing homework' }, explanation: { ru: 'Откладывал домашку, играл вместо учебы.', uk: 'Відкладав домашку, грав замість навчання.', en: 'Postponed homework, played instead of studying.' } },
+            { id: 'child_self_3', text: { ru: 'Смотрел плохие мультики или видео', uk: 'Дивився погані мультики або відео', en: 'Watched bad cartoons or videos' }, explanation: { ru: 'Смотрел страшные или вредные видео тайком.', uk: 'Дивився страшні або шкідливі відео потайки.', en: 'Watched scary or harmful videos secretly.' } },
+            { id: 'child_self_4', text: { ru: 'Долго играл в телефон тайком', uk: 'Довго грав у телефон потайки', en: 'Played on phone too long secretly' }, explanation: { ru: 'Играл в игры, когда родители запретили.', uk: 'Грав в ігри, коли батьки заборонили.', en: 'Played games when parents said no.' } },
+            { id: 'child_self_5', text: { ru: 'Гордился — думал, что я лучше всех', uk: 'Гордився — думав, що я кращий за всіх', en: 'Was proud — thought I am better than everyone' }, explanation: { ru: 'Хвастался, что я умнее или сильнее других.', uk: 'Хвалився, що я розумніший або сильніший за інших.', en: 'Bragged that I am smarter or stronger than others.' } },
+            { id: 'child_self_6', text: { ru: 'Говорил плохие ругательные слова', uk: 'Говорив погані лайливі слова', en: 'Said bad swear words' }, explanation: { ru: 'Слышал от других и повторял эти слова.', uk: 'Чув від інших і повторював ці слова.', en: 'Heard from others and repeated those words.' } },
+            { id: 'child_self_7', text: { ru: 'Завидовал оценкам других детей', uk: 'Зазидав оцінкам інших дітей', en: 'Envied other kids grades' }, explanation: { ru: 'Сердился, что другим ставят лучшие оценки.', uk: 'Сердився, що іншим ставлять кращі оцінки.', en: 'Got angry when others got better grades.' } },
+            { id: 'child_self_8', text: { ru: 'Не убирал свои вещи и игрушки', uk: 'Не прибирав свої речі та іграшки', en: 'Did not clean up my things and toys' }, explanation: { ru: 'Оставлял игрушки разбросанными по комнате.', uk: 'Залишав іграшки розкиданими по кімнаті.', en: 'Left toys scattered around the room.' } },
+            { id: 'child_self_9', text: { ru: 'Тратил деньги на сладости без спроса', uk: 'Тратив гроші на солодощі без дозволу', en: 'Spent money on sweets without permission' }, explanation: { ru: 'Брал деньги у родителей и покупал конфеты.', uk: 'Брав гроші у батьків і купував цукерки.', en: 'Took money from parents and bought candy.' } },
+            { id: 'child_self_10', text: { ru: 'Обманывал, чтобы получить подарок', uk: 'Обманював, щоб отримати подарунок', en: 'Lied to get a gift' }, explanation: { ru: 'Говорил неправду, чтобы мне что-то купили.', uk: 'Говорив неправду, щоб мені щось купили.', en: 'Told lies to get something bought for me.' } },
+            { id: 'child_self_11', text: { ru: 'Не хотел ложиться спать вовремя', uk: 'Не хотів лягати спати вчасно', en: 'Did not want to go to bed on time' }, explanation: { ru: 'Капризничал вечером, не хотел спать.', uk: 'Капризував увечері, не хотів спати.', en: 'Was fussy at night, did not want to sleep.' } },
+            { id: 'child_self_12', text: { ru: 'Ел слишком много сладкого', uk: 'Їв занадто багато солодкого', en: 'Ate too much candy' }, explanation: { ru: 'Тайком ел конфеты, когда запретили.', uk: 'Потайки їв цукерки, коли заборонили.', en: 'Ate candy secretly when told not to.' } },
+            { id: 'child_self_13', text: { ru: 'Не хотел помогать младшим', uk: 'Не хотів допомагати молодшим', en: 'Did not want to help younger ones' }, explanation: { ru: 'Отказывался помочь брату или сестре.', uk: 'Відмовлявся допомогти брату чи сестрі.', en: 'Refused to help brother or sister.' } },
+            { id: 'child_self_14', text: { ru: 'Сравнивал себя с другими детьми', uk: 'Порівнював себе з іншими дітьми', en: 'Compared myself to other kids' }, explanation: { ru: 'Расстраивался, что у других одежда лучше.', uk: 'Засмучувався, що в інших одяг кращий.', en: 'Got upset that others had better clothes.' } }
         ]
     }
 ];
+
+// Teen sins (same as child for now)
+const teenSins = childSins;
 
 /**
  * Get sins data based on current profile

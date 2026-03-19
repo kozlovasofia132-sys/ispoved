@@ -13,8 +13,8 @@
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <meta name="theme-color" content="#121212">
     <link rel="apple-touch-icon" href="/icon.svg">
-  <script type="module" crossorigin src="/assets/index-Bzd6KB-i.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-CLJIbaeI.css">
+  <script type="module" crossorigin src="/assets/index-C_bCK4fk.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-CYFpo8k_.css">
 <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
 
 <body class="bg-background-dark font-display antialiased text-white min-h-screen flex flex-col overflow-hidden">
@@ -713,7 +713,13 @@
     <div id="donate-modal"
         class="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm hidden">
         <div
-            class="bg-[#1a1025] w-full max-w-md rounded-[32px] overflow-hidden shadow-2xl border border-white/10 animate-fade-in-up">
+            class="bg-[#1a1025] w-full max-w-md rounded-[32px] overflow-hidden shadow-2xl border border-white/10 animate-fade-in-up relative">
+            <!-- Close Button -->
+            <button id="close-donate-btn"
+                class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white/60 hover:text-white hover:bg-white/20 transition-all active:scale-90 z-10">
+                <span class="material-symbols-outlined text-xl">close</span>
+            </button>
+            
             <!-- Header -->
             <div class="flex justify-center pt-8 pb-2">
                 <div
@@ -770,8 +776,14 @@
             <span class="material-symbols-outlined text-3xl">close</span>
         </button>
 
-        <div class="flex-1 overflow-y-auto px-6 pt-24 pb-20 no-scrollbar">
-            <div id="reading-mode-content" class="max-w-xl mx-auto space-y-12">
+        <div class="flex-1 overflow-y-auto px-6 pt-16 pb-20 no-scrollbar">
+            <div id="reading-mode-content" class="max-w-xl mx-auto space-y-8">
+                <!-- Opening Formula -->
+                <div class="p-6 bg-white/5 rounded-2xl border border-white/10">
+                    <p class="text-base text-slate-300 italic text-center leading-relaxed" data-t="formulaText">
+                        Господи, помоги мне исповедать грехи мои искренне и без утайки. Батюшка, я каюсь в том, что...
+                    </p>
+                </div>
                 <!-- Sins and notes will be injected here with LARGE font -->
             </div>
             <div id="reading-mode-footer" class="max-w-xl mx-auto mt-12 mb-20 px-4 hidden">

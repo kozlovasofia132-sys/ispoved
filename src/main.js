@@ -21,6 +21,14 @@ document.addEventListener('DOMContentLoaded', () => {
         settings: document.getElementById('tab-settings'),
     };
 
+    // --- Global Speech Function (Stub) ---
+    window.toggleSpeech = (text, iconId) => {
+        console.log('[Speech] Toggling speech for:', text.substring(0, 30) + '...');
+        if (typeof showToast === 'function') {
+            showToast(t('audioPlaybackNotAvailable'));
+        }
+    };
+
     const headerTitle = document.getElementById('header-title');
     const catalogContainer = document.getElementById('sins-container');
     const myListContainer = document.getElementById('my-list-container');
@@ -49,6 +57,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const contactDevBtn = document.getElementById('contact-dev-btn');
     const contactModal = document.getElementById('contact-modal');
     const closeContactBtn = document.getElementById('close-contact-btn');
+
+    // Donation Modal
+    const donateBtn = document.getElementById('donate-btn');
+    const donateModal = document.getElementById('donate-modal');
+    const closeDonateBtn = document.getElementById('close-donate-btn');
+    const donateAmountBtns = document.querySelectorAll('.donate-amount-btn');
+    const customAmountContainer = document.getElementById('custom-amount-container');
+    const customAmountInput = document.getElementById('custom-amount-input');
+    const donateSubmitBtn = document.getElementById('donate-submit-btn');
 
     // Reading Mode Modal
     const readingModeModal = document.getElementById('reading-mode-modal');
@@ -198,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!tabContents[tabId]) return;
 
         // Protection for "My Confession" tab — запрашиваем ПИН только если есть грехи в списке
-        if (tabId === 'list' && isPinEnabled && selectedSins.length > 0) {
+        if (tabId === 'church-today' && isPinEnabled && selectedSins.length > 0) {
             let authenticated = false;
 
             if (isBiometricEnabled) {
@@ -208,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Если уже разблокировано в этой сессии, не запрашиваем ПИН снова
             if (!isUnlocked) {
                 if (!authenticated && hashedPin) {
-                    pendingTabAfterAuth = 'list';
+                    pendingTabAfterAuth = 'church-today';
                     openPinPad(false);
                     return;
                 } else if (!authenticated) {
@@ -232,11 +249,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         updateHeader();
-        if (tabId === 'list' && typeof window.autoResizeNotes === 'function') {
+        if (tabId === 'church-today' && typeof window.autoResizeNotes === 'function') {
             window.autoResizeNotes();
         }
         if (tabId === 'church-today') {
             renderPreparation();
+            renderCatalog();
         }
     }
 
@@ -287,7 +305,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     navButtons.forEach(btn => {
-        btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
+        btn.addEventListener('click', () => {
+            switchTab(btn.getAttribute('data-tab'));
+        });
     });
 
     // --- Render Catalog ---
@@ -829,8 +849,8 @@ document.addEventListener('DOMContentLoaded', () => {
             renderCatalog();
             updateMyList();
             
-            // Переключаемся на каталог
-            switchTab('catalog');
+            // Переключаемся на вкладку Исповедь
+            switchTab('church-today');
             
             // Показываем уведомление
             showToast(t('confessionCompleted'));
@@ -901,7 +921,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isPinEnabled && !isUnlocked) {
             console.log('[PIN] Clear blocked - requires authentication');
             // Если ПИН включен, но не разблокировано — запрашиваем ПИН
-            pendingTabAfterAuth = 'list';
+            pendingTabAfterAuth = 'church-today';
             openPinPad(false, () => {
                 // После успешной разблокировки открываем модальное окно
                 if (clearModal) clearModal.classList.remove('hidden');
@@ -937,6 +957,85 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     setupModal(aboutAppBtn, aboutModal, closeAboutBtn);
     setupModal(contactDevBtn, contactModal, closeContactBtn);
+
+    // --- Donation Modal Logic ---
+    let selectedAmount = null;
+
+    // Open donate modal
+    if (donateBtn) {
+        donateBtn.addEventListener('click', () => {
+            if (donateModal) {
+                donateModal.classList.remove('hidden');
+                selectedAmount = null;
+                donateAmountBtns.forEach(btn => {
+                    btn.classList.remove('bg-[#7f19e6]', 'text-white');
+                    btn.classList.add('border-[#7f19e6]/50');
+                });
+                if (customAmountContainer) customAmountContainer.classList.add('hidden');
+                if (customAmountInput) customAmountInput.value = '';
+            }
+        });
+    }
+
+    // Close donate modal
+    if (closeDonateBtn) {
+        closeDonateBtn.addEventListener('click', () => {
+            if (donateModal) donateModal.classList.add('hidden');
+        });
+    }
+
+    // Amount selection
+    donateAmountBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const amount = btn.dataset.amount;
+            selectedAmount = amount;
+            
+            donateAmountBtns.forEach(b => {
+                b.classList.remove('bg-[#7f19e6]', 'text-white');
+                b.classList.add('border-[#7f19e6]/50');
+            });
+            
+            btn.classList.remove('border-[#7f19e6]/50');
+            btn.classList.add('bg-[#7f19e6]', 'text-white');
+            
+            if (amount === 'custom' && customAmountContainer) {
+                customAmountContainer.classList.remove('hidden');
+            } else if (customAmountContainer) {
+                customAmountContainer.classList.add('hidden');
+            }
+        });
+    });
+
+    // Submit donation
+    if (donateSubmitBtn) {
+        donateSubmitBtn.addEventListener('click', () => {
+            let finalAmount = selectedAmount;
+            
+            if (selectedAmount === 'custom' && customAmountInput) {
+                finalAmount = customAmountInput.value;
+            }
+            
+            if (!finalAmount || finalAmount === 'custom') {
+                alert(t('donationSuccess') || 'Функция оплаты временно недоступна. Спасибо за вашу поддержку!');
+                return;
+            }
+            
+            // Show success message (temporary stub)
+            alert(t('donationSuccess') || 'Функция оплаты временно недоступна. Спасибо за вашу поддержку!');
+            
+            // Close modal after action
+            if (donateModal) donateModal.classList.add('hidden');
+        });
+    }
+
+    // Close on backdrop click
+    if (donateModal) {
+        donateModal.addEventListener('click', (e) => {
+            if (e.target === donateModal) {
+                donateModal.classList.add('hidden');
+            }
+        });
+    }
 
     // --- Language Selection ---
     langButtons.forEach(btn => {
@@ -2136,7 +2235,7 @@ document.addEventListener('DOMContentLoaded', () => {
             prayersContainer.querySelectorAll('.prayer-menu-item').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const prayerId = btn.getAttribute('data-prayer-id');
-                    openPrayerModal(prayerId);
+                    openPrayersModal(prayerId);
                 });
             });
         }

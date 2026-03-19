@@ -94,6 +94,14 @@ export const translations = {
         contactSupportDesc: 'Поддержка и отзывы в Telegram',
         maxMessenger: 'MAX мессенджер',
         appHelperVersion: `Версия ${APP_VERSION}`,
+        // Donation
+        sectionSupport: 'Поддержать проект',
+        donateTitle: 'Внести пожертвование',
+        donateDesc: 'Приложение создается и развивается силами энтузиастов',
+        donateModalTitle: 'Спаси Господи за ваше желание помочь!',
+        donateModalText: 'Ваша поддержка помогает нам развивать приложение и делать его лучше',
+        donateSubmitBtn: 'Пожертвовать',
+        donationSuccess: 'Функция оплаты временно недоступна. Спасибо за вашу поддержку!',
         // Preparation screen
         preparation: 'Подготовка',
         prepSectionTitle: 'Подготовка',
@@ -291,6 +299,14 @@ export const translations = {
         contactSupportDesc: 'Підтримка та відгуки в Telegram',
         maxMessenger: 'MAX мессенджер',
         appHelperVersion: `Версія ${APP_VERSION}`,
+        // Donation
+        sectionSupport: 'Підтримати проєкт',
+        donateTitle: 'Внести пожертвування',
+        donateDesc: 'Додаток створюється і розвивається силами ентузіастів',
+        donateModalTitle: 'Спаси Господи за ваше бажання допомогти!',
+        donateModalText: 'Ваша підтримка допомагає нам розвивати додаток і робити його кращим',
+        donateSubmitBtn: 'Пожертвувати',
+        donationSuccess: 'Функція оплати тимчасово недоступна. Дякуємо за вашу підтримку!',
         // Preparation screen
         preparation: 'Підготовка',
         prepSectionTitle: 'Підготовка',
@@ -482,6 +498,14 @@ export const translations = {
         contactSupportDesc: 'Support & Feedback via Telegram',
         maxMessenger: 'MAX Messenger',
         appHelperVersion: `Version ${APP_VERSION}`,
+        // Donation
+        sectionSupport: 'Support Project',
+        donateTitle: 'Make a Donation',
+        donateDesc: 'The app is created and developed by enthusiasts',
+        donateModalTitle: 'God bless you for your desire to help!',
+        donateModalText: 'Your support helps us develop the app and make it better',
+        donateSubmitBtn: 'Donate',
+        donationSuccess: 'Payment function is temporarily unavailable. Thank you for your support!',
         // Preparation screen
         preparation: 'Preparation',
         prepSectionTitle: 'Preparation',
