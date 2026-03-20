@@ -1,806 +1,277 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer utilities {
-  .hidden {
-    display: none !important;
-  }
+:root {
+    --color-bg: #f7f6f8;        /* Светлый фон */
+    --color-text-main: #120F16;  /* Темный текст */
+    --color-text-muted: #6b7280; /* Серый текст */
+    --color-surface: #ffffff;    /* Белые карточки */
+    --color-border: #e5e7eb;     /* Светлая граница */
+    --color-primary: #7f19e6;
+    --color-primary-gold: #D4AF37;
+}
 
-  /* Screen reader only class - visually hidden but accessible */
-  .sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border-width: 0;
-    pointer-events: auto;
-    /* Allow clicks to pass through */
-  }
+.dark {
+    --color-bg: #120F16;        /* Темный фон */
+    --color-text-main: #ffffff;  /* Белый текст */
+    --color-text-muted: #ab9db8; 
+    --color-surface: #2a1f33;    /* Темные карточки */
+    --color-surface-alt: #352940; 
+    --color-border: rgba(255, 255, 255, 0.05);
+    --color-primary-gold: #D4AF37;
+    --color-danger: #F87171;
+}
 
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
+@layer base {
   body {
-    background-color: theme('colors.background-dark');
-    color: white;
-    transition: background-color 0.3s ease, color 0.3s ease;
-    line-height: 1.4;
+    background-color: var(--color-bg);
+    color: var(--color-text-main);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: 'Inter', sans-serif;
   }
+}
 
-  body.light {
-    background-color: theme('colors.background-light') !important;
-    color: #1a1a1a !important;
-  }
-
-  ::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 2px;
-  }
-
-  .glass-panel {
-    background: rgba(42, 31, 51, 0.4);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-  }
-
-  .glass-card {
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-  }
-
-  .slavonic-text {
-    line-height: 1.8;
-    letter-spacing: 0.01em;
-  }
-
-  .text-gold {
-    background: linear-gradient(135deg, #FFD700 0%, #B8860B 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-weight: 700;
-  }
-
-  .font-serif {
-    font-family: 'Lora', serif;
-  }
-
-  .font-cs {
-    font-family: 'Lora', Georgia, 'Times New Roman', Times, serif;
-    letter-spacing: 0.01em;
-    line-height: 1.4;
-  }
-
-  .quote-card {
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 24px;
-    padding: 32px;
-    position: relative;
-    margin: 20px 0;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
-  }
-
-  .light .quote-card {
-    background: rgba(255, 255, 255, 0.7);
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-  }
-
-  .quote-text {
-    font-size: 1.25rem;
-    line-height: 1.6;
-    font-style: italic;
-    color: white;
-    text-align: center;
-    position: relative;
-    z-index: 1;
-  }
-
-  .light .quote-text {
-    color: #1a1a1a;
-  }
-
-  .quote-author {
-    margin-top: 16px;
-    font-size: 0.95rem;
-    font-weight: 500;
-    color: #ab9db8;
-    text-align: center;
-    display: block;
-  }
-
-  .quote-icon {
-    position: absolute;
-    font-size: 4rem;
-    color: rgba(127, 25, 230, 0.15);
-    font-family: serif;
-    line-height: 1;
-    z-index: 0;
-  }
-
-  .quote-icon-start {
-    top: 10px;
-    left: 20px;
-  }
-
-  .quote-icon-end {
-    bottom: -10px;
-    right: 20px;
-  }
-
-  .refresh-quote-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 0 auto;
-    padding: 8px 16px;
-    background: rgba(127, 25, 230, 0.1);
-    border: 1px solid rgba(127, 25, 230, 0.2);
-    border-radius: 12px;
-    color: #a78bfa;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-  }
-
-  .refresh-quote-btn:active {
-    scale: 0.95;
-    background: rgba(127, 25, 230, 0.2);
-  }
-
-  .refresh-quote-btn .material-symbols-outlined {
-    font-size: 18px;
-    transition: transform 0.5s ease;
-  }
-
-  .refresh-quote-btn:hover .material-symbols-outlined {
-    transform: rotate(180deg);
-  }
-
-  .light .glass-panel {
-    background: rgba(255, 255, 255, 0.7);
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-  }
-
-  .glass-header {
-    background: rgba(25, 17, 33, 0.8);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  }
-
-  .light .glass-header {
-    background: rgba(255, 255, 255, 0.85);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  }
-
-  /* Custom Checkbox */
-  .sin-checkbox {
-    appearance: none;
-    border-radius: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background-color: rgba(255, 255, 255, 0.05);
-    width: 24px;
-    height: 24px;
-    cursor: pointer;
-    position: relative;
+@layer components {
+  .glass-panel, .glass-card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 1.5rem;
+    overflow: hidden;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     transition: all 0.2s ease;
   }
 
-  .light .sin-checkbox {
-    border: 2px solid #94a3b8;
-    background-color: white;
+  .dark .glass-panel, .dark .glass-card {
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(24px);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   }
 
-  .sin-checkbox:checked {
-    background-color: #7f19e6;
-    border-color: transparent;
+  /* Icons */
+  .material-symbols-outlined {
+    user-select: none;
+    vertical-align: middle;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 48;
   }
 
-  .sin-checkbox:checked::after {
-    content: "";
-    position: absolute;
-    left: 8px;
-    top: 3px;
-    width: 7px;
-    height: 13px;
-    border: solid white;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
+  /* Golden Gradient Text Effect */
+  .golden-text {
+    background: linear-gradient(135deg, #fbf5b7 0%, #d4af37 50%, #a67c00 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-family: 'Lora', serif;
+    font-weight: 700;
   }
 
-  details {
-    scroll-margin-top: 100px;
+  /* Button Styles */
+  .btn-primary {
+    background-color: var(--color-primary);
+    color: white;
+    font-weight: 700;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   }
+  .btn-primary:active { transform: scale(0.95); }
+
+  .btn-outline {
+    border: 2px solid var(--color-primary);
+    color: var(--color-primary);
+    font-weight: 700;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    padding: 1rem 1.5rem;
+  }
+  .btn-outline:active { transform: scale(0.95); }
 }
 
-/* Base Body Styles */
-body {
-  min-height: 100dvh;
+@layer utilities {
+  .font-sans { font-family: 'Inter', sans-serif !important; }
+  .font-serif { font-family: 'Lora', serif !important; }
+  
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 }
 
-.light .text-white {
-  color: #1a1a1a !important;
+/* Specific reading mode header styling */
+.reading-mode-header {
+  background-color: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+  backdrop-filter: blur(24px);
+  z-index: 210;
+  position: sticky;
+  top: 0;
 }
 
-.light .text-slate-100 {
-  color: #1a1a1a !important;
+.dark .reading-mode-header {
+  background-color: rgba(10, 10, 10, 0.95);
 }
 
-.light .text-slate-200 {
-  color: #2d2d2d !important;
-}
-
-.light .text-\[\#ab9db8\] {
-  color: #6e6e73 !important;
-}
-
-/* Section headers and labels in light mode */
-.light h2[data-t],
-.light p[data-t],
-.light h3[data-t] {
-  color: #1a1a1a !important;
-}
-
-.light .bg-black\/40 {
-  background-color: rgba(0, 0, 0, 0.05) !important;
-}
-
-.light .bg-white\/5 {
-  background-color: rgba(0, 0, 0, 0.04) !important;
-}
-
-.light .border-white\/5 {
-  border-color: rgba(0, 0, 0, 0.08) !important;
-}
-
-.light .border-white\/10 {
-  border-color: rgba(0, 0, 0, 0.12) !important;
-}
-
-/* Specific text color overrides for light mode */
-.light .text-white\/90 {
-  color: #1a1a1a !important;
-}
-
-.light .text-white\/40 {
-  color: #6e6e73 !important;
-}
-
-.light .text-white\/20 {
-  color: #8e8e93 !important;
-}
-
-.light .text-slate-300 {
-  color: #334155 !important;
-}
-
-.light .text-amber-500\/80 {
-  color: #c2410c !important; /* amber-700 */
-}
-
-/* Prayer Menu Items in Light Mode */
-.light .prayer-menu-item {
-  background-color: white !important;
-  border-color: rgba(0, 0, 0, 0.05) !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) !important;
-}
-
-.light .prayer-menu-item:active {
-  background-color: #f8fafc !important;
-  transform: scale(0.98);
-}
-
-.light .prayer-menu-item span[data-t] {
-  color: #1a1a1a !important;
-}
-
-.light .prayer-menu-item .material-symbols-outlined.text-white\/20 {
-  color: #cbd5e1 !important; /* slate-300 */
-}
-
-/* Theme toggle switch in light mode */
-.light #theme-toggle+div {
-  background-color: #e5e7eb !important;
-  /* bg-gray-200 */
-  border: 1px solid #d1d5db !important;
-  /* border-gray-300 */
-}
-
-.light #theme-toggle:checked+div {
-  background-color: #7f19e6 !important;
-  border-color: transparent !important;
-}
-
-.light #theme-toggle+div::after {
-  background-color: white !important;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* Smooth transition for theme toggle */
-* {
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
-}
-
-/* Catalog cards text must remain white even in light mode due to dark image/gradient */
-.light .glass-panel summary h3.text-white {
-  color: white !important;
-}
-
-/* Subtitles (e.g., "I. ОТНОШЕНИЯ") must keep their accent colors */
-.light .glass-panel summary span.text-primary {
-  color: #7f19e6 !important;
-}
-
-.light .glass-panel summary span.text-blue-400 {
-  color: #60a5fa !important;
-}
-
-.light .glass-panel summary span.text-emerald-400 {
-  color: #34d399 !important;
-}
-
-.light .glass-panel summary span.opacity-90 {
-  opacity: 1 !important;
-}
-
+/* Animations from old file */
 @keyframes fadeInKeyUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes shake {
-
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-
-  25% {
-    transform: translateX(-10px);
-  }
-
-  75% {
-    transform: translateX(10px);
-  }
-}
-
-.animate-shake {
-  animation: shake 0.4s cubic-bezier(.36, .07, .19, .97) both;
-}
-
-#pin-pad-modal.setup-mode {
-  background: #09090b;
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-fade-in-up {
   animation: fadeInKeyUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.teaching-filter-btn.active {
-  background-color: #7f19e6 !important;
-  color: white !important;
-  border-color: transparent !important;
-}
-
-#bottom-nav {
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px) !important;
-}
-
-/* Reading Mode Styles */
+/* Reading mode sin items */
 #reading-mode-modal .reading-sin-item {
-  border-left: 6px solid #7f19e6;
-  padding-left: 24px;
+  border-left: 6px solid var(--color-primary);
+  background-color: var(--color-surface);
+  padding: 1.5rem;
+  border-top-right-radius: 1.5rem;
+  border-bottom-right-radius: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
 }
 
 #reading-mode-modal .reading-sin-text {
-  font-size: 2rem;
+  font-size: 2.2rem;
   font-weight: 700;
   line-height: 1.25;
 }
 
 #reading-mode-modal .reading-sin-note {
-  font-size: 1.4rem;
-  color: #ab9db8;
+  font-size: 1.5rem;
+  color: var(--color-text-muted);
   font-style: italic;
-  margin-top: 12px;
+  margin-top: 0.75rem;
+  opacity: 0.8;
 }
 
-/*
-   Interactive Sin Card (Accordion + Swipe)
-*/
-.sin-card-wrapper {
-  position: relative;
-  overflow: hidden;
-  border-radius: 20px;
-  background: rgba(42, 31, 51, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+/* Audio Bars and Progress */
+#audio-progress {
+  box-shadow: 0 0 12px var(--color-primary);
 }
 
-.sin-card-main {
-  position: relative;
-  z-index: 10;
-  background: transparent;
-}
-
-/* Light mode overrides for card */
-.light .sin-card-main {
-  background: white;
-}
-
-.light .sin-card-wrapper {
-  background: rgba(255, 255, 255, 0.8);
-  border-color: rgba(0, 0, 0, 0.05);
-}
-
-.sin-card-header {
-  padding: 16px 20px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  cursor: pointer;
-  user-select: none;
-}
-
-.sin-card-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: white;
-  flex: 1;
-  line-height: 1.3;
-}
-
-.light .sin-card-title {
-  color: #1a1a1a;
-}
-
-.sin-card-indicator {
-  color: #ab9db8;
-  transition: transform 0.3s ease;
-}
-
-.sin-card-wrapper.open .sin-card-indicator {
-  transform: rotate(180deg);
-  color: #7f19e6;
-}
-
-.sin-card-body {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), padding 0.3s ease;
-  padding: 0 20px;
-}
-
-.sin-card-wrapper.open .sin-card-body {
-  max-height: 500px;
-  padding-bottom: 20px;
-}
-
-/* Details Label */
-.details-label {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #ab9db8;
-  opacity: 0.6;
-  display: block;
-  margin-bottom: 8px;
-}
-
-/* Per-sin Note Input */
-.sin-note-input {
-  width: 100%;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  color: white;
-  font-size: 14px;
-  padding: 12px;
-  outline: none;
-  transition: all 0.2s ease;
-  min-height: 80px;
-}
-
-.sin-note-input:focus {
-  border-color: #7f19e6;
-  background: rgba(127, 25, 230, 0.05);
-}
-
-.light .sin-note-input {
-  background: rgba(0, 0, 0, 0.02);
-  border-color: rgba(0, 0, 0, 0.05);
-  color: #1a1a1a;
-}
-
-@keyframes ttsPulse {
-  0% {
-    transform: scale(1);
-    opacity: 0.6;
-  }
-
-  50% {
-    transform: scale(1.2);
-    opacity: 1;
-    color: #7f19e6;
-  }
-
-  100% {
-    transform: scale(1);
-    opacity: 0.6;
-  }
-}
-
-.pulse-tts {
-  animation: ttsPulse 1.5s infinite ease-in-out;
-  color: #7f19e6 !important;
-  opacity: 1 !important;
-}
-
-/* Preview Modal (Paper Sheet) */
-#preview-modal .preview-sheet-container {
-  height: calc(100% - 60px);
-}
-
-#preview-sheet {
-  background-image:
-    linear-gradient(rgba(0, 0, 0, 0.02) 1px, transparent 1px);
-  background-size: 100% 1.4em;
-  line-height: 1.4;
-}
-
-#preview-sheet .reading-sin-item {
-  border: none;
-  padding: 0;
-}
-
-#preview-sheet::-webkit-scrollbar {
-  width: 6px;
-}
-
-#preview-sheet::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
-}
-
-@media (max-width: 640px) {
-  #preview-sheet {
-    padding: 30px 20px;
-  }
-}
-
-/* Prayer Modal Styles - Church Book Aesthetic */
-#prayers-reading-modal {
-  background: #000000 !important;
-  /* Pure black for maximum contrast */
-}
-
-/* Hide the top header title as requested */
-#prayers-reading-modal .glass-header {
-  border-bottom: none !important;
-  background: transparent !important;
-  backdrop-filter: none !important;
-}
-
-#prayers-modal-header-text {
-  display: none !important;
-}
-
-#prayer-scroll-area {
-  background: #000000 !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-  border: none !important;
-}
-
-#prayer-content-area {
-  font-family: 'EB Garamond', serif !important;
-  color: #f3f4f6 !important;
-  /* Soft white */
-  font-size: 22px !important;
-  line-height: 1.4 !important;
-  max-width: 800px;
-  margin: 0 auto;
-  border: none !important;
-  text-align: left !important;
-}
-
-/* Force light text in prayers modal even in light mode */
-.light #prayer-content-area .troparion,
-.light #prayer-content-area .canon-text,
-.light #prayer-content-area .canon-text-bold,
-.light #prayer-content-area .irmos-label,
-.light #prayer-content-area p {
-  color: #f3f4f6 !important;
-}
-
-.light #prayer-content-area .irmos {
-  background: linear-gradient(90deg, rgba(225, 193, 110, 0.1) 0%, transparent 100%) !important;
-  border-left-color: rgba(225, 193, 110, 0.4) !important;
-}
-
-.light #prayer-content-area .irmos-text {
-  color: #E1C16E !important;
-}
-
-#prayer-content-area h2,
-#prayer-content-area h3,
-#prayer-content-area h4 {
-  color: #E1C16E !important;
-  /* Golden */
-  text-transform: none !important;
-  /* Normal case */
-  letter-spacing: 0.05em;
-  text-align: center !important;
-  margin-top: 0.5rem !important;
-  margin-bottom: 0.5rem !important;
-  font-weight: 700 !important;
-  border-bottom: none !important;
-  background: transparent !important;
-}
-
-#prayer-content-area .rubric {
-  color: #E1C16E !important;
-  font-style: italic;
-  font-size: 0.95em;
-}
-
-#prayer-content-area p {
-  text-transform: none !important;
-  font-style: normal !important;
-  margin-bottom: 0.75rem !important;
-  background: transparent !important;
-}
-
-#prayer-content-area b,
-#prayer-content-area strong {
-  color: #E1C16E !important;
-  font-weight: 700;
-  background: transparent !important;
-}
-
-#prayer-content-area i,
-#prayer-content-area em {
-  color: #ab9db8;
-  font-style: italic;
-  font-size: 0.95em;
-}
-
-/* Force transparency on nested wrappers */
-#prayer-content-area div {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-
-/* Golden Dividers */
-#prayer-content-area hr {
-  border: none;
-  height: 1px;
-  background: linear-gradient(to right, transparent, #E1C16E, transparent);
-  margin: 4rem auto;
-  width: 60%;
-  opacity: 0.4;
-}
-
-/* Ensure no side lines exist */
-#prayer-content-area *,
-#prayer-scroll-area,
-#prayer-modal {
-  border-left: none !important;
-  border-right: none !important;
-}
-
-/* KILL STRIPES: Force background to be empty */
-#prayers-reading-modal * {
-  background-image: none !important;
-}
-
-/* Teleprompter Drawer UI */
-.teleprompter-drawer {
+#bottom-nav {
+  background-color: var(--color-bg);
+  border-top: 1px solid var(--color-border);
+  z-index: 50;
   position: fixed;
+  bottom: 0;
+  left: 0;
   right: 0;
-  top: 50%;
-  transform: translateY(-50%) translateX(calc(100% - 10px));
-  z-index: 500;
-  display: flex;
-  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(16px);
 }
 
-.teleprompter-drawer.expanded {
-  transform: translateY(-50%) translateX(0);
-}
-
-.teleprompter-drawer.hidden {
-  display: none !important;
-}
-
-.drawer-handle {
-  width: 30px;
-  height: 140px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  cursor: pointer;
-  padding-right: 0;
-  background: transparent;
-}
-
-.handle-bar {
-  width: 10px;
-  height: 140px;
-  background: #7f19e6;
-  border-radius: 5px 0 0 5px;
-  box-shadow: -4px 0 15px rgba(127, 25, 230, 0.4);
-  transition: width 0.3s ease;
-}
-
-.teleprompter-drawer:hover .handle-bar {
-  width: 14px;
-}
-
-.drawer-content {
-  width: 80px;
-  background: rgba(25, 11, 33, 0.8);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-right: none;
-  border-radius: 32px 0 0 32px;
-  padding: 30px 0;
+.nav-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24px;
-  box-shadow: -20px 0 50px rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  color: var(--color-text-muted);
+}
+
+.nav-btn.active {
+  color: var(--color-primary-gold);
+}
+
+.nav-btn.active .material-symbols-outlined {
+  font-variation-settings: 'FILL' 1;
+  color: var(--color-primary-gold);
+}
+
+/* Swatch colors for settings */
+[data-profile].active, [data-lang].active, [data-font].active, [data-view].active {
+  background-color: var(--color-primary) !important;
+  color: white !important;
+}
+
+/* Common Modal Styling */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background-color: var(--color-bg);
+  border-radius: 2.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s ease;
+  max-width: 24rem;
+  width: 100%;
+  outline: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Forms */
+input[type="text"], textarea {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-main);
+  width: 100%;
+  border-radius: 1rem;
+  padding: 1rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+input[type="text"]:focus, textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(127, 25, 230, 0.2);
+}
+
+/* Details and Accordions */
+summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+summary::-webkit-details-marker {
+  display: none;
 }
 
 .drawer-btn,
 .drawer-step-btn {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: white;
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.drawer-btn:hover, .drawer-step-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.1);
+}
+
+.drawer-btn.active {
+  background: var(--color-primary);
+  border-color: transparent;
+  box-shadow: 0 0 20px var(--color-primary);
 }
 
 .drawer-btn:active,
@@ -880,7 +351,6 @@ body {
    CANON READING STYLES - Orthodox Design
    ======================================== */
 
-/* Canon Header with Cross */
 .canon-header {
   text-align: center;
   padding: 40px 20px 30px;
@@ -913,17 +383,8 @@ body {
 }
 
 @keyframes crossGlow {
-
-  0%,
-  100% {
-    opacity: 0.8;
-    transform: scale(1);
-  }
-
-  50% {
-    opacity: 1;
-    transform: scale(1.05);
-  }
+  0%, 100% { opacity: 0.8; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
 }
 
 .canon-title {
@@ -936,10 +397,7 @@ body {
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
-.light .canon-title {
-  color: #1a1a1a;
-  text-shadow: none;
-}
+.light .canon-title { color: #1a1a1a; text-shadow: none; }
 
 .canon-subtitle {
   font-family: 'Lora', serif;
@@ -950,36 +408,21 @@ body {
   text-transform: lowercase;
 }
 
-/* Canon Content Container */
-.canon-content {
-  padding: 0 8px;
-}
+.canon-content { padding: 0 8px; }
 
-/* ========================================
-   RUBRICS - UNIFIED GOLDEN STYLE
-   (Седален, Богородичен, Песнь, Кондак, Икос)
-   ======================================== */
-
-/* Song Headers (Песнь) */
-.canon-song {
+/* RUBRICS */
+.canon-song, .canon-sedalen, .canon-kontakion, .canon-ikos, .canon-prayer {
   font-family: 'EB Garamond', 'Lora', serif;
   font-size: clamp(24px, 6vw, 30px);
   font-weight: 700 !important;
   color: #E1C16E !important;
-  /* Золотистый */
   text-align: center !important;
   margin: 28px 0 16px !important;
-  /* Отступы сверху и снизу */
-  padding: 0;
-  letter-spacing: 0.03em;
-  text-transform: none;
   font-style: normal !important;
   position: relative;
 }
 
-/* Ромбики по краям заголовков Песнь */
-.canon-song::before,
-.canon-song::after {
+.canon-song::before, .canon-song::after {
   content: '✦';
   position: absolute;
   top: 50%;
@@ -987,113 +430,9 @@ body {
   color: rgba(225, 193, 110, 0.4);
   font-size: 14px;
 }
+.canon-song::before { left: calc(50% - 80px); }
+.canon-song::after { right: calc(50% - 80px); }
 
-.canon-song::before {
-  left: calc(50% - 80px);
-}
-
-.canon-song::after {
-  right: calc(50% - 80px);
-}
-
-/* Убираем ромбики у Тропаря Богородице, заголовка Канона, Тропаря глас 2-й, Другого кондака и Стихиры */
-.canon-song:first-of-type::before,
-.canon-song:first-of-type::after,
-.canon-song:nth-of-type(2)::before,
-.canon-song:nth-of-type(2)::after,
-.canon-song:nth-of-type(4)::before,
-.canon-song:nth-of-type(4)::after,
-.canon-song:nth-of-type(10)::before,
-.canon-song:nth-of-type(10)::after,
-.canon-song:nth-of-type(11)::before,
-.canon-song:nth-of-type(11)::after {
-  content: none;
-}
-
-/* Возвращаем ромбики у Песнь 1-9 (начиная с 3-го .canon-song) */
-.canon-song:nth-of-type(n+3)::before,
-.canon-song:nth-of-type(n+3)::after {
-  content: '✦';
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  color: rgba(225, 193, 110, 0.4);
-  font-size: 14px;
-}
-
-.canon-song:nth-of-type(n+3)::before {
-  left: calc(50% - 80px);
-}
-
-.canon-song:nth-of-type(n+3)::after {
-  right: calc(50% - 80px);
-}
-
-/* Sedalen (Седален) - без ромбиков */
-.canon-sedalen {
-  font-family: 'EB Garamond', 'Lora', serif;
-  font-size: clamp(24px, 6vw, 30px);
-  font-weight: 700 !important;
-  color: #E1C16E !important;
-  /* Золотистый */
-  text-align: center !important;
-  margin: 28px 0 16px !important;
-  font-style: normal !important;
-}
-
-/* Убираем ромбики у Седален */
-.canon-sedalen::before,
-.canon-sedalen::after {
-  content: none;
-}
-
-/* Kontakion and Ikos (Кондак, Икос) - без ромбиков */
-.canon-kontakion,
-.canon-ikos {
-  font-family: 'EB Garamond', 'Lora', serif;
-  font-size: clamp(24px, 6vw, 30px);
-  font-weight: 700 !important;
-  color: #E1C16E !important;
-  /* Золотистый */
-  text-align: center !important;
-  margin: 28px 0 16px !important;
-  font-style: normal !important;
-}
-
-/* Убираем ромбики у Кондак и Икос */
-.canon-kontakion::before,
-.canon-kontakion::after,
-.canon-ikos::before,
-.canon-ikos::after {
-  content: none;
-}
-
-/* Prayer (Моли́тва) - Final Prayer */
-.canon-prayer {
-  font-family: 'EB Garamond', 'Lora', serif;
-  font-size: clamp(24px, 6vw, 30px);
-  font-weight: 700 !important;
-  color: #E1C16E !important;
-  /* Золотистый */
-  text-align: center !important;
-  margin: 28px 0 16px !important;
-  font-style: normal !important;
-}
-
-/* Canon labels (Богородичен и др.) */
-.canon-label {
-  font-family: 'EB Garamond', 'Lora', serif;
-  font-size: clamp(18px, 5vw, 22px);
-  font-weight: 700 !important;
-  color: #E1C16E !important;
-  /* Золотистый */
-  text-align: center !important;
-  margin: 24px 0 12px !important;
-  letter-spacing: 0.05em;
-  font-style: normal !important;
-}
-
-/* Irmolos (Ирмос) - курсивом, золотистый цвет, первая буква красная */
 .irmos {
   font-family: 'EB Garamond', 'Lora', serif;
   font-size: clamp(20px, 5vw, 22px);
@@ -1106,235 +445,128 @@ body {
   border-radius: 0 12px 12px 0;
 }
 
-.light .irmos {
-  color: #2d2d2d;
-  background: linear-gradient(90deg, rgba(225, 193, 110, 0.03) 0%, transparent 100%);
-  border-left-color: rgba(225, 193, 110, 0.2);
-}
+.irmos-label { color: #ffffff !important; margin-right: 6px; }
+.irmos-text { color: #E1C16E !important; font-style: italic; }
 
-.irmos-label {
-  font-family: 'EB Garamond', 'Lora', serif;
-  font-weight: 700;
-  font-size: clamp(20px, 5vw, 22px);
-  color: #ffffff !important;
-  text-transform: none;
-  letter-spacing: 0.02em;
-  font-style: normal;
-  margin-right: 6px;
-}
-
-.light .irmos-label {
-  color: #000000 !important;
-}
-
-.irmos-text {
-  font-family: 'EB Garamond', 'Lora', serif;
-  font-size: inherit;
-  color: #E1C16E !important;
-  line-height: inherit;
-  font-style: italic;
-}
-
-.light .irmos-text {
-  color: #b8943a !important;
-}
-
-/* Первая буква внутри irmos-text - красная (только буква, без знаков препинания) */
-.irmos-text-first {
-  color: #e11d48 !important;
-  font-weight: 700;
-  font-size: 1.25em !important;
-  /* Чуть увеличена для заметности */
-  display: inline-block;
-  vertical-align: baseline !important;
-  line-height: 1;
-  margin: 0 !important;
-  padding: 0 !important;
-  font-style: italic;
-}
-
-/* ========================================
-   TROPARION & ZAPEV UNIFIED STYLES
-   ======================================== */
-
-/* Zapev (Припев) - КРАСНЫЙ, КУРСИВ, без буквицы */
-.zapev,
-.slava-full,
-.i-nyne-full {
+.zapev, .slava-full, .i-nyne-full {
   color: #ef4444 !important;
-  /* red-500 */
   font-style: italic !important;
   font-family: 'EB Garamond', 'Lora', serif;
   font-size: clamp(20px, 5vw, 22px);
   line-height: 1.5;
   margin: 0 0 4px 0 !important;
-  /* mb-1 минимальный отступ снизу */
-  padding: 0 0 !important;
 }
 
-/* Отменяем ::first-letter для запевов (они уже целиком красные) */
-.zapev::first-letter,
-.slava-full::first-letter,
-.i-nyne-full::first-letter {
-  color: inherit !important;
-  font-weight: inherit !important;
-  font-size: inherit !important;
-}
-
-/* Особая строка "Сла́ва... и ны́не..." - БЕЛЫЙ текст с КРАСНОЙ первой буквой */
-.zapev.slava-nyne {
-  color: #ffffff !important;
-  font-style: normal !important;
-}
-
-/* Первая буква "С" - красная, через span */
-.slava-nyne-first {
-  color: #ef4444 !important;
-  font-weight: 700;
-  font-size: 1.25em !important;
-  /* Чуть увеличена для заметности */
-  display: inline-block;
-  vertical-align: baseline !important;
-  line-height: 1;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-/* Troparion (Тропарь) - БЕЛЫЙ, не курсив, с красной буквицей */
 .troparion {
   font-family: 'EB Garamond', 'Lora', serif;
   font-size: clamp(20px, 5vw, 22px);
   line-height: 1.5;
   color: #ffffff !important;
-  font-style: normal !important;
-  padding: 0 0 !important;
   margin: 0 0 12px 0 !important;
-  /* Отступ после тропаря до следующего запева */
 }
 
-/* Буквица (Киноварь) - первая буква тропаря КРАСНАЯ */
 .troparion::first-letter {
   color: #ef4444 !important;
-  /* red-500 */
   font-weight: 700;
   font-size: 1.25em !important;
-  /* Чуть увеличена для заметности */
-  display: inline-block;
-  vertical-align: baseline !important;
-  line-height: 1;
-  margin: 0 !important;
-  padding: 0 !important;
 }
 
-.light .troparion {
-  color: #1a1a1a !important;
-}
-
-/* ========================================
-   LEGACY / ADDITIONAL STYLES
-   ======================================== */
-
-/* Regular Prayer Text */
-.canon-text {
-  font-family: 'EB Garamond', 'Lora', serif;
-  font-size: clamp(20px, 5vw, 22px);
-  line-height: 1.5;
-  color: #d4d4d4;
-  padding: 6px 0 !important;
-  margin: 4px 0 !important;
-}
-
-.light .canon-text {
-  color: #2d2d2d;
-}
-
-/* Первая буква обычного текста - красная (через span) */
-.canon-text-first {
-  color: #ef4444 !important;
-  font-weight: 700;
-  font-size: 1.3em;
-  display: inline;
-}
-
-/* Bold Prayer Text */
-.canon-text-bold {
-  font-family: 'EB Garamond', 'Lora', serif;
-  font-size: clamp(20px, 5vw, 22px);
-  line-height: 1.5;
-  font-weight: 600;
-  color: #f0f0f0;
-}
-
-.light .canon-text-bold {
-  color: #1a1a1a;
-}
-
-/* Служебные слова - красным цветом */
-.slava,
-.i-nyne,
-.trizhdy,
-.service-word {
-  color: #ef4444 !important;
-  font-weight: 600;
-}
-
-/* Divider between major sections */
-.canon-divider {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(225, 193, 110, 0.3), transparent);
-  margin: 40px auto;
-  width: 60%;
-}
-
-/* Ornamental element */
-.canon-ornament {
-  text-align: center;
-  color: rgba(225, 193, 110, 0.4);
-  font-size: 20px;
-  margin: 24px 0;
-  letter-spacing: 8px;
-}
-
-/* Responsive adjustments for mobile */
-@media (max-width: 400px) {
-  .canon-header {
-    padding: 30px 16px 24px;
-  }
-
-  .cross-icon {
-    font-size: 48px;
-  }
-
-  .canon-title {
-    font-size: 22px;
-  }
-}
-
-/* Light mode adjustments */
-.light .canon-header {
-  background: linear-gradient(180deg, rgba(225, 193, 110, 0.1) 0%, transparent 100%);
-}
-
-/* ========================================
-   COMPACT AUDIO PLAYER BAR
-   ======================================== */
-#audio-player-bar {
-  transition: opacity 0.3s ease;
-}
-
-#audio-player-bar.hidden {
-  opacity: 0;
-  pointer-events: none;
-}
-
+/* Audio Progress */
 #audio-progress {
-  box-shadow: 0 0 8px rgba(127, 25, 230, 0.5);
+  position: relative;
+  height: 4px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-top: 16px;
 }
 
-#audio-play-pause-btn:hover {
-  background: rgba(127, 25, 230, 0.8);
+#audio-progress-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background-color: var(--color-primary);
+  box-shadow: 0 0 8px rgba(127, 25, 230, 0.6);
 }
 
-#audio-play-pause-btn:active {
-  transform: scale(0.9);
+/* Premium Calendar Styles */
+.calendar-day {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.calendar-day span {
+    color: white;
+    font-weight: 500;
+    position: relative;
+    z-index: 10;
+    font-size: 15px;
+}
+
+.calendar-day:hover:not(.other-month) {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 9999px;
+}
+
+.calendar-day.has-holiday::before {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border-radius: 9999px;
+    border: 1px solid rgba(239, 68, 68, 0.5); /* red-500 @ 50% */
+}
+
+.calendar-day.has-memorial::before {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border-radius: 9999px;
+    border: 1px solid rgba(212, 175, 55, 0.4); /* primary-gold @ 40% */
+}
+
+.calendar-day.important::before {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border-radius: 9999px;
+    border: 2px solid #D4AF37;
+}
+
+.calendar-day.selected { border-radius: 9999px; background-color: rgba(255, 255, 255, 0.1); }
+.calendar-day.other-month { opacity: 0.2; pointer-events: none; }
+
+.calendar-day.has-fast::after {
+    content: '';
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background-color: #7f19e6;
+    box-shadow: 0 0 4px rgba(127, 25, 230, 0.8);
+}
+
+/* Container Styles */
+#calendar-container {
+    transition: all 0.5s ease;
+}
+
+#date-picker-modal.hidden { display: none; }
+#date-picker-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(24px);
 }

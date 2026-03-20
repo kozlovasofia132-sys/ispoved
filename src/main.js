@@ -9,7 +9,6 @@ import { translations } from './data/translations.js';
 import { preparationData } from './data/preparation.js';
 import { quotes } from './data/quotes.js';
 import { prayersData } from './data/prayers.js';
-import { getTodayInfo, getFastingIcon, getFastingColor } from './services/calendarService.js';
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -29,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const headerTitle = document.getElementById('header-title');
+    const headerTitle = document.getElementById('header-dynamic-title');
     const catalogContainer = document.getElementById('sins-container');
     const myListContainer = document.getElementById('my-list-container');
     const emptyState = document.getElementById('empty-state');
@@ -186,9 +185,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateHeader() {
         if (!headerTitle) return;
+        
         let headerKey = '';
         switch (activeTab) {
-            case 'church-empty': headerKey = 'churchToday'; break;
+            case 'church-empty': headerKey = 'churchTitle'; break;
             case 'church-today': headerKey = 'catalog'; break;
             case 'settings': headerKey = 'settings'; break;
             default: headerKey = 'appName';
@@ -2181,65 +2181,467 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize auto-pause for reading mode modal
     setupAutoPause(readingModeModal.querySelector('.overflow-y-auto'));
 
-    // === Church Today Tab - Calendar & Prayers ===
-    async function loadChurchToday() {
-        // Load calendar data
-        const todayInfo = await getTodayInfo();
-        if (todayInfo.success) {
-            const dateEl = document.getElementById('church-today-date');
-            const fastingEl = document.getElementById('church-today-fasting');
-            const fastingIconEl = document.getElementById('church-today-fasting-icon');
-            const memoryEl = document.getElementById('church-today-memory');
-            
-            if (dateEl) dateEl.textContent = todayInfo.data.date;
-            if (fastingEl) fastingEl.textContent = todayInfo.data.fastingDescription;
-            if (fastingIconEl) {
-                const iconSpan = fastingIconEl.querySelector('span');
-                if (iconSpan) iconSpan.textContent = getFastingIcon(todayInfo.data.fasting);
-                fastingIconEl.className = `w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center ${getFastingColor(todayInfo.data.fasting)}`;
-            }
-            if (memoryEl) {
-                const memoryText = Array.isArray(todayInfo.data.memory) 
-                    ? todayInfo.data.memory.slice(0, 2).join('. ') 
-                    : todayInfo.data.memory;
-                memoryEl.textContent = memoryText || '';
-            }
-        }
+    // === Church Tab - Orthodox Calendar (Azbyka.ru API) ===
+    let currentDate = new Date();
+    let currentNavDate = new Date();
+
+    // Format date for display (e.g., "19 марта")
+    function formatDateShort(date) {
+        const day = date.getDate();
+        const month = date.toLocaleDateString('ru-RU', { month: 'long' });
+        return `${day} ${month}`;
+    }
+
+    // Format full date (e.g., "Среда, 14 августа 2024 г.")
+    function formatDateFull(date) {
+        const weekday = date.toLocaleDateString('ru-RU', { weekday: 'long' });
+        const day = date.getDate();
+        const month = date.toLocaleDateString('ru-RU', { month: 'long' });
+        const year = date.getFullYear();
+        // Capitalize first letter
+        return `${weekday.charAt(0).toUpperCase() + weekday.slice(1)}, ${day} ${month} ${year} г.`;
+    }
+
+    // Get date string in YYYY-MM-DD format
+    function getDateString(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    // Render icon of the day
+    function renderIconOfDay(iconUrl, holyDayTitle) {
+        const container = document.getElementById('icon-of-day-container');
+        if (!container) return;
+
+        const defaultIcon = '/theotokos.png';
+        const imageUrl = iconUrl || defaultIcon;
+        const altText = holyDayTitle || t('iconOfDay') || 'Икона дня';
+
+        container.innerHTML = `
+            <img src="${imageUrl}" alt="${altText}" 
+                 class="w-full h-full object-cover"
+                 onerror="this.src='${defaultIcon}'; this.alt='${t('iconOfDay') || 'Икона дня'}';" />
+        `;
+    }
+
+    // Render fasting tag - упрощённая логика: ПОСТ или МЯСОЕД
+    function renderFastingTag(fastingType, fastingDescription) {
+        const tag = document.getElementById('fasting-tag');
+        const tagText = document.getElementById('fasting-tag-text');
+        if (!tag || !tagText) return;
+
+        // Определяем, есть ли пост: если fastingType не 'no_fast' или есть описание поста
+        const isFast = fastingType && fastingType !== 'no_fast' && fastingType !== 'unknown';
         
-        // Load prayers quick access
-        const prayersContainer = document.getElementById('church-today-prayers');
-        if (prayersContainer) {
-            const prayersList = [
-                { id: 'repentanceCanon', icon: 'local_fire_department', color: 'text-red-400', bg: 'bg-red-500/20', key: 'repentanceCanon' },
-                { id: 'theotokosCanon', icon: 'stars', color: 'text-amber-400', bg: 'bg-amber-500/20', key: 'theotokosCanon' },
-                { id: 'guardianAngelCanon', icon: 'flare', color: 'text-cyan-400', bg: 'bg-cyan-500/20', key: 'guardianAngelCanon' },
-                { id: 'beforeCommunion', icon: 'menu_book', color: 'text-indigo-400', bg: 'bg-indigo-500/20', key: 'beforeCommunion' },
-                { id: 'afterCommunion', icon: 'celebration', color: 'text-emerald-400', bg: 'bg-emerald-500/20', key: 'afterCommunion' }
-            ];
-            
-            let prayersHtml = '';
-            prayersList.forEach(prayer => {
-                prayersHtml += `
-                <button data-prayer-id="${prayer.id}"
-                    class="prayer-menu-item w-full p-5 rounded-2xl bg-white/5 border border-white/5 flex items-center gap-4 active:scale-[0.98] transition-all text-left">
-                    <div class="w-10 h-10 rounded-full ${prayer.bg} flex items-center justify-center ${prayer.color}">
-                        <span class="material-symbols-outlined">${prayer.icon}</span>
-                    </div>
-                    <span class="font-bold text-white/90" data-t="${prayer.key}"></span>
-                    <span class="material-symbols-outlined ml-auto text-white/20">chevron_right</span>
-                </button>`;
-            });
-            prayersContainer.innerHTML = prayersHtml;
-            
-            // Add click handlers for prayers
-            prayersContainer.querySelectorAll('.prayer-menu-item').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const prayerId = btn.getAttribute('data-prayer-id');
-                    openPrayersModal(prayerId);
-                });
-            });
+        // Проверяем описание на наличие слов "пост"
+        const hasFastInDescription = fastingDescription && 
+            (fastingDescription.toLowerCase().includes('пост') || 
+             fastingDescription.toLowerCase().includes('fast'));
+
+        const isFastDay = isFast || hasFastInDescription;
+
+        if (isFastDay) {
+            // ПОСТ - красный/бордовый цвет
+            tag.className = 'px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-widest border bg-red-900/50 text-red-400 border-red-500/30';
+            tagText.textContent = t('fastStatus') || 'ПОСТ';
+        } else {
+            // МЯСОЕД - зелёный цвет
+            tag.className = 'px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-widest border bg-emerald-900/50 text-emerald-400 border-emerald-500/30';
+            tagText.textContent = t('meatEaterStatus') || 'МЯСОЕД';
         }
     }
+
+    // Render readings
+    function renderReadings(readings) {
+        const container = document.getElementById('readings-container');
+        if (!container) return;
+
+        if (!readings || readings.length === 0) {
+            container.innerHTML = `
+                <div class="p-4 text-center text-text-muted">
+                    <span class="material-symbols-outlined text-4xl mb-2 opacity-50">menu_book</span>
+                    <p class="text-sm">${t('noData') || 'Нет данных'}</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        readings.forEach((reading, index) => {
+            const icon = reading.type?.includes('Евангелие') ? 'auto_stories' : 'menu_book';
+            html += `
+                <div class="p-4 flex items-center justify-between hover:bg-white/5 transition-colors cursor-pointer group">
+                    <div class="flex items-center gap-4">
+                        <div class="size-10 rounded-full bg-primary-gold/10 flex items-center justify-center border border-primary-gold/20">
+                            <span class="material-symbols-outlined text-primary-gold">${icon}</span>
+                        </div>
+                        <div>
+                            <p class="font-serif text-lg text-text-main">${reading.text || reading}</p>
+                            ${reading.zachalo ? `<p class="text-xs text-text-muted">Зачало ${reading.zachalo}</p>` : ''}
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined text-text-muted opacity-40 group-hover:text-primary-gold transition-colors">navigate_next</span>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    }
+
+    // Render saints memory
+    function renderSaints(saints) {
+        const container = document.getElementById('saints-container');
+        if (!container) return;
+
+        if (!saints || saints.length === 0) {
+            container.innerHTML = `
+                <div class="p-4 text-center text-text-muted">
+                    <span class="material-symbols-outlined text-4xl mb-2 opacity-50">brightness_7</span>
+                    <p class="text-sm">${t('noData') || 'Нет данных'}</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        saints.forEach(saint => {
+            html += `
+                <div class="p-4 flex items-center gap-4 group cursor-pointer">
+                    <div class="size-8 rounded-full border border-primary-gold/30 flex items-center justify-center text-primary-gold group-hover:bg-primary-gold group-hover:text-black transition-all">
+                        <span class="material-symbols-outlined text-lg fill-[1]">brightness_low</span>
+                    </div>
+                    <span class="font-serif text-text-main flex-1">${saint.name || saint}</span>
+                    <span class="material-symbols-outlined text-text-muted opacity-40 text-sm">info</span>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    }
+
+    // Load calendar data for specific date
+    async function loadCalendarDate(date) {
+        const dateStr = getDateString(date);
+        
+        try {
+            const response = await fetch(`https://azbyka.ru/days/api/day/${dateStr}.json`);
+            if (!response.ok) throw new Error('API error');
+            const data = await response.json();
+
+            // Update Navigator Date
+            const navDateDisplay = document.getElementById('nav-date-display');
+            if (navDateDisplay) navDateDisplay.textContent = formatDateShort(date);
+
+            // Re-render header to ensure it's static
+            updateHeader();
+
+            // Liturgical status
+            const statusEl = document.getElementById('liturgical-status');
+            if (statusEl) {
+                statusEl.textContent = data.holy_day ? 'СЕГОДНЯШНИЙ ПРАЗДНИК' : 'ПАМЯТЬ СВЯТЫХ';
+            }
+
+            // Main Title
+            const mainTitle = document.getElementById('calendar-main-title');
+            if (mainTitle) {
+                mainTitle.textContent = data.description || t('churchTitle') || 'Православный календарь';
+            }
+
+            // Vigil Block
+            const vigilBlock = document.getElementById('vigil-block');
+            if (vigilBlock) {
+                if (data.service && data.service.toLowerCase().includes('бдение')) {
+                    vigilBlock.classList.remove('hidden');
+                } else {
+                    vigilBlock.classList.add('hidden');
+                }
+            }
+
+            // Saints Short List
+            const saintsEl = document.getElementById('saints-short-list');
+            if (saintsEl) {
+                const names = (data.saints || data.memory || []).map(s => s.name || s).slice(0, 3);
+                saintsEl.textContent = names.length > 0 ? names.join(', ') + (names.length < (data.saints?.length || 0) ? '...' : '.') : '';
+            }
+
+            // Fasting Pill
+            const fastingPillText = document.getElementById('fasting-pill-text');
+            if (fastingPillText) {
+                const desc = data.fastingDescription || '';
+                if (desc.length > 0) {
+                    fastingPillText.textContent = desc.split(',')[0].toUpperCase();
+                } else {
+                    fastingPillText.textContent = data.fasting === 1 ? 'МЯСОЕД' : 'ПОСТ';
+                }
+            }
+
+            // Tone Pill
+            const tonePillText = document.getElementById('tone-pill-text');
+            if (tonePillText) {
+                tonePillText.textContent = data.voice ? `Глас ${data.voice}` : 'Без гласа';
+            }
+
+            // Render other details
+            renderIconOfDay(data.image || data.icon, data.description);
+            renderReadings(data.readings || []);
+            renderSaints(data.saints || data.memory || []);
+
+        } catch (error) {
+            console.error('[Calendar] Error:', error);
+            renderDateSlider(date);
+        }
+    }
+
+    // Initialize calendar with today's date or saved date
+    async function loadChurchToday() {
+        const savedDate = localStorage.getItem('selectedDate');
+        if (savedDate) {
+            currentNavDate = new Date(savedDate);
+        } else {
+            currentNavDate = new Date();
+        }
+        await loadCalendarDate(currentNavDate);
+        if (typeof renderCalendar === 'function') {
+            renderCalendar(currentNavDate);
+        }
+    }
+
+    // Navigation handlers
+    const prevDateBtn = document.getElementById('prev-date-btn');
+    const nextDateBtn = document.getElementById('next-date-btn');
+    const todayBtn = document.getElementById('today-btn');
+    const dateDisplayBtn = document.getElementById('date-display-btn');
+    const calendarModal = document.getElementById('date-picker-modal');
+    const calPrevMonthBtn = document.getElementById('date-picker-prev-month');
+    const calNextMonthBtn = document.getElementById('date-picker-next-month');
+    const calTodayBtn = document.getElementById('date-picker-today-btn');
+    const calCloseBtn = document.getElementById('date-picker-close-btn');
+
+    let currentCalendarDate = new Date();
+    const liturgicalCache = {};
+
+    function fetchMonthData(year, month) {
+        const key = `${year}-${month}`;
+        if (liturgicalCache[key]) return;
+        
+        liturgicalCache[key] = { status: 'loading', days: {} };
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        let fetched = 0;
+
+        for (let d = 1; d <= daysInMonth; d++) {
+            const date = new Date(year, month, d);
+            const dateStr = getDateString(date);
+            
+            fetch(`https://azbyka.ru/days/api/day/${dateStr}.json`)
+                .then(res => res.json())
+                .then(data => {
+                    const fastingType = data.fasting;
+                    const fastingDescription = data.fastingDescription || data.description || '';
+                    const isFast = (fastingType && fastingType !== 'no_fast' && fastingType !== 'unknown') || 
+                                 fastingDescription.toLowerCase().includes('пост');
+                    
+                    liturgicalCache[key].days[d] = {
+                        isFast: isFast,
+                        isHoliday: (data.priority && data.priority > 3) || (data.holy_day && data.holy_day.length > 0)
+                    };
+                })
+                .catch(() => {})
+                .finally(() => {
+                    fetched++;
+                    if (fetched === daysInMonth) {
+                        liturgicalCache[key].status = 'done';
+                        if (currentCalendarDate.getMonth() === month && currentCalendarDate.getFullYear() === year) {
+                            renderCalendar(currentCalendarDate);
+                        }
+                    }
+                });
+        }
+    }
+
+    function openCalendarModal() {
+        if (!calendarModal) return;
+        currentCalendarDate = new Date(currentNavDate);
+        renderCalendar(currentCalendarDate);
+        calendarModal.classList.remove('hidden');
+    }
+
+    function closeCalendarModal() {
+        if (calendarModal) {
+            calendarModal.classList.add('hidden');
+        }
+    }
+
+    function renderCalendar(viewDate) {
+        const calGrid = document.getElementById('date-picker-days');
+        const calMonthYear = document.getElementById('date-picker-month-year');
+        if (!calGrid || !calMonthYear) return;
+
+        const monthName = viewDate.toLocaleDateString('ru-RU', { month: 'long' });
+        calMonthYear.textContent = monthName.charAt(0).toUpperCase() + monthName.slice(1) + ' ' + viewDate.getFullYear();
+
+        calGrid.innerHTML = '';
+
+        const year = viewDate.getFullYear();
+        const month = viewDate.getMonth();
+
+        const firstDay = new Date(year, month, 1);
+        let firstDayOfWeek = firstDay.getDay();
+        if (firstDayOfWeek === 0) firstDayOfWeek = 7;
+
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const prevMonthLastDay = new Date(year, month, 0).getDate();
+
+        // Prev month padding
+        for (let i = firstDayOfWeek - 1; i > 0; i--) {
+            const day = prevMonthLastDay - i + 1;
+            const cell = document.createElement('div');
+            cell.className = 'calendar-day other-month';
+            const span = document.createElement('span');
+            span.textContent = day;
+            cell.appendChild(span);
+            calGrid.appendChild(cell);
+        }
+
+        const today = new Date();
+        const cacheKey = `${year}-${month}`;
+
+        // Trigger background fetch for this month
+        fetchMonthData(year, month);
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const date = new Date(year, month, day);
+            const isToday = date.toDateString() === today.toDateString();
+            const isSelected = date.toDateString() === currentNavDate.toDateString();
+
+            const cell = document.createElement('div');
+            cell.className = `calendar-day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}`;
+            
+            // 1. Try to use API data from Cache
+            if (liturgicalCache[cacheKey] && liturgicalCache[cacheKey].days[day]) {
+                const api = liturgicalCache[cacheKey].days[day];
+                if (api.isFast) cell.classList.add('has-fast');
+                if (api.isHoliday) cell.classList.add('has-holiday');
+            } else {
+                // 2. Fallback: Simulation for 2026 (until API data loads)
+                if (year === 2026) {
+                    if (month === 3 && day === 12) {
+                        cell.classList.add('important');
+                        cell.classList.add('has-holiday');
+                    }
+                    if (((month === 2) || (month === 1 && day >= 23) || (month === 3 && day <= 11))) {
+                        cell.classList.add('has-fast');
+                    } else if (!(month === 3 && day >= 13 && day <= 19) && [3, 5].includes(date.getDay())) {
+                        cell.classList.add('has-fast');
+                    }
+                } else if ([3, 5].includes(date.getDay())) {
+                    cell.classList.add('has-fast');
+                }
+            }
+
+            const span = document.createElement('span');
+            span.textContent = day;
+            cell.appendChild(span);
+            
+            cell.addEventListener('click', () => {
+                currentNavDate = new Date(year, month, day);
+                localStorage.setItem('selectedDate', currentNavDate.toISOString());
+                loadCalendarDate(currentNavDate);
+                closeCalendarModal();
+            });
+
+            calGrid.appendChild(cell);
+        }
+    }
+
+    // Modal Interaction Listeners
+    if (calPrevMonthBtn) {
+        calPrevMonthBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+            renderCalendar(currentCalendarDate);
+        });
+    }
+
+    if (calNextMonthBtn) {
+        calNextMonthBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+            renderCalendar(currentCalendarDate);
+        });
+    }
+
+    if (calTodayBtn) {
+        calTodayBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            currentNavDate = new Date();
+            currentCalendarDate = new Date();
+            localStorage.setItem('selectedDate', currentNavDate.toISOString());
+            loadCalendarDate(currentNavDate);
+            closeCalendarModal();
+        });
+    }
+
+    if (calCloseBtn) {
+        calCloseBtn.addEventListener('click', closeCalendarModal);
+    }
+
+    if (calendarModal) {
+        calendarModal.addEventListener('click', (e) => {
+            if (e.target === calendarModal) closeCalendarModal();
+        });
+    }
+
+    if (dateDisplayBtn) {
+        dateDisplayBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            openCalendarModal();
+        });
+    }
+
+    if (prevDateBtn) {
+        prevDateBtn.addEventListener('click', () => {
+            currentNavDate.setDate(currentNavDate.getDate() - 1);
+            localStorage.setItem('selectedDate', currentNavDate.toISOString());
+            loadCalendarDate(currentNavDate);
+            // Sync calendar view if needed
+            if (currentCalendarDate.getMonth() !== currentNavDate.getMonth()) {
+                currentCalendarDate = new Date(currentNavDate);
+                renderCalendar(currentCalendarDate);
+            } else {
+                renderCalendar(currentCalendarDate);
+            }
+        });
+    }
+
+    if (nextDateBtn) {
+        nextDateBtn.addEventListener('click', () => {
+            currentNavDate.setDate(currentNavDate.getDate() + 1);
+            localStorage.setItem('selectedDate', currentNavDate.toISOString());
+            loadCalendarDate(currentNavDate);
+            if (currentCalendarDate.getMonth() !== currentNavDate.getMonth()) {
+                currentCalendarDate = new Date(currentNavDate);
+                renderCalendar(currentCalendarDate);
+            } else {
+                renderCalendar(currentCalendarDate);
+            }
+        });
+    }
+
+    if (todayBtn) {
+        todayBtn.addEventListener('click', () => {
+            currentNavDate = new Date();
+            currentCalendarDate = new Date();
+            localStorage.setItem('selectedDate', currentNavDate.toISOString());
+            loadCalendarDate(currentNavDate);
+            renderCalendar(currentCalendarDate);
+        });
+    }
+
+    // Re-initialize when language changes
+    const originalUpdateAppLanguage = updateAppLanguage;
+    updateAppLanguage = function() {
+        originalUpdateAppLanguage.call(this);
+    };
 
     // === Profile Buttons ===
     const profileButtons = document.querySelectorAll('.profile-btn');
