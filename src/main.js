@@ -2189,7 +2189,30 @@ document.addEventListener('DOMContentLoaded', () => {
     function formatDateShort(date) {
         const day = date.getDate();
         const month = date.toLocaleDateString('ru-RU', { month: 'long' });
-        return `${day} ${month}`;
+        // Convert month from nominative to genitive case
+        const monthGenitiveMap = {
+            'январь': 'января',
+            'февраль': 'февраля',
+            'март': 'марта',
+            'апрель': 'апреля',
+            'май': 'мая',
+            'июнь': 'июня',
+            'июль': 'июля',
+            'август': 'августа',
+            'сентябрь': 'сентября',
+            'октябрь': 'октября',
+            'ноябрь': 'ноября',
+            'декабрь': 'декабря'
+        };
+        const monthGenitive = monthGenitiveMap[month] || month;
+        return `${day} ${monthGenitive}`;
+    }
+
+    // Get Old Style (Julian) date - Julian calendar is 13 days behind Gregorian in 20th-21st centuries
+    function getOldStyleDate(date) {
+        const oldStyleDate = new Date(date);
+        oldStyleDate.setDate(date.getDate() - 13);
+        return formatDateShort(oldStyleDate);
     }
 
     // Format full date (e.g., "Среда, 14 августа 2024 г.")
@@ -2213,16 +2236,31 @@ document.addEventListener('DOMContentLoaded', () => {
     // Render icon of the day
     function renderIconOfDay(iconUrl, holyDayTitle) {
         const container = document.getElementById('icon-of-day-container');
+        const iconBlock = document.getElementById('icon-of-day-block');
+        
         if (!container) return;
 
         const defaultIcon = '/theotokos.png';
-        const imageUrl = iconUrl || defaultIcon;
+        
+        // Если иконы нет, скрываем блок
+        if (!iconUrl) {
+            if (iconBlock) iconBlock.style.display = 'none';
+            return;
+        }
+        
+        // Показываем блок
+        if (iconBlock) {
+            iconBlock.style.display = 'block';
+            iconBlock.classList.remove('hidden');
+        }
+        
+        const imageUrl = iconUrl.startsWith('http') ? iconUrl : defaultIcon;
         const altText = holyDayTitle || t('iconOfDay') || 'Икона дня';
 
         container.innerHTML = `
-            <img src="${imageUrl}" alt="${altText}" 
-                 class="w-full h-full object-cover"
-                 onerror="this.src='${defaultIcon}'; this.alt='${t('iconOfDay') || 'Икона дня'}';" />
+            <img src="${imageUrl}" alt="${altText}"
+                 class="w-full h-auto max-h-48 object-contain rounded-2xl"
+                 onerror="this.parentElement.parentElement.style.display='none';" />
         `;
     }
 
@@ -2328,23 +2366,43 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error('API error');
             const data = await response.json();
 
-            // Update Navigator Date
-            const navDateDisplay = document.getElementById('nav-date-display');
-            if (navDateDisplay) navDateDisplay.textContent = formatDateShort(date);
+            // Update Card Date Display
+            const cardDateText = document.getElementById('card-date-text');
+            if (cardDateText) cardDateText.textContent = formatDateShort(date);
 
-            // Re-render header to ensure it's static
-            updateHeader();
-
-            // Liturgical status
-            const statusEl = document.getElementById('liturgical-status');
-            if (statusEl) {
-                statusEl.textContent = data.holy_day ? 'СЕГОДНЯШНИЙ ПРАЗДНИК' : 'ПАМЯТЬ СВЯТЫХ';
+            // Update Day of Week
+            const dayOfWeek = document.getElementById('day-of-week');
+            if (dayOfWeek) {
+                const days = ['воскресенье', 'понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота'];
+                const dayName = days[date.getDay()];
+                dayOfWeek.textContent = dayName;
             }
 
-            // Main Title
-            const mainTitle = document.getElementById('calendar-main-title');
-            if (mainTitle) {
-                mainTitle.textContent = data.description || t('churchTitle') || 'Православный календарь';
+            // Update Old Style Date
+            const oldStyleDate = document.getElementById('old-style-date');
+            if (oldStyleDate) oldStyleDate.textContent = getOldStyleDate(date);
+
+            // Update Sedmitsa & Fasting Info
+            const sedmitsaText = document.getElementById('sedmitsa-text');
+            const fastingToneText = document.getElementById('fasting-tone-text');
+            if (sedmitsaText) {
+                const sedmitsa = data.fasting?.round_week || '';
+                // Remove HTML tags
+                const plainText = sedmitsa.replace(/<[^>]*>/g, '');
+                sedmitsaText.textContent = plainText || 'Седмица 4-я Великого поста, Крестопоклонная';
+            }
+            if (fastingToneText) {
+                const fastingInfo = [];
+                const fastingType = data.fasting?.type || data.fasting?.fasting || '';
+                const voice = data.fasting?.voice || null;
+                
+                if (fastingType && fastingType !== 'no_fast' && fastingType !== 'unknown') {
+                    fastingInfo.push('Постный день');
+                }
+                if (voice) {
+                    fastingInfo.push(`Глас ${voice}`);
+                }
+                fastingToneText.textContent = fastingInfo.length > 0 ? fastingInfo.join('. ') : 'Постный день. Глас 7-й';
             }
 
             // Vigil Block
@@ -2381,8 +2439,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 tonePillText.textContent = data.voice ? `Глас ${data.voice}` : 'Без гласа';
             }
 
-            // Render other details
-            renderIconOfDay(data.image || data.icon, data.description);
+            // Debug: log API response for icon
+            console.log('[Calendar] API Response:', {
+                image: data.image,
+                icon: data.icon,
+                description: data.description
+            });
+
+            // --- Редактирование: Улучшенная логика извлечения иконки ---
+            let dayIconUrl = null;
+            
+            // 1. Приоритет праздникам
+            if (data.holidays && data.holidays.length > 0) {
+                const holiday = data.holidays.find(h => h.imgs && h.imgs.length > 0);
+                if (holiday) dayIconUrl = holiday.imgs[0].original_absolute_url;
+            }
+            
+            // 2. Иконы Божией Матери
+            if (!dayIconUrl && data.ikons && data.ikons.length > 0) {
+                const ikon = data.ikons.find(i => i.imgs && i.imgs.length > 0);
+                if (ikon) dayIconUrl = ikon.imgs[0].original_absolute_url;
+            }
+            
+            // 3. Святые дня
+            if (!dayIconUrl && data.saints && data.saints.length > 0) {
+                const saint = data.saints.find(s => s.imgs && s.imgs.length > 0);
+                if (saint) dayIconUrl = saint.imgs[0].original_absolute_url;
+            }
+
+            // Fallback на старые поля, если вдруг появятся
+            if (!dayIconUrl) dayIconUrl = data.image || data.icon;
+
+            renderIconOfDay(dayIconUrl, data.description);
             renderReadings(data.readings || []);
             renderSaints(data.saints || data.memory || []);
 
@@ -2400,16 +2488,16 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             currentNavDate = new Date();
         }
+        currentCalendarDate = new Date(currentNavDate);
         await loadCalendarDate(currentNavDate);
         if (typeof renderCalendar === 'function') {
-            renderCalendar(currentNavDate);
+            renderCalendar(currentCalendarDate);
         }
     }
 
     // Navigation handlers
     const prevDateBtn = document.getElementById('prev-date-btn');
     const nextDateBtn = document.getElementById('next-date-btn');
-    const todayBtn = document.getElementById('today-btn');
     const dateDisplayBtn = document.getElementById('date-display-btn');
     const calendarModal = document.getElementById('date-picker-modal');
     const calPrevMonthBtn = document.getElementById('date-picker-prev-month');
@@ -2624,16 +2712,6 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 renderCalendar(currentCalendarDate);
             }
-        });
-    }
-
-    if (todayBtn) {
-        todayBtn.addEventListener('click', () => {
-            currentNavDate = new Date();
-            currentCalendarDate = new Date();
-            localStorage.setItem('selectedDate', currentNavDate.toISOString());
-            loadCalendarDate(currentNavDate);
-            renderCalendar(currentCalendarDate);
         });
     }
 

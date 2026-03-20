@@ -570,3 +570,10 @@ summary::-webkit-details-marker {
     background-color: rgba(0, 0, 0, 0.8);
     backdrop-filter: blur(24px);
 }
+
+/* Church Font Text - для дней недели в стиле вязи */
+.church-font-text {
+    font-family: 'Ruslan Display', serif !important;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+}

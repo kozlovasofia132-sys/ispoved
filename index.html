@@ -31,70 +31,79 @@
                 <!-- Spacer just for the top fixed bar -->
                 <div class="h-[64px]"></div>
 
-                <!-- Date Navigation in Feed -->
-                <div class="px-4 mb-4 mt-2">
-                    <div class="flex items-center justify-between p-2 bg-white/5 rounded-2xl border border-white/5 backdrop-blur-xl max-w-2xl mx-auto gap-2">
-                        <div class="flex items-center gap-1">
-                            <button id="prev-date-btn" class="size-10 flex items-center justify-center text-text-muted hover:text-primary-gold active:scale-90 transition-all">
-                                <span class="material-symbols-outlined text-2xl">chevron_left</span>
-                            </button>
-                            
-                            <button id="date-display-btn" class="flex items-center gap-2 group px-2 py-1 rounded-xl hover:bg-white/5 transition-all">
-                                <span id="nav-date-display" class="font-serif text-lg font-bold text-text-main tracking-tight">20 апреля</span>
-                            </button>
-
-                            <button id="next-date-btn" class="size-10 flex items-center justify-center text-text-muted hover:text-primary-gold active:scale-90 transition-all">
-                                <span class="material-symbols-outlined text-2xl">chevron_right</span>
-                            </button>
-                        </div>
-
-                        <button id="today-btn" class="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-primary-gold bg-primary-gold/10 rounded-xl border border-primary-gold/15 active:scale-95 transition-all whitespace-nowrap">
-                            СЕГОДНЯ
-                        </button>
-                    </div> <!-- закрываем flex items-center justify-between -->
-                </div> <!-- закрываем px-4 mb-4 mt-2 -->
-
                 <!-- Main Day Card (Premium Redesign) -->
                 <div class="px-4 animate-fade-in-up">
-                    <section id="calendar-card-section" class="bg-[#1a1914] rounded-[32px] overflow-hidden relative p-8 shadow-2xl border border-white/5 transition-colors duration-500">
-                        <div class="space-y-6 relative z-10">
-                            <!-- Liturgical Title / Status -->
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
-                                <span id="liturgical-status" class="text-[10px] font-bold text-text-muted uppercase tracking-[0.2em]">СЕГОДНЯШНИЙ ПРАЗДНИК</span>
-                            </div>
- 
-                            <!-- Main Title -->
-                            <h2 id="calendar-main-title" class="font-serif text-[28px] font-bold leading-[1.2] text-white tracking-tight">
-                                Церковный календарь
-                            </h2>
-
-                            <!-- Vigil Status -->
-                            <div id="vigil-block" class="flex items-center gap-2.5 text-primary-gold hidden">
-                                <span class="material-symbols-outlined text-lg">schedule</span>
-                                <span id="vigil-text" class="text-[11px] font-bold uppercase tracking-[0.15em]">ВСЕНОЩНОЕ БДЕНИЕ</span>
-                            </div>
-
-                            <!-- Saints Summary -->
-                            <p id="saints-short-list" class="text-sm text-text-muted/80 leading-relaxed font-medium">
-                                Святителя Тарасия, архиепископа Константинопольского.
-                            </p>
-
-                            <!-- Bottom Action Tags -->
-                            <div class="flex flex-wrap gap-3 pt-2">
-                                <!-- Fasting Status Pill -->
-                                <div id="fasting-pill" class="flex items-center gap-2.5 bg-primary-gold/10 border border-primary-gold/20 rounded-2xl px-4 py-2.5">
-                                    <span class="material-symbols-outlined text-primary-gold text-lg">restaurant</span>
-                                    <span id="fasting-pill-text" class="text-[10px] font-bold text-primary-gold uppercase tracking-[0.1em]">СУХОЯДЕНИЕ</span>
+                    <section id="calendar-card-section" class="bg-[#1a1914] rounded-[32px] overflow-hidden relative p-3 shadow-2xl border border-white/5">
+                        <div class="border border-[#E1C16E]/20 rounded-[0px] p-6">
+                            <div class="space-y-4 flex flex-col items-center">
+                                <!-- Vigil Status -->
+                                <div id="vigil-block" class="flex items-center gap-2.5 text-primary-gold hidden">
+                                    <span class="material-symbols-outlined text-lg">schedule</span>
+                                    <span id="vigil-text" class="text-[11px] font-bold uppercase tracking-[0.15em]">ВСЕНОЩНОЕ БДЕНИЕ</span>
                                 </div>
-                                <!-- Tone Pill -->
-                                <div id="tone-pill" class="flex items-center gap-2.5 bg-white/5 border border-white/10 rounded-2xl px-4 py-2.5">
-                                    <span class="material-symbols-outlined text-text-muted text-lg">music_note</span>
-                                    <span id="tone-pill-text" class="text-[10px] font-bold text-text-muted uppercase tracking-[0.1em]">Глас 6</span>
+
+                                <!-- Icon of the Day -->
+                                <div id="icon-of-day-block" class="mt-0 w-full">
+                                    <div id="icon-of-day-container" class="w-full h-auto max-h-48 flex flex-col items-center justify-start">
+                                        <!-- Icon will be injected here -->
+                                    </div>
+                                </div>
+
+                                <!-- Golden Divider Top -->
+                                <div class="w-full flex items-center justify-center my-2">
+                                    <div class="h-[1px] w-24 bg-gradient-to-r from-transparent via-[#E1C16E] to-transparent"></div>
+                                </div>
+
+                                <!-- 3 Cells Block -->
+                                <div class="flex items-center justify-center gap-2 mt-4">
+                                    <!-- Prev Day Button -->
+                                    <button id="prev-date-btn" class="flex items-center justify-center w-10 h-10 bg-white/5 rounded-xl border border-[#E1C16E]/20 text-text-muted hover:text-primary-gold active:scale-90 transition-all">
+                                        <span class="material-symbols-outlined text-2xl">chevron_left</span>
+                                    </button>
+                                    
+                                    <!-- New Style Date -->
+                                    <button id="date-display-btn" class="flex items-center justify-end p-3 bg-white/5 rounded-xl border border-[#E1C16E]/20">
+                                        <div class="text-right">
+                                            <p class="text-[10px] font-bold text-[#E1C16E] uppercase tracking-[0.2em] mb-1">Новый стиль</p>
+                                            <p class="text-xl font-['Ruslan_Display'] text-[#E1C16E]" id="card-date-text">20 марта</p>
+                                        </div>
+                                    </button>
+                                    <!-- Day of Week -->
+                                    <div class="flex items-center justify-center bg-white/5 rounded-xl border border-[#E1C16E]/20 min-w-[120px]">
+                                        <p class="text-5xl font-['Triodion'] text-[#E1C16E] uppercase truncate max-w-full" style="font-size: clamp(1.5rem, 5vw, 3rem); line-height: 1;" id="day-of-week">вторник</p>
+                                    </div>
+                                    <!-- Old Style Date -->
+                                    <div class="flex items-center justify-start p-3 bg-white/5 rounded-xl border border-[#E1C16E]/20">
+                                        <div class="text-left">
+                                            <p class="text-[10px] font-bold text-[#E1C16E] uppercase tracking-[0.2em] mb-1">Старый стиль</p>
+                                            <p class="text-xl font-['Ruslan_Display'] text-[#E1C16E]" id="old-style-date">7 марта</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Next Day Button -->
+                                    <button id="next-date-btn" class="flex items-center justify-center w-10 h-10 bg-white/5 rounded-xl border border-[#E1C16E]/20 text-text-muted hover:text-primary-gold active:scale-90 transition-all">
+                                        <span class="material-symbols-outlined text-2xl">chevron_right</span>
+                                    </button>
+                                </div>
+
+                                <!-- Golden Divider Bottom -->
+                                <div class="w-full flex items-center justify-center my-2">
+                                    <div class="h-[1px] w-24 bg-gradient-to-r from-transparent via-[#E1C16E] to-transparent"></div>
+                                </div>
+
+                                <!-- Sedmitsa & Fasting Info -->
+                                <div class="text-center space-y-2 mt-4">
+                                    <p id="sedmitsa-text" class="text-sm font-bold text-[#E1C16E] font-serif">Седмица 4-я Великого поста, Крестопоклонная</p>
+                                    <p id="fasting-tone-text" class="text-sm text-gray-400 font-serif italic">Постный день. Глас 7-й</p>
+                                </div>
+
+                                <!-- Golden Divider Bottom -->
+                                <div class="w-full flex items-center justify-center my-2">
+                                    <div class="h-[1px] w-24 bg-gradient-to-r from-transparent via-[#E1C16E] to-transparent"></div>
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Decorative Watermark -->
                         <div class="absolute -bottom-10 -right-10 opacity-[0.03] pointer-events-none transform rotate-12">
                             <span class="material-symbols-outlined text-[200px] text-white">church</span>
@@ -115,26 +124,10 @@
                     </section>
                 </div>
 
-                <!-- Icon of the Day & Saints Memory (Horizontal Row) -->
-                <div class="flex flex-row gap-4 overflow-x-auto px-4 mt-10 mb-12 animate-fade-in-up" style="animation-delay: 0.2s">
-                    <!-- Icon of the Day -->
-                    <div id="icon-of-day-block" class="flex-1 min-w-[150px]">
-                        <div class="glass-card rounded-xl p-5 border-primary-gold/20 h-full">
-                            <div class="flex items-center gap-3 mb-4 px-1">
-                                <div class="w-8 h-8 rounded-xl bg-primary-gold/10 flex items-center justify-center border border-primary-gold/15">
-                                    <span class="material-symbols-outlined text-primary-gold text-lg">image</span>
-                                </div>
-                                <h3 class="text-[11px] font-bold text-text-muted uppercase tracking-[0.2em]" data-t="iconOfDay">Икона дня</h3>
-                            </div>
-                            <div id="icon-of-day-container" class="rounded-2xl overflow-hidden shadow-inner bg-black/5 flex items-center justify-center min-h-[200px]">
-                                <!-- Icon will be injected here -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Saints Memory -->
-                    <div id="saints-memory-block" class="flex-1 min-w-[150px]">
-                        <section class="space-y-3 h-full">
+                <!-- Saints Memory -->
+                <div class="px-4 mt-10 mb-12 animate-fade-in-up" style="animation-delay: 0.2s">
+                    <div id="saints-memory-block">
+                        <section class="space-y-3">
                             <div id="saints-container" class="glass-card rounded-xl divide-y divide-white/5">
                                 <!-- Saints memory will be injected here -->
                             </div>
@@ -390,8 +383,31 @@
                         <div class="glass-card p-2 grid grid-cols-2 gap-2">
                             <button data-lang="ru" class="lang-btn py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all active:scale-95 border border-transparent">Русский</button>
                             <button data-lang="en" class="lang-btn py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all active:scale-95 border border-transparent">English</button>
-                            <button data-lang="uk" class="lang-btn py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all active:scale-95 border border-transparent">Українська</button>
+                            <button data-lang="uk" class="lang-btn py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all active:scale-95 border border-transparent">Українская</button>
                             <button data-lang="cs" class="lang-btn py-3 rounded-xl text-[9px] font-bold uppercase tracking-tighter transition-all active:scale-95 border border-transparent" data-t="cs">Славянский</button>
+                        </div>
+                    </section>
+
+                    <!-- Privacy Section -->
+                    <section>
+                        <div class="flex items-center gap-3 mb-4 px-2">
+                            <span class="material-symbols-outlined text-primary-gold text-lg">lock</span>
+                            <h3 class="text-[11px] font-bold text-text-muted uppercase tracking-[0.2em]" data-t="sectionPrivacy">Приватность</h3>
+                        </div>
+                        <div class="glass-card rounded-2xl overflow-hidden">
+                            <div class="flex items-center justify-between p-4">
+                                <span class="font-bold text-text-main" data-t="pinEntryTitle">Вход по ПИН-коду</span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input id="pin-toggle" type="checkbox" class="sr-only peer" />
+                                    <div class="w-12 h-6 bg-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                </label>
+                            </div>
+                            <div id="change-pin-container" class="hidden p-4 bg-primary/5 transition-all border-t border-border">
+                                <button id="change-pin-btn" class="w-full flex items-center justify-center gap-2 text-sm font-bold text-primary active:scale-95">
+                                    <span class="material-symbols-outlined text-lg">key</span>
+                                    <span data-t="changePinBtn">Изменить ПИН-код</span>
+                                </button>
+                            </div>
                         </div>
                     </section>
 
@@ -415,57 +431,27 @@
                         </div>
                     </section>
 
-                    <!-- Privacy Section -->
-                    <section>
-                        <div class="flex items-center gap-3 mb-4 px-2">
-                            <span class="material-symbols-outlined text-primary-gold text-lg">lock</span>
-                            <h3 class="text-[11px] font-bold text-text-muted uppercase tracking-[0.2em]" data-t="sectionPrivacy">Приватность</h3>
-                        </div>
-                        <div class="glass-card divide-y divide-border">
-                            <div class="flex items-center justify-between p-5">
-                                <span class="font-bold text-text-main" data-t="pinEntryTitle">Вход по ПИН-коду</span>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input id="pin-toggle" type="checkbox" class="sr-only peer" />
-                                    <div class="w-12 h-6 bg-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                                </label>
-                            </div>
-                            <div id="change-pin-container" class="hidden p-5 bg-primary/5 transition-all">
-                                <button id="change-pin-btn" class="w-full flex items-center justify-center gap-2 text-sm font-bold text-primary active:scale-95">
-                                    <span class="material-symbols-outlined text-lg">key</span>
-                                    <span data-t="changePinBtn">Изменить ПИН-код</span>
-                                </button>
-                            </div>
-                        </div>
-                    </section>
-
                     <!-- Info Section -->
                     <section>
                         <div class="flex items-center gap-3 mb-4 px-2">
                             <span class="material-symbols-outlined text-primary-gold text-lg">info</span>
-                            <h3 class="text-[11px] font-bold text-text-muted uppercase tracking-[0.2em]" data-t="sectionApp">О проекте</h3>
+                            <h3 class="text-[11px] font-bold text-text-muted uppercase tracking-[0.2em]" data-t="sectionApp">Приложение</h3>
                         </div>
-                        <div class="glass-card divide-y divide-border">
-                            <button id="about-app-btn" class="w-full flex items-center gap-4 p-5 active:bg-primary/5 transition-colors text-left group">
-                                <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                        <div class="glass-card divide-y divide-border rounded-2xl overflow-hidden">
+                            <button id="about-app-btn" class="w-full flex items-center gap-4 p-4 active:bg-primary/5 transition-colors text-left group">
+                                <div class="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform border border-primary/15">
                                     <span class="material-symbols-outlined">info</span>
                                 </div>
                                 <span class="font-bold text-text-main flex-1" data-t="aboutApp">О приложении</span>
                                 <span class="material-symbols-outlined text-text-muted opacity-40">chevron_right</span>
                             </button>
-                            <button id="contact-dev-btn" class="w-full flex items-center gap-4 p-5 active:bg-primary/5 transition-colors text-left group">
-                                <div class="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary group-hover:scale-110 transition-transform">
+                            <button id="contact-dev-btn" class="w-full flex items-center gap-4 p-4 active:bg-primary/5 transition-colors text-left group">
+                                <div class="w-10 h-10 rounded-2xl bg-secondary/10 flex items-center justify-center text-secondary group-hover:scale-110 transition-transform border border-secondary/15">
                                     <span class="material-symbols-outlined">mail</span>
                                 </div>
-                                <span class="font-bold text-text-main flex-1" data-t="contactDev">Связаться с нами</span>
+                                <span class="font-bold text-text-main flex-1" data-t="contactDev">Написать разработчикам</span>
                                 <span class="material-symbols-outlined text-text-muted opacity-40">chevron_right</span>
                             </button>
-                            <a href="https://t.me/ispoved_app" target="_blank" class="w-full flex items-center gap-4 p-5 active:bg-primary/5 transition-colors text-left group">
-                                <div class="w-10 h-10 rounded-xl bg-[#0088cc]/10 flex items-center justify-center text-[#0088cc] group-hover:scale-110 transition-transform">
-                                    <span class="material-symbols-outlined">send</span>
-                                </div>
-                                <span class="font-bold text-text-main flex-1">Telegram-канал</span>
-                                <span class="material-symbols-outlined text-text-muted opacity-40">open_in_new</span>
-                            </a>
                         </div>
                     </section>
 
@@ -473,11 +459,11 @@
                     <section class="opacity-80">
                         <div class="flex items-center gap-3 mb-4 px-2">
                             <span class="material-symbols-outlined text-danger text-lg">science</span>
-                            <h3 class="text-[11px] font-bold text-text-muted uppercase tracking-[0.2em]" data-t="experimentalFeaturesTitle">Эксперименты</h3>
+                            <h3 class="text-[11px] font-bold text-text-muted uppercase tracking-[0.2em]" data-t="experimentalFeaturesTitle">Экспериментальные функции</h3>
                         </div>
-                        <div class="glass-card border-danger/20">
-                            <div class="flex items-start gap-4 p-5">
-                                <div class="w-10 h-10 rounded-xl bg-danger/10 flex items-center justify-center text-danger shrink-0 mt-1">
+                        <div class="glass-card border-danger/20 rounded-2xl overflow-hidden">
+                            <div class="flex items-start gap-4 p-4">
+                                <div class="w-10 h-10 rounded-2xl bg-danger/10 flex items-center justify-center text-danger shrink-0 mt-1 border border-danger/15">
                                     <span class="material-symbols-outlined">auto_awesome</span>
                                 </div>
                                 <div class="flex-1">
@@ -596,28 +582,21 @@
                         </div>
                         <span class="material-symbols-outlined text-text-muted opacity-40 group-hover:translate-x-1 transition-transform">chevron_right</span>
                     </a>
+                    <a href="https://max.ru/u/f9LHodD0cOJxOqxx75s-mYr7TCtRbzJPtXoCK1n5WRuENnqejXIB0wkWgC4" target="_blank" class="flex items-center gap-4 p-4 rounded-2xl bg-surface-alt border border-border hover:border-primary/30 active:scale-95 transition-all group">
+                        <div class="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/20">
+                            <span class="material-symbols-outlined">chat</span>
+                        </div>
+                        <div class="flex-1">
+                            <span class="font-bold text-text-main block">MAX</span>
+                            <span class="text-[11px] text-text-muted">Написать в мессенджер</span>
+                        </div>
+                        <span class="material-symbols-outlined text-text-muted opacity-40 group-hover:translate-x-1 transition-transform">chevron_right</span>
+                    </a>
                 </div>
                 <button id="close-contact-btn" class="mt-8 w-full py-4 rounded-2xl border border-border text-text-muted font-bold active:bg-surface-alt transition-colors" data-t="close">Закрыть</button>
             </div>
         </div>
-    </div>         <a href="https://t.me/ReligiyaDialog" target="_blank"
-                        class="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 dark:bg-white/5 active:scale-95 transition-all text-black dark:text-white no-underline border border-transparent hover:border-[#0088cc]/30 group/tg">
-                        <div
-                            class="w-10 h-10 rounded-full bg-[#0088cc] flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
-                            <span class="material-symbols-outlined">send</span>
-                        </div>
-                        <span class="font-bold flex-1">Telegram</span>
-                        <span
-                            class="material-symbols-outlined text-[#ab9db8]/40 group-hover/tg:text-[#0088cc] transition-colors">chevron_right</span>
-                    </a>
-                </div>
-                <button id="close-contact-btn"
-                    class="mt-8 w-full py-4 rounded-2xl border border-gray-100 dark:border-white/10 text-gray-500 dark:text-[#ab9db8] font-bold"
-                    data-t="close">Закрыть</button>
-            </div>
-        </div>
     </div>
-
 
     <!-- Prayer Modal -->
     <div id="prayer-modal" class="fixed inset-0 z-[300] flex items-end justify-center p-0 bg-black/70 backdrop-blur-sm hidden">

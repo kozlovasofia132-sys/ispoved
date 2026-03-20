@@ -14,8 +14,8 @@
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <meta name="theme-color" content="#121212">
     <link rel="apple-touch-icon" href="/icon.svg">
-  <script type="module" crossorigin src="/assets/index-3kO1fEfW.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-B8DRHel5.css">
+  <script type="module" crossorigin src="/assets/index-D_uSTphS.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-BlYEXIxT.css">
 <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
 
 <body class="bg-bg font-sans antialiased text-text-main min-h-screen flex flex-col overflow-hidden transition-colors duration-300">
@@ -58,45 +58,48 @@
 
                 <!-- Main Day Card (Premium Redesign) -->
                 <div class="px-4 animate-fade-in-up">
-                    <section id="calendar-card-section" class="bg-[#1a1914] rounded-[32px] overflow-hidden relative p-8 shadow-2xl border border-white/5 transition-colors duration-500">
-                        <div class="space-y-6 relative z-10">
-                            <!-- Liturgical Title / Status -->
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
-                                <span id="liturgical-status" class="text-[10px] font-bold text-text-muted uppercase tracking-[0.2em]">СЕГОДНЯШНИЙ ПРАЗДНИК</span>
-                            </div>
- 
-                            <!-- Main Title -->
-                            <h2 id="calendar-main-title" class="font-serif text-[28px] font-bold leading-[1.2] text-white tracking-tight">
-                                Церковный календарь
-                            </h2>
-
-                            <!-- Vigil Status -->
-                            <div id="vigil-block" class="flex items-center gap-2.5 text-primary-gold hidden">
-                                <span class="material-symbols-outlined text-lg">schedule</span>
-                                <span id="vigil-text" class="text-[11px] font-bold uppercase tracking-[0.15em]">ВСЕНОЩНОЕ БДЕНИЕ</span>
-                            </div>
-
-                            <!-- Saints Summary -->
-                            <p id="saints-short-list" class="text-sm text-text-muted/80 leading-relaxed font-medium">
-                                Святителя Тарасия, архиепископа Константинопольского.
-                            </p>
-
-                            <!-- Bottom Action Tags -->
-                            <div class="flex flex-wrap gap-3 pt-2">
-                                <!-- Fasting Status Pill -->
-                                <div id="fasting-pill" class="flex items-center gap-2.5 bg-primary-gold/10 border border-primary-gold/20 rounded-2xl px-4 py-2.5">
-                                    <span class="material-symbols-outlined text-primary-gold text-lg">restaurant</span>
-                                    <span id="fasting-pill-text" class="text-[10px] font-bold text-primary-gold uppercase tracking-[0.1em]">СУХОЯДЕНИЕ</span>
+                    <section id="calendar-card-section" class="bg-[#1a1914] rounded-[32px] overflow-hidden relative p-3 shadow-2xl border border-white/5">
+                        <div class="border border-[#E1C16E]/20 rounded-[0px] p-6">
+                            <div class="space-y-4 flex flex-col items-center">
+                                <!-- Vigil Status -->
+                                <div id="vigil-block" class="flex items-center gap-2.5 text-primary-gold hidden">
+                                    <span class="material-symbols-outlined text-lg">schedule</span>
+                                    <span id="vigil-text" class="text-[11px] font-bold uppercase tracking-[0.15em]">ВСЕНОЩНОЕ БДЕНИЕ</span>
                                 </div>
-                                <!-- Tone Pill -->
-                                <div id="tone-pill" class="flex items-center gap-2.5 bg-white/5 border border-white/10 rounded-2xl px-4 py-2.5">
-                                    <span class="material-symbols-outlined text-text-muted text-lg">music_note</span>
-                                    <span id="tone-pill-text" class="text-[10px] font-bold text-text-muted uppercase tracking-[0.1em]">Глас 6</span>
+
+                                <!-- Icon of the Day -->
+                                <div id="icon-of-day-block" class="mt-0 w-full">
+                                    <div id="icon-of-day-container" class="w-full h-auto max-h-48 flex flex-col items-center justify-start">
+                                        <!-- Icon will be injected here -->
+                                    </div>
+                                </div>
+
+                                <!-- Golden Divider Top -->
+                                <div class="w-full flex items-center justify-center my-2">
+                                    <div class="h-[1px] w-24 bg-gradient-to-r from-transparent via-[#E1C16E] to-transparent"></div>
+                                </div>
+
+                                <!-- New Style Block (2 lines) -->
+                                <div class="text-center mt-4">
+                                    <p class="text-[10px] font-bold text-[#E1C16E] uppercase tracking-[0.2em]">Новый стиль</p>
+                                    <div class="flex items-center justify-center gap-2 mt-1">
+                                        <p class="text-[28px] font-['Triodion'] text-[#E1C16E] font-bold" id="card-date-text">20 марта</p>
+                                        <p class="text-[14px] font-bold text-[#E1C16E]" id="day-of-week"><span class="church-font-text">вторник</span></p>
+                                    </div>
+                                </div>
+
+                                <!-- Golden Divider Bottom -->
+                                <div class="w-full flex items-center justify-center my-2">
+                                    <div class="h-[1px] w-24 bg-gradient-to-r from-transparent via-[#E1C16E] to-transparent"></div>
+                                </div>
+
+                                <!-- Holy Day / Sedmitsa Block -->
+                                <div id="holy-day-block" class="border border-[#E1C16E] bg-purple-900/30 rounded-full px-4 py-1 text-center hidden">
+                                    <span id="holy-day-text" class="text-[11px] font-bold text-[#E1C16E] uppercase tracking-[0.15em]"></span>
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Decorative Watermark -->
                         <div class="absolute -bottom-10 -right-10 opacity-[0.03] pointer-events-none transform rotate-12">
                             <span class="material-symbols-outlined text-[200px] text-white">church</span>
@@ -117,26 +120,10 @@
                     </section>
                 </div>
 
-                <!-- Icon of the Day & Saints Memory (Horizontal Row) -->
-                <div class="flex flex-row gap-4 overflow-x-auto px-4 mt-10 mb-12 animate-fade-in-up" style="animation-delay: 0.2s">
-                    <!-- Icon of the Day -->
-                    <div id="icon-of-day-block" class="flex-1 min-w-[150px]">
-                        <div class="glass-card rounded-xl p-5 border-primary-gold/20 h-full">
-                            <div class="flex items-center gap-3 mb-4 px-1">
-                                <div class="w-8 h-8 rounded-xl bg-primary-gold/10 flex items-center justify-center border border-primary-gold/15">
-                                    <span class="material-symbols-outlined text-primary-gold text-lg">image</span>
-                                </div>
-                                <h3 class="text-[11px] font-bold text-text-muted uppercase tracking-[0.2em]" data-t="iconOfDay">Икона дня</h3>
-                            </div>
-                            <div id="icon-of-day-container" class="rounded-2xl overflow-hidden shadow-inner bg-black/5 flex items-center justify-center min-h-[200px]">
-                                <!-- Icon will be injected here -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Saints Memory -->
-                    <div id="saints-memory-block" class="flex-1 min-w-[150px]">
-                        <section class="space-y-3 h-full">
+                <!-- Saints Memory -->
+                <div class="px-4 mt-10 mb-12 animate-fade-in-up" style="animation-delay: 0.2s">
+                    <div id="saints-memory-block">
+                        <section class="space-y-3">
                             <div id="saints-container" class="glass-card rounded-xl divide-y divide-white/5">
                                 <!-- Saints memory will be injected here -->
                             </div>
