@@ -227,6 +227,10 @@ export const translations = {
         fullFast: 'Полный пост',
         noData: 'Нет данных',
         tone: 'Глас',
+        noReadings: 'Чтений на этот день не запланировано',
+        psalm50Recommendation: 'Рекомендуется прочитать Псалом 50',
+        psalm50AudioUrl: 'https://azbyka.ru/audio/audio1/molitvoslov/psalmy/psalom-50.mp3',
+        psalm50Full: 'Помилуй мя, Боже, по велицей милости Твоей, и по множеству щедрот Твоих очисти беззаконие мое. Наипаче омый мя от беззакония моего, и от греха моего очисти мя; яко беззаконие мое аз знаю, и грех мой предо мною есть выну. Тебе единому согреших и лукавое пред Тобою сотворих, яко да оправдишися во словесех Твоих, и победиши, внегда судити Ти. Се бо, в беззакониих зачат есмь, и во гресех роди мя мати моя. Се бо, истину возлюбил еси; безвестная и тайная премудрости Твоея явил ми еси. Окропиши мя иссопом, и очищуся; омый мя, и паче снега убелюся. Слуху моему даси радость и веселие; возрадуются кости смиренныя. Отврати лице Твое от грех моих и вся беззакония моя очисти. Сердце чисто созижди во мне, Боже, и дух прав обнови во утробе моей. Не отвержи мене от лица Твоего и Духа Твоего Святаго не отыми от мене. Воздаждь ми радость спасения Твоего и Духом Владычним утверди мя. Научу беззаконныя путем Твоим, и нечестивии к Тебе обратятся. Избави мя от кровей, Боже, Боже спасения моего; возрадуется язык мой правде Твоей. Господи, устне мои отверзеши, и уста моя возвестят хвалу Твою. Яко аще бы восхотел еси жертвы, дал бых убо: всесожжения не благоволиши. Жертва Богу дух сокрушен; сердце сокрушенно и смиренно Бог не уничижит. Ублажи, Господи, благоволением Твоим Сиона, и да созиждутся стены Иерусалимския. Тогда благоволиши жертву правды, возношение и всесожгаемая; тогда возложат на олтарь Твой тельцы.'
     },
     uk: {
         appName: 'Сповідь',
@@ -447,6 +451,10 @@ export const translations = {
         fullFast: 'Повний піст',
         noData: 'Немає даних',
         tone: 'Глас',
+        noReadings: 'Читань на цей день не заплановано',
+        psalm50Recommendation: 'Рекомендується прочитати Псалом 50',
+        psalm50AudioUrl: 'https://azbyka.ru/audio/audio1/molitvoslov/psalmy/psalom-50.mp3',
+        psalm50Full: 'Помилуй мене, Боже, з великої милости Твоєї, і з великого милосердя Твого зітри беззаконня мої. Найперше омий мене від беззаконня мого і від гріха мого очисти мене. Бо беззаконня мої я знаю, і гріх мій повсякчас переді мною. Тобі єдиному згрішив я і лукаве перед Тобою вчинив, щоб Ти був праведний у приговорі Твоїм і чистий у суді Твоїм. Це бо в беззаконнях я зачатий, і в гріхах народила мене мати моя. Це бо істину возлюбив Ти, невідоме й таємне мудрости Твоєї явив Ти мені. Окропи мене ісопом, і очищуся; омий мене, і стану біліший від снігу. Дай мені почути радість і веселість, і зрадіють кості мої упокорені. Відверни лице Твоє від гріхів моїх і всі беззаконня мої зітри. Серце чисте створи в мені, Боже, і духа правого віднови в нутрі моєму. Не відкинь мене від лиця Твого і Духа Твого Святого не відніми від мене. Поверни мені радість спасіння Твого і духом владичним утверди мене. Навчу беззаконних шляхів Твоїх, і нечестиві до Тебе навернуться. Визволи мене від вини кривавої, Боже, Боже спасіння мого, і язик мій радісно славитиме справедливість Твою. Господи, відкрий уста мої, і язик мій сповістить хвалу Твою. Бо якби Ти жертви забажав, я дав би її; але всепалення не любе Тобі. Жертва Богові — це дух упокорений, серцем сокрушенним і смиренним Бог не погордує. Ущаслив, Господи, благоволінням Твоїм Сион, і нехай відбудуються стіни єрусалимські. Тоді буде угодна Тобі жертва правди, приношення і всепалення; тоді покладуть на вівтар Твій тельців.'
     },
     en: {
         appName: 'Confession',
@@ -669,6 +677,10 @@ export const translations = {
         fullFast: 'Full Fast',
         noData: 'No Data',
         tone: 'Tone',
+        noReadings: 'No readings scheduled for this day',
+        psalm50Recommendation: 'It is recommended to read Psalm 50',
+        psalm50AudioUrl: 'https://azbyka.ru/audio/audio1/molitvoslov/psalmy/psalom-50.mp3',
+        psalm50Full: 'Have mercy upon me, O God, according to Thy great mercy: according to the multitude of Thy tender mercies blot out my transgressions. Wash me thoroughly from mine iniquity, and cleanse me from my sin. For I acknowledge my transgressions: and my sin is ever before me. Against Thee, Thee only, have I sinned, and done this evil in Thy sight: that Thou mightest be justified when Thou speakest, and be clear when Thou judgest. Behold, I was shapen in iniquity; and in sin did my mother conceive me. Behold, Thou desirest truth in the inward parts: and in the hidden part Thou shalt make me to know wisdom. Purge me with hyssop, and I shall be clean: wash me, and I shall be whiter than snow. Make me to hear joy and gladness; that the bones which Thou hast broken may rejoice. Hide Thy face from my sins, and blot out all mine iniquities. Create in me a clean heart, O God; and renew a right spirit within me. Cast me not away from Thy presence; and take not Thy holy spirit from me. Restore unto me the joy of Thy salvation; and uphold me with Thy free spirit. Then will I teach transgressors Thy ways; and sinners shall be converted unto Thee. Deliver me from bloodguiltiness, O God, Thou God of my salvation: and my tongue shall sing aloud of Thy righteousness. O Lord, open Thou my lips; and my mouth shall shew forth Thy praise. For Thou desirest not sacrifice; else would I give it: Thou delightest not in burnt offering. The sacrifices of God are a broken spirit: a broken and a contrite heart, O God, Thou wilt not despise. Do good in Thy good pleasure unto Zion: build Thou the walls of Jerusalem. Then shalt Thou be pleased with the sacrifices of righteousness, with burnt offering and whole burnt offering: then shall they offer bullocks upon Thine altar.'
     },
     cs: {
         appName: 'Исповѣдь',
@@ -877,5 +889,9 @@ export const translations = {
         fullFast: 'Полный постъ',
         noData: 'Нѣтъ данныхъ',
         tone: 'Гласъ',
+        noReadings: 'Чтеній на этотъ день не запланировано',
+        psalm50Recommendation: 'Рекомендуется прочитать Псаломъ 50',
+        psalm50AudioUrl: 'https://azbyka.ru/audio/audio1/molitvoslov/psalmy/psalom-50.mp3',
+        psalm50Full: 'Помилуй мя, Боже, по велицей милости Твоей, и по множеству щедрот Твоих очисти беззаконие мое. Наипаче омый мя от беззакония моего, и от греха моего очисти мя. Яко беззаконие мое аз знаю и грех мой предо мною есть выну. Тебе единому согреших, и лукавое пред Тобою сотворих, яко да оправдишися во словесех Твоих и победиши, внегда судити Ти. Се бо в беззакониих зачат есмь, и во гресех роди мя мати моя. Се бо истину возлюбил еси, безвестная и тайная премудрости Твоея явил ми еси. Окропиши мя иссопом, и очищуся, омый мя, и паче снега убелюся. Слуху моему даси радость и веселие, возрадуются кости смиренныя. Отврати лице Твое от грех моих, и вся беззакония моя очисти. Сердце чисто созижди во мне, Боже, и дух прав обнови во утробе моей. Не отвержи мене от лица Твоего, и Духа Твоего Святаго не отыми от мене. Воздаждь ми радость спасения Твоего, и Духом Владычним утверди мя. Научу беззаконныя путем Твоим, и нечестивии к Тебе обратятся. Избави мя от кровей, Боже, Боже спасения моего, возрадуется язык мой правде Твоей. Господи, устне мои отверзеши, и уста моя возвестят хвалу Твою. Яко аще бы восхотел еси жертвы, дал бых убо, всесожжения не благоволиши. Жертва Богу дух сокрушен, сердце сокрушенно и смиренно Бог не уничижит. Ублажи, Господи, благоволением Твоим Сиона, и да созиждутся стены Иерусалимския. Тогда благоволиши жертву правды, возношение и всесожгаемая, тогда возложат на олтарь Твой тельцы.'
     },
 };

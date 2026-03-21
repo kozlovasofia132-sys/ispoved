@@ -2234,34 +2234,82 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Render icon of the day
-    function renderIconOfDay(iconUrl, holyDayTitle) {
+    function renderIconOfDay(iconUrl, holyDayTitle, saintsIcons = []) {
         const container = document.getElementById('icon-of-day-container');
         const iconBlock = document.getElementById('icon-of-day-block');
-        
+
         if (!container) return;
 
-        const defaultIcon = '/theotokos.png';
-        
-        // Если иконы нет, скрываем блок
-        if (!iconUrl) {
+        // Если нет икон святых, скрываем блок
+        if (!saintsIcons || saintsIcons.length === 0) {
             if (iconBlock) iconBlock.style.display = 'none';
             return;
         }
-        
+
         // Показываем блок
         if (iconBlock) {
             iconBlock.style.display = 'block';
             iconBlock.classList.remove('hidden');
         }
-        
-        const imageUrl = iconUrl.startsWith('http') ? iconUrl : defaultIcon;
-        const altText = holyDayTitle || t('iconOfDay') || 'Икона дня';
+
+        // Рендерим иконы святых (первые 6-8)
+        let saintsIconsHtml = '';
+        if (saintsIcons && saintsIcons.length > 0) {
+            const iconsToShow = saintsIcons.slice(0, 8);
+            saintsIconsHtml = `
+                <div class="overflow-x-auto w-full pb-2 no-scrollbar" id="icons-scroll-container">
+                    <div class="flex gap-4 md:gap-6 justify-start flex-shrink-0">
+                        ${iconsToShow.map((icon, index) => `
+                            <img src="${icon}" alt="Икона святого ${index + 1}"
+                                 class="w-40 h-40 md:w-56 md:h-56 object-contain border border-white/10 shadow-lg hover:scale-110 transition-transform flex-shrink-0"
+                                 loading="lazy" />
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Показываем стрелочки только если икон больше одной
+        const navigationArrows = saintsIcons.length > 1 ? `
+            <button id="prev-icon-btn" class="absolute -left-12 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-[#1a1914] rounded-xl border border-[#E1C16E]/20 text-[#E1C16E] flex items-center justify-center hover:bg-[#E1C16E]/10 active:scale-95 active:opacity-100 transition-all shadow-lg shadow-black/40">
+                <span class="material-symbols-outlined text-2xl">chevron_left</span>
+            </button>
+            <button id="next-icon-btn" class="absolute -right-12 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-[#1a1914] rounded-xl border border-[#E1C16E]/20 text-[#E1C16E] flex items-center justify-center hover:bg-[#E1C16E]/10 active:scale-95 active:opacity-100 transition-all shadow-lg shadow-black/40">
+                <span class="material-symbols-outlined text-2xl">chevron_right</span>
+            </button>
+        ` : '';
 
         container.innerHTML = `
-            <img src="${imageUrl}" alt="${altText}"
-                 class="w-full h-auto max-h-48 object-contain rounded-2xl"
-                 onerror="this.parentElement.parentElement.style.display='none';" />
+            <div class="relative flex flex-col items-center py-4 px-2 group w-full">
+                ${navigationArrows}
+                <div class="w-full flex items-center justify-center">
+                    ${saintsIconsHtml}
+                </div>
+            </div>
         `;
+
+        // Добавляем обработчики для стрелочек
+        setTimeout(() => {
+            const prevBtn = document.getElementById('prev-icon-btn');
+            const nextBtn = document.getElementById('next-icon-btn');
+            const scrollContainer = document.getElementById('icons-scroll-container');
+
+            if (prevBtn && nextBtn && scrollContainer) {
+                const scrollAmount = 200; // Ширина иконки + отступ
+
+                prevBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    scrollContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+                });
+
+                nextBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    scrollContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+                });
+            }
+        }, 100);
     }
 
     // Render fasting tag - упрощённая логика: ПОСТ или МЯСОЕД
@@ -2291,46 +2339,579 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Парсинг текста чтений из API
+    function parseReadingsText(text) {
+        console.log('[parseReadingsText] Input:', text);
+
+        if (!text) return [];
+
+        const readings = [];
+
+        // Декодируем HTML-сущности
+        function decodeHtml(html) {
+            const txt = document.createElement('textarea');
+            txt.innerHTML = html;
+            return txt.value;
+        }
+
+        // Очищаем текст от HTML тегов, сущностей, переносов строк и лишних пробелов
+        let cleanText = decodeHtml(text)
+            .replace(/&ndash;/g, '–')
+            .replace(/&mdash;/g, '—')
+            .replace(/&nbsp;/g, ' ')
+            .replace(/<[^>]*>/g, '')  // Удаляем все HTML теги
+            .replace(/\n/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+
+        console.log('[parseReadingsText] Clean text:', cleanText);
+
+        // Определяем тип службы по префиксу
+        const serviceTypes = {
+            'утр.': 'Утреня',
+            'утр': 'Утреня',
+            'лит.': 'Литургия',
+            'лит': 'Литургия',
+            'мчч.': 'Мученики',
+            'мчч': 'Мученики',
+            'мч.': 'Мученик',
+            'мч': 'Мученик',
+            'за упокой': 'За упокой',
+            'на 6-м часе': 'На 6-м часе',
+            'на веч.': 'На вечерне',
+            'на веч': 'На вечерне',
+            'веч.': 'На вечерне',
+            'веч': 'На вечерне'
+        };
+
+        // Разбиваем по "). " или по ". " перед "На" или перед заглавной буквой
+        // Пример: "На 6-м часе: Ис.37:33–38:6 (зач. 151). На веч.: Быт.13:12–18. Притч.14:27–15:4 (зач. 70)."
+        const parts = cleanText.split(/\)\.\s*/);
+        
+        console.log('[parseReadingsText] Parts:', parts);
+
+        let currentServiceType = '';
+
+        for (let part of parts) {
+            part = part.trim();
+            if (!part) continue;
+
+            // Дополнительно разбиваем часть по ". " если есть несколько чтений
+            const subParts = part.split(/\.\s+(?=[А-Я])/);
+            
+            for (let subPart of subParts) {
+                subPart = subPart.trim();
+                if (!subPart) continue;
+                
+                // Проверяем, есть ли тип службы в начале части
+                for (const [abbrev, fullName] of Object.entries(serviceTypes)) {
+                    const regex = new RegExp(`^${abbrev.replace('.', '\\.')}\\s*[:–-]\\s*`, 'i');
+                    if (regex.test(subPart)) {
+                        currentServiceType = fullName;
+                        subPart = subPart.replace(regex, '');
+                        break;
+                    }
+                }
+
+                // Используем regex для поиска всех вхождений чтений
+                // Паттерн: Книга Глава:Стихи (зач. Номер) или Книга.Глава:Стихи (зач. Номер)
+                // Примеры: "Ис.37:33–38:6", "Быт.13:12–18", "Притч.14:27–15:4"
+                // Поддерживаем диапазон глав: 37:33–38:6
+                // Используем более гибкий паттерн для тире
+                const regex = /([А-Яа-я]+)\.?(\d+):(\d+)\s*[-–—]\s*(\d+):?(\d+)?(?:\s*\(\s*зач\s*\.?\s*(\d+)\s*\))?/g;
+                let match;
+
+                while ((match = regex.exec(subPart)) !== null) {
+                    const [, book, chapter1, startVerse, chapter2, endVerse, zachalo] = match;
+                    
+                    console.log('[parseReadingsText] Match found:', { book, chapter1, startVerse, chapter2, endVerse, zachalo });
+                    
+                    // Если есть вторая глава, используем её для конца диапазона
+                    const endVerseFinal = endVerse || chapter2;
+                    const chapter = chapter1;
+
+                    // Определяем тип чтения и полное название книги
+                    let type = currentServiceType || 'Апостол';
+                    const bookLower = book.toLowerCase();
+
+                    // Если тип службы не установлен, определяем по книге
+                    if (!currentServiceType) {
+                        if (['мк', 'мф', 'лк', 'ин'].some(b => bookLower.includes(b))) {
+                            type = 'Евангелие';
+                        } else {
+                            type = 'Апостол';
+                        }
+                    }
+
+                    // Расшифровка сокращений книг
+                    const bookNames = {
+                        'Ис.': 'Книга пророка Исаии',
+                        'Ис': 'Книга пророка Исаии',
+                        'Быт.': 'Книга Бытия',
+                        'Быт': 'Книга Бытия',
+                        'Притч.': 'Книга Притчей Соломоновых',
+                        'Притч': 'Книга Притчей Соломоновых',
+                        'Евр.': 'Послание к Евреям',
+                        'Евр': 'Послание к Евреям',
+                        'Мк.': 'Евангелие от Марка',
+                        'Мк': 'Евангелие от Марка',
+                        'Мф.': 'Евангелие от Матфея',
+                        'Мф': 'Евангелие от Матфея',
+                        'Лк.': 'Евангелие от Луки',
+                        'Лк': 'Евангелие от Луки',
+                        'Ин.': 'Евангелие от Иоанна',
+                        'Ин': 'Евангелие от Иоанна',
+                        'Кор.': 'Послание к Коринфянам',
+                        'Кор': 'Послание к Коринфянам',
+                        '1Кор.': '1-е послание к Коринфянам',
+                        '1Кор': '1-е послание к Коринфянам',
+                        '2Кор.': '2-е послание к Коринфянам',
+                        '2Кор': '2-е послание к Коринфянам',
+                        '1Фес.': '1-е послание к Фессалоникийцам',
+                        '1Фес': '1-е послание к Фессалоникийцам',
+                        '2Фес.': '2-е послание к Фессалоникийцам',
+                        '2Фес': '2-е послание к Фессалоникийцам',
+                        '1Тим.': '1-е послание к Тимофею',
+                        '1Тим': '1-е послание к Тимофею',
+                        '2Тим.': '2-е послание к Тимофею',
+                        '2Тим': '2-е послание к Тимофею',
+                        '1Пет.': '1-е послание Петра',
+                        '1Пет': '1-е послание Петра',
+                        '2Пет.': '2-е послание Петра',
+                        '2Пет': '2-е послание Петра',
+                        '1Ин.': '1-е послание Иоанна',
+                        '1Ин': '1-е послание Иоанна',
+                        '2Ин.': '2-е послание Иоанна',
+                        '2Ин': '2-е послание Иоанна',
+                        '3Ин.': '3-е послание Иоанна',
+                        '3Ин': '3-е послание Иоанна',
+                        'Гал.': 'Послание к Галатам',
+                        'Гал': 'Послание к Галатам',
+                        'Еф.': 'Послание к Ефесянам',
+                        'Еф': 'Послание к Ефесянам',
+                        'Флп.': 'Послание к Филиппийцам',
+                        'Флп': 'Послание к Филиппийцам',
+                        'Кол.': 'Послание к Колоссянам',
+                        'Кол': 'Послание к Колоссянам',
+                        'Рим.': 'Послание к Римлянам',
+                        'Рим': 'Послание к Римлянам',
+                        'Деян.': 'Деяния святых Апостолов',
+                        'Деян': 'Деяния святых Апостолов',
+                        'Иак.': 'Послание Иакова',
+                        'Иак': 'Послание Иакова',
+                        'Иуд.': 'Послание Иуды',
+                        'Иуд': 'Послание Иуды',
+                        'Тит.': 'Послание к Титу',
+                        'Тит': 'Послание к Титу',
+                        'Флм.': 'Послание к Филимону',
+                        'Флм': 'Послание к Филимону',
+                        'Откр.': 'Откровение Иоанна Богослова',
+                        'Откр': 'Откровение Иоанна Богослова'
+                    };
+
+                    // Получаем полное название книги
+                    let fullBookName = book;
+                    for (const [abbrev, fullName] of Object.entries(bookNames)) {
+                        if (book === abbrev || book === abbrev.replace('.', '')) {
+                            fullBookName = fullName;
+                            break;
+                        }
+                    }
+
+                    // Форматируем текст: Полное название, глава, стихи (зачало опционально)
+                    const formattedText = zachalo
+                        ? `${fullBookName}, ${zachalo} зач., глава ${parseInt(chapter)}, стихи ${startVerse}–${endVerseFinal}`
+                        : `${fullBookName}, глава ${parseInt(chapter)}, стихи ${startVerse}–${endVerseFinal}`;
+
+                    readings.push({
+                        type: type,
+                        text: formattedText,
+                        link_mp3: null,
+                        audio: null,
+                        mp3_remote: null
+                    });
+                }
+            }
+        }
+
+        console.log('[parseReadingsText] Result:', readings);
+
+        return readings;
+    }
+
+    // Преобразование арабских цифр в римские
+    function toRoman(num) {
+        const roman = {
+            M: 1000, CM: 900, D: 500, CD: 400,
+            C: 100, XC: 90, L: 50, XL: 40,
+            X: 10, IX: 9, V: 5, IV: 4, I: 1
+        };
+        let result = '';
+        for (const [key, value] of Object.entries(roman)) {
+            const count = Math.floor(num / value);
+            num %= value;
+            result += key.repeat(count);
+        }
+        return result;
+    }
+
+    // Универсальный сброс UI всех медиа-элементов (чтений и святых)
+    function resetAllMediaUI() {
+        // Сброс чтений и святых
+        document.querySelectorAll('.reading-row, .saint-row').forEach(row => {
+            const icon = row.querySelector('.play-btn span');
+            const hasAudio = row.dataset.hasAudio === 'true';
+            if (icon) icon.textContent = hasAudio ? 'play_arrow' : 'volume_up';
+            const progress = row.querySelector('.audio-progress');
+            if (progress) progress.classList.add('opacity-0');
+        });
+
+        // Сброс Псалма 50
+        const p50Btn = document.getElementById('psalm-50-play-btn');
+        if (p50Btn) p50Btn.querySelector('span').textContent = 'play_arrow';
+        const p50Progress = document.getElementById('psalm-50-audio-progress-container');
+        if (p50Progress) p50Progress.classList.add('hidden');
+    }
+
+    // Логика аудио для Псалма 50
+    function initPsalm50Audio() {
+        const playBtn = document.getElementById('psalm-50-play-btn');
+        const progressContainer = document.getElementById('psalm-50-audio-progress-container');
+        const progressBar = document.getElementById('psalm-50-audio-progress-bar');
+        
+        if (!playBtn) return;
+
+        playBtn.addEventListener('click', () => {
+            const audioUrl = t('psalm50AudioUrl');
+            
+            // Если уже играет этот псалом
+            if (window.currentAudio && window.currentAudio._isPsalm50) {
+                if (window.currentAudio.paused) {
+                    window.currentAudio.play();
+                    playBtn.querySelector('span').textContent = 'pause';
+                } else {
+                    window.currentAudio.pause();
+                    playBtn.querySelector('span').textContent = 'play_arrow';
+                }
+                return;
+            }
+
+            // Останавливаем всё остальное
+            if (window.currentAudio) {
+                window.currentAudio.pause();
+                window.currentAudio = null;
+            }
+            if ('speechSynthesis' in window) {
+                speechSynthesis.cancel();
+            }
+            resetAllMediaUI();
+
+            // Запускаем аудио Псалма 50
+            const audio = new Audio(audioUrl);
+            audio._isPsalm50 = true;
+            window.currentAudio = audio;
+            
+            if (progressContainer) progressContainer.classList.remove('hidden');
+            playBtn.querySelector('span').textContent = 'pause';
+
+            audio.play().catch(err => {
+                console.error("Psalm 50 audio play error:", err);
+                resetAllMediaUI();
+            });
+
+            audio.addEventListener('timeupdate', () => {
+                const percent = (audio.currentTime / audio.duration) * 100;
+                if (progressBar) progressBar.style.width = `${percent}%`;
+            });
+
+            audio.addEventListener('ended', () => {
+                resetAllMediaUI();
+                window.currentAudio = null;
+            });
+
+            audio.addEventListener('play', () => { playBtn.querySelector('span').textContent = 'pause'; });
+            audio.addEventListener('pause', () => { playBtn.querySelector('span').textContent = 'play_arrow'; });
+        });
+    }
+
     // Render readings
-    function renderReadings(readings) {
+    function renderReadings(readings, texts) {
         const container = document.getElementById('readings-container');
         if (!container) return;
 
+        // Если readings пустой, пробуем распарсить texts
+        if ((!readings || readings.length === 0) && texts && texts.length > 0) {
+            const textData = texts[0].text;
+            const parsedReadings = parseReadingsText(textData);
+            if (parsedReadings.length > 0) {
+                readings = parsedReadings;
+                
+                // Привязываем MP3 ссылки из refs, если количество совпадает
+                if (texts[0].refs && texts[0].refs.length === readings.length) {
+                    readings.forEach((r, i) => {
+                        const ref = texts[0].refs[i];
+                        const bookPart = ref.split('.')[0];
+                        // Формируем ссылку по шаблону Азбуки: https://azbyka.ru/audio/audio1/zachala/Book/Book.Chapter:Verse-Verse.mp3
+                        r.link_mp3 = `https://azbyka.ru/audio/audio1/zachala/${bookPart}/${ref}.mp3`;
+                    });
+                }
+            }
+        }
+
+        // Расшифровка сокращений книг
+        const bookNames = {
+            'Евр.': 'Послание к Евреям',
+            'Евр': 'Послание к Евреям',
+            'Мк.': 'Евангелие от Марка',
+            'Мк': 'Евангелие от Марка',
+            'Мф.': 'Евангелие от Матфея',
+            'Мф': 'Евангелие от Матфея',
+            'Лк.': 'Евангелие от Луки',
+            'Лк': 'Евангелие от Луки',
+            'Ин.': 'Евангелие от Иоанна',
+            'Ин': 'Евангелие от Иоанна',
+            '1Кор.': '1-е послание к Коринфянам',
+            '1Кор': '1-е послание к Коринфянам',
+            '2Кор.': '2-е послание к Коринфянам',
+            '2Кор': '2-е послание к Коринфянам',
+            '1Фес.': '1-е послание к Фессалоникийцам',
+            '2Фес.': '2-е послание к Фессалоникийцам',
+            '1Тим.': '1-е послание к Тимофею',
+            '2Тим.': '2-е послание к Тимофею',
+            '1Пет.': '1-е послание Петра',
+            '2Пет.': '2-е послание Петра',
+            '1Ин.': '1-е послание Иоанна',
+            '2Ин.': '2-е послание Иоанна',
+            '3Ин.': '3-е послание Иоанна',
+            'Гал.': 'Послание к Галатам',
+            'Гал': 'Послание к Галатам',
+            'Еф.': 'Послание к Ефесянам',
+            'Еф': 'Послание к Ефесянам',
+            'Флп.': 'Послание к Филиппийцам',
+            'Флп': 'Послание к Филиппийцам',
+            'Кол.': 'Послание к Колоссянам',
+            'Кол': 'Послание к Колоссянам',
+            'Рим.': 'Послание к Римлянам',
+            'Рим': 'Послание к Римлянам',
+            'Деян.': 'Деяния святых Апостолов',
+            'Деян': 'Деяния святых Апостолов',
+            'Иак.': 'Послание Иакова',
+            'Иуд.': 'Послание Иуды',
+            'Тит.': 'Послание к Титу',
+            'Флм.': 'Послание к Филимону',
+            'Откр.': 'Откровение Иоанна Богослова'
+        };
+
+        function formatReadingText(text) {
+            if (!text) return '';
+
+            let formatted = text;
+
+            // Заменяем "зач." на "зачало"
+            formatted = formatted.replace(/(\d+)\s*зач\./g, '$1 зачало');
+
+            // Форматируем главы и стихи
+            // Пример: "VI, 9–12" → ", глава VI, стихи 9–12"
+            const chapterVerseMatch = formatted.match(/,\s*([IVX]+),\s*(\d+)\s*[–-]\s*(\d+)/);
+            if (chapterVerseMatch) {
+                const [, chapter, startVerse, endVerse] = chapterVerseMatch;
+                formatted = formatted.replace(
+                    /,\s*[IVX]+,\s*\d+\s*[–-]\s*\d+/,
+                    `, глава ${chapter}, стихи ${startVerse}–${endVerse}`
+                );
+            }
+
+            return formatted;
+        }
+
+        // Показываем все чтения в исходном порядке
+        container.innerHTML = '';
+
         if (!readings || readings.length === 0) {
             container.innerHTML = `
-                <div class="p-4 text-center text-text-muted">
-                    <span class="material-symbols-outlined text-4xl mb-2 opacity-50">menu_book</span>
-                    <p class="text-sm">${t('noData') || 'Нет данных'}</p>
+                <div class="p-8 text-center text-text-muted opacity-60">
+                    <span class="material-symbols-outlined text-4xl mb-3 block">auto_stories</span>
+                    <p class="text-sm font-serif italic">${t('noReadings') || 'Чтений на этот день не запланировано'}</p>
                 </div>
             `;
             return;
         }
 
-        let html = '';
         readings.forEach((reading, index) => {
-            const icon = reading.type?.includes('Евангелие') ? 'auto_stories' : 'menu_book';
-            html += `
-                <div class="p-4 flex items-center justify-between hover:bg-white/5 transition-colors cursor-pointer group">
-                    <div class="flex items-center gap-4">
-                        <div class="size-10 rounded-full bg-primary-gold/10 flex items-center justify-center border border-primary-gold/20">
-                            <span class="material-symbols-outlined text-primary-gold">${icon}</span>
+            const row = document.createElement('div');
+            row.className = "reading-row p-4 hover:bg-white/5 transition-colors cursor-pointer group";
+            
+            const audioUrl = reading.link_mp3 || reading.audio || reading.mp3_remote;
+            row.dataset.hasAudio = audioUrl ? 'true' : 'false';
+            
+            // Полная расшифровка книг
+            const formattedText = formatReadingText(reading.text || reading);
+
+            row.innerHTML = `
+                <div class="flex items-start gap-4">
+                    <button class="play-btn size-8 rounded-full border border-red-500/30 flex items-center justify-center text-red-500 hover:bg-red-500/10 active:scale-90 transition-all flex-shrink-0">
+                        <span class="material-symbols-outlined text-lg">${audioUrl ? 'play_arrow' : 'volume_up'}</span>
+                    </button>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-serif text-lg text-text-main leading-snug">
+                            <span class="text-[#E1C16E] font-bold">${reading.type}:</span> ${formattedText}
+                        </p>
+                        ${audioUrl ? `
+                        <div class="audio-progress h-1 bg-white/10 rounded-full mt-2 overflow-hidden opacity-0 transition-opacity">
+                            <div class="progress-bar h-full bg-red-500 transition-all duration-300" style="width: 0%"></div>
                         </div>
-                        <div>
-                            <p class="font-serif text-lg text-text-main">${reading.text || reading}</p>
-                            ${reading.zachalo ? `<p class="text-xs text-text-muted">Зачало ${reading.zachalo}</p>` : ''}
-                        </div>
+                        ` : ''}
                     </div>
-                    <span class="material-symbols-outlined text-text-muted opacity-40 group-hover:text-primary-gold transition-colors">navigate_next</span>
                 </div>
             `;
+            
+
+            row.addEventListener('click', (e) => {
+                const icon = row.querySelector('.play-btn span');
+                const progressBox = row.querySelector('.audio-progress');
+                const progressBar = row.querySelector('.progress-bar');
+                
+                // 1. Проверяем, играет ли уже ЭТО аудио (МП3 файл)
+                if (window.currentAudio && window.currentAudio._row === row) {
+                    if (window.currentAudio.paused) {
+                        window.currentAudio.play();
+                        icon.textContent = 'pause';
+                    } else {
+                        window.currentAudio.pause();
+                        icon.textContent = 'play_arrow';
+                    }
+                    return;
+                }
+                
+                // 2. Проверяем, говорит ли сейчас синтезатор для ЭТОГО чтения
+                if (window._currentSynthRow === row && 'speechSynthesis' in window && speechSynthesis.speaking) {
+                    speechSynthesis.cancel();
+                    window._currentSynthRow = null;
+                resetAllMediaUI();
+                    return;
+                }
+                
+                // 3. Если нажали на новое чтение — останавливаем всё остальное
+                if (window.currentAudio) {
+                    window.currentAudio.pause();
+                    window.currentAudio = null;
+                }
+                if ('speechSynthesis' in window) {
+                    speechSynthesis.cancel();
+                }
+                
+                resetAllRowsUI();
+
+                if (audioUrl) {
+                    icon.textContent = 'pause';
+                    if (progressBox) progressBox.classList.remove('opacity-0');
+                    window._currentSynthRow = row;
+
+                    // Озвучиваем заголовок И текст через синтезатор
+                    let speechType = reading.type;
+                    if (reading.type === 'Утреня') speechType = 'на утрени';
+                    else if (reading.type === 'Литургия') speechType = 'на Литургии';
+                    else if (reading.type === 'На 6-м часе') speechType = 'на шестом часе';
+                    else if (reading.type === 'На вечерне') speechType = 'на вечерне';
+                    
+                    // Формируем полный текст для синтеза (Тип + Текст)
+                    const fullIntroText = speechType ? `${speechType}: ${formattedText}` : formattedText;
+                    
+                    if ('speechSynthesis' in window) {
+                        const introUtterance = new SpeechSynthesisUtterance(fullIntroText);
+                        introUtterance.lang = 'ru-RU';
+                        introUtterance.rate = 0.9;
+                        
+                        introUtterance.onend = () => {
+                            // Если за время синтеза мы не переключились на другое чтение
+                            if (window._currentSynthRow === row) {
+                                // Запускаем аудиофайл
+                                const audio = new Audio(audioUrl);
+                                audio._row = row;
+                                window.currentAudio = audio;
+                                audio.play().catch(err => console.error("Audio play error:", err));
+                                
+                                audio.addEventListener('timeupdate', () => {
+                                    const percent = (audio.currentTime / audio.duration) * 100;
+                                    if (progressBar) progressBar.style.width = `${percent}%`;
+                                });
+                                
+                                audio.addEventListener('ended', () => {
+                                resetAllMediaUI();
+                                    window.currentAudio = null;
+                                    window._currentSynthRow = null;
+                                    
+                                    // Пытаемся запустить следующее чтение автоматически
+                                    const nextRow = row.nextElementSibling;
+                                    if (nextRow && nextRow.classList.contains('reading-row')) {
+                                        nextRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                        nextRow.click();
+                                    }
+                                });
+                                
+                                audio.addEventListener('play', () => { icon.textContent = 'pause'; });
+                                audio.addEventListener('pause', () => { icon.textContent = 'play_arrow'; });
+                            }
+                        };
+                        speechSynthesis.speak(introUtterance);
+                    } else {
+                        // Если нет синтезатора, сразу аудио
+                        const audio = new Audio(audioUrl);
+                        audio._row = row;
+                        window.currentAudio = audio;
+                        audio.addEventListener('ended', () => {
+                        resetAllMediaUI();
+                            window.currentAudio = null;
+                            const nextRow = row.nextElementSibling;
+                            if (nextRow && nextRow.classList.contains('reading-row')) {
+                                nextRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                nextRow.click();
+                            }
+                        });
+                        audio.play();
+                    }
+                } else {
+                    // Обычный синтез всей строки (если нет аудофайла)
+                    icon.textContent = 'pause';
+                    window._currentSynthRow = row;
+                    
+                    let speechType = reading.type;
+                    if (reading.type === 'Утреня') speechType = 'на утрени';
+                    else if (reading.type === 'Литургия') speechType = 'на Литургии';
+                    else if (reading.type === 'На 6-м часе') speechType = 'на шестом часе';
+                    else if (reading.type === 'На вечерне') speechType = 'на вечерне';
+                    
+                    const text = speechType ? `${speechType}: ${formattedText}` : formattedText;
+                    if ('speechSynthesis' in window) {
+                        const utterance = new SpeechSynthesisUtterance(text);
+                        utterance.lang = 'ru-RU';
+                        utterance.rate = 0.9;
+                        utterance.onend = () => {
+                        resetAllMediaUI();
+                            window._currentSynthRow = null;
+                            
+                            // Пытаемся запустить следующее чтение автоматически
+                            const nextRow = row.nextElementSibling;
+                            if (nextRow && nextRow.classList.contains('reading-row')) {
+                                nextRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                nextRow.click();
+                            }
+                        };
+                        speechSynthesis.speak(utterance);
+                    }
+                }
+            });
+            
+            container.appendChild(row);
         });
-        container.innerHTML = html;
     }
 
     // Render saints memory
     function renderSaints(saints) {
         const container = document.getElementById('saints-container');
         if (!container) return;
+
+        container.innerHTML = '';
 
         if (!saints || saints.length === 0) {
             container.innerHTML = `
@@ -2342,19 +2923,234 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        let html = '';
-        saints.forEach(saint => {
-            html += `
-                <div class="p-4 flex items-center gap-4 group cursor-pointer">
-                    <div class="size-8 rounded-full border border-primary-gold/30 flex items-center justify-center text-primary-gold group-hover:bg-primary-gold group-hover:text-black transition-all">
-                        <span class="material-symbols-outlined text-lg fill-[1]">brightness_low</span>
+        saints.forEach((saint, index) => {
+            const row = document.createElement('div');
+            row.className = "saint-row p-4 hover:bg-white/5 transition-colors cursor-pointer group";
+            
+            let saintName = '';
+            if (saint.type_of_sanctity && saint.title) {
+                const expandedSanctity = expandSanctityType(saint.type_of_sanctity);
+                const genitiveName = toGenitiveCase(saint.title);
+                saintName = `${expandedSanctity} ${genitiveName}`;
+            } else if (saint.title) {
+                saintName = saint.title;
+            } else if (saint.name) {
+                saintName = saint.name;
+            } else {
+                saintName = saint;
+            }
+
+            const audioUrl = saint.link_mp3 || saint.audio || saint.mp3_remote;
+            row.dataset.hasAudio = audioUrl ? 'true' : 'false';
+
+            row.innerHTML = `
+                <div class="flex items-start gap-4">
+                    <button class="play-btn size-8 rounded-full border border-red-500/30 flex items-center justify-center text-red-500 hover:bg-red-500/10 active:scale-90 transition-all flex-shrink-0">
+                        <span class="material-symbols-outlined text-lg">${audioUrl ? 'play_arrow' : 'volume_up'}</span>
+                    </button>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-serif text-lg text-text-main leading-snug">
+                            ${saintName}
+                        </p>
+                        ${audioUrl ? `
+                        <div class="audio-progress h-1 bg-white/10 rounded-full mt-2 overflow-hidden opacity-0 transition-opacity">
+                            <div class="progress-bar h-full bg-red-500 transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                        ` : ''}
                     </div>
-                    <span class="font-serif text-text-main flex-1">${saint.name || saint}</span>
-                    <span class="material-symbols-outlined text-text-muted opacity-40 text-sm">info</span>
                 </div>
             `;
+
+            row.addEventListener('click', () => {
+                const icon = row.querySelector('.play-btn span');
+                const progressBox = row.querySelector('.audio-progress');
+                const progressBar = row.querySelector('.progress-bar');
+
+                // Проверка текущего воспроизведения (МП3)
+                if (window.currentAudio && window.currentAudio._row === row) {
+                    if (window.currentAudio.paused) (window.currentAudio.play(), icon.textContent = 'pause');
+                    else (window.currentAudio.pause(), icon.textContent = 'play_arrow');
+                    return;
+                }
+
+                // Проверка текущего синтеза
+                const isPlayingSameSynth = window._currentSynthRow === row && 'speechSynthesis' in window && speechSynthesis.speaking;
+                
+                // Останавливаем всё старое
+                if (window.currentAudio) (window.currentAudio.pause(), window.currentAudio = null);
+                if ('speechSynthesis' in window) (speechSynthesis.cancel());
+                
+                resetAllMediaUI();
+
+                if (isPlayingSameSynth) {
+                    window._currentSynthRow = null;
+                    return;
+                }
+
+                if (audioUrl) {
+                    icon.textContent = 'pause';
+                    if (progressBox) progressBox.classList.remove('opacity-0');
+                    const audio = new Audio(audioUrl);
+                    audio._row = row;
+                    window.currentAudio = audio;
+                    
+                    audio.addEventListener('timeupdate', () => {
+                        const percent = (audio.currentTime / audio.duration) * 100;
+                        if (progressBar) progressBar.style.width = `${percent}%`;
+                    });
+
+                    audio.addEventListener('ended', () => {
+                        resetAllMediaUI();
+                        window.currentAudio = null;
+                        const next = row.nextElementSibling;
+                        if (next && next.classList.contains('saint-row')) {
+                            next.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            next.click();
+                        }
+                    });
+
+                    audio.play().catch(e => console.error(e));
+                } else {
+                    icon.textContent = 'pause';
+                    window._currentSynthRow = row;
+                    if ('speechSynthesis' in window) {
+                        const utterance = new SpeechSynthesisUtterance(saintName);
+                        utterance.lang = 'ru-RU';
+                        utterance.rate = 0.9;
+                        utterance.onend = () => {
+                            resetAllMediaUI();
+                            window._currentSynthRow = null;
+                            const next = row.nextElementSibling;
+                            if (next && next.classList.contains('saint-row')) {
+                                next.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                next.click();
+                            }
+                        };
+                        speechSynthesis.speak(utterance);
+                    }
+                }
+            });
+            container.appendChild(row);
         });
-        container.innerHTML = html;
+    }
+
+    // Расшифровка сокращений святости
+    function expandSanctityType(sanctityType) {
+        if (!sanctityType) return '';
+        
+        const sanctityMap = {
+            'прпп.': 'преподобные',
+            'прп.': 'преподобный',
+            'сщмчч.': 'священномученики',
+            'сщмч.': 'священномученик',
+            'мчч.': 'мученики',
+            'мч.': 'мученик',
+            'мцц.': 'мученицы',
+            'мц.': 'мученица',
+            'свтт.': 'святители',
+            'свт.': 'святитель',
+            'св.': 'святой',
+            'свв.': 'святые',
+            'вввв.': 'великомученики',
+            'вмчч.': 'великомученики',
+            'вмч.': 'великомученик',
+            'вмцц.': 'великомученицы',
+            'вмц.': 'великомученица',
+            'блжж.': 'блаженные',
+            'блж.': 'блаженный',
+            'испп.': 'исповедники',
+            'исп.': 'исповедник',
+            'прав.': 'праведный',
+            'правв.': 'праведные',
+            'апст.': 'апостолы',
+            'ап.': 'апостол',
+            'прор.': 'пророк',
+            'прорр.': 'пророки',
+            'сщиспп.': 'священноисповедники',
+            'сщисп.': 'священноисповедник',
+            'прмчч.': 'преподобномученики',
+            'прмч.': 'преподобномученик',
+            'прмцц.': 'преподобномученицы',
+            'прмц.': 'преподобномученица',
+            'равноап.': 'равноапостольный'
+        };
+        
+        // Проверяем точное совпадение (с учётом регистра)
+        const lowerSanctity = sanctityType.toLowerCase();
+        if (sanctityMap[lowerSanctity]) {
+            return sanctityMap[lowerSanctity];
+        }
+        
+        // Особые случаи с дополнительными словами
+        // "ап. от 70-ти" → "апостол от 70-ти"
+        if (lowerSanctity.includes('ап. от 70')) {
+            return sanctityType.replace(/ап\./gi, 'апостол');
+        }
+        
+        // Если не нашли, возвращаем как есть
+        return sanctityType;
+    }
+
+    // Преобразование имени из именительного падежа в родительный
+    function toGenitiveCase(name) {
+        if (!name) return '';
+        
+        let result = name.trim();
+        
+        // Словарь имён для склонения (именительный -> родительный)
+        const firstNames = {
+            'Афана́сий': 'Афана́сия',
+            'Ана́стасия': 'Ана́стасии',
+            'Григо́рий': 'Григо́рия',
+            'Кири́лл': 'Кири́лла',
+            'Влади́мир': 'Влади́мира',
+            'Ла́зарь': 'Ла́заря',
+            'Феофила́кт': 'Феофила́кта',
+            'Феодори́т': 'Феодори́та',
+            'Доме́тий': 'Доме́тия',
+            'Иоа́нн': 'Иоа́нна',
+            'Ерм': 'Е́рма'
+        };
+        
+        // Словарь прозваний для склонения
+        const surnames = {
+            'Никомидийский': 'Никомидийского',
+            'Муромский': 'Муромского',
+            'Мурманский': 'Мурманского',
+            'Олонецкий': 'Олонецкого',
+            'Персиянин': 'Персиянина',
+            'Знаменский': 'Знаменского',
+            'Ушков': 'Ушкова',
+            'Антиохийский': 'Антиохийского',
+            'Филиппопольский': 'Филиппопольского'
+        };
+        
+        // Склоняем первое имя (берём первое слово до пробела или запятой)
+        const firstWord = result.split(/[\s,]/)[0];
+        for (const [nom, gen] of Object.entries(firstNames)) {
+            // Сравниваем без учёта ударений
+            if (firstWord.normalize('NFD').replace(/[\u0300-\u036f]/g, '') === 
+                nom.normalize('NFD').replace(/[\u0300-\u036f]/g, '')) {
+                result = result.replace(firstWord, gen);
+                break;
+            }
+        }
+        
+        // Склоняем прозвания
+        for (const [nom, gen] of Object.entries(surnames)) {
+            const regex = new RegExp(nom.replace(/[\u0300-\u036f]/g, ''), 'gi');
+            result = result.replace(regex, gen);
+        }
+        
+        // Исповедник -> Исповедника
+        result = result.replace(/Испове[д́]?дник/gi, (match) => {
+            if (match.includes('́')) {
+                return 'Испове́дника';
+            }
+            return 'Исповедника';
+        });
+        
+        return result;
     }
 
     // Load calendar data for specific date
@@ -2418,7 +3214,22 @@ document.addEventListener('DOMContentLoaded', () => {
             // Saints Short List
             const saintsEl = document.getElementById('saints-short-list');
             if (saintsEl) {
-                const names = (data.saints || data.memory || []).map(s => s.name || s).slice(0, 3);
+                // Формируем полные имена с типом святости в родительном падеже
+                const names = (data.saints || data.memory || []).map(s => {
+                    if (s.type_of_sanctity && s.title) {
+                        // Используем type_of_sanctity (прп., сщмч., мч. и т.д.)
+                        const sanctityType = s.type_of_sanctity;
+                        const expandedSanctity = expandSanctityType(sanctityType);
+                        const genitiveName = toGenitiveCase(s.title);
+                        return `${expandedSanctity} ${genitiveName}`;
+                    } else if (s.title) {
+                        return s.title;
+                    } else if (s.name) {
+                        return s.name;
+                    } else {
+                        return s;
+                    }
+                }).slice(0, 3);
                 saintsEl.textContent = names.length > 0 ? names.join(', ') + (names.length < (data.saints?.length || 0) ? '...' : '.') : '';
             }
 
@@ -2443,24 +3254,27 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('[Calendar] API Response:', {
                 image: data.image,
                 icon: data.icon,
-                description: data.description
+                description: data.description,
+                texts: data.texts
             });
+            
+            console.log('[Calendar] texts[0].text:', data.texts?.[0]?.text);
 
             // --- Редактирование: Улучшенная логика извлечения иконки ---
             let dayIconUrl = null;
-            
+
             // 1. Приоритет праздникам
             if (data.holidays && data.holidays.length > 0) {
                 const holiday = data.holidays.find(h => h.imgs && h.imgs.length > 0);
                 if (holiday) dayIconUrl = holiday.imgs[0].original_absolute_url;
             }
-            
+
             // 2. Иконы Божией Матери
             if (!dayIconUrl && data.ikons && data.ikons.length > 0) {
                 const ikon = data.ikons.find(i => i.imgs && i.imgs.length > 0);
                 if (ikon) dayIconUrl = ikon.imgs[0].original_absolute_url;
             }
-            
+
             // 3. Святые дня
             if (!dayIconUrl && data.saints && data.saints.length > 0) {
                 const saint = data.saints.find(s => s.imgs && s.imgs.length > 0);
@@ -2470,8 +3284,23 @@ document.addEventListener('DOMContentLoaded', () => {
             // Fallback на старые поля, если вдруг появятся
             if (!dayIconUrl) dayIconUrl = data.image || data.icon;
 
-            renderIconOfDay(dayIconUrl, data.description);
-            renderReadings(data.readings || []);
+            // Собираем иконы святых (по одной иконе от каждого святого)
+            const saintsIcons = [];
+            if (data.saints && data.saints.length > 0) {
+                data.saints.forEach(saint => {
+                    if (saint.imgs && saint.imgs.length > 0) {
+                        // Берём первую икону в высоком качестве (2x)
+                        saintsIcons.push(saint.imgs[0].preview_absolute_url_2x || saint.imgs[0].original_absolute_url);
+                    }
+                });
+            }
+
+            renderIconOfDay(dayIconUrl, data.description, saintsIcons);
+            
+            console.log('[Calendar] API readings:', data.readings);
+            console.log('[Calendar] API texts:', data.texts);
+            
+            renderReadings(data.readings || [], data.texts || []);
             renderSaints(data.saints || data.memory || []);
 
         } catch (error) {
@@ -2755,6 +3584,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Initialization ---
+    initPsalm50Audio(); // Настройка аудио Псалма 50
     applyTheme();
     updateAppLanguage();
     applyLanguageFont();

@@ -43,8 +43,8 @@
                                 </div>
 
                                 <!-- Icon of the Day -->
-                                <div id="icon-of-day-block" class="mt-0 w-full">
-                                    <div id="icon-of-day-container" class="w-full h-auto max-h-48 flex flex-col items-center justify-start">
+                                <div id="icon-of-day-block" class="w-full">
+                                    <div id="icon-of-day-container" class="w-full h-auto flex flex-col items-center justify-start">
                                         <!-- Icon will be injected here -->
                                     </div>
                                 </div>
@@ -55,12 +55,12 @@
                                 </div>
 
                                 <!-- 3 Cells Block -->
-                                <div class="flex items-center justify-center gap-2 mt-4">
+                                <div class="flex items-center justify-center gap-2 mt-4 relative group w-full">
                                     <!-- Prev Day Button -->
-                                    <button id="prev-date-btn" class="flex items-center justify-center w-10 h-10 bg-white/5 rounded-xl border border-[#E1C16E]/20 text-text-muted hover:text-primary-gold active:scale-90 transition-all">
+                                    <button id="prev-date-btn" class="absolute -left-12 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-[#1a1914] rounded-xl border border-[#E1C16E]/20 text-[#E1C16E] flex items-center justify-center hover:bg-[#E1C16E]/10 active:scale-95 active:opacity-100 transition-all shadow-lg shadow-black/40">
                                         <span class="material-symbols-outlined text-2xl">chevron_left</span>
                                     </button>
-                                    
+
                                     <!-- New Style Date -->
                                     <button id="date-display-btn" class="flex items-center justify-end p-3 bg-white/5 rounded-xl border border-[#E1C16E]/20">
                                         <div class="text-right">
@@ -79,9 +79,9 @@
                                             <p class="text-xl font-['Ruslan_Display'] text-[#E1C16E]" id="old-style-date">7 марта</p>
                                         </div>
                                     </div>
-                                    
+
                                     <!-- Next Day Button -->
-                                    <button id="next-date-btn" class="flex items-center justify-center w-10 h-10 bg-white/5 rounded-xl border border-[#E1C16E]/20 text-text-muted hover:text-primary-gold active:scale-90 transition-all">
+                                    <button id="next-date-btn" class="absolute -right-12 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-[#1a1914] rounded-xl border border-[#E1C16E]/20 text-[#E1C16E] flex items-center justify-center hover:bg-[#E1C16E]/10 active:scale-95 active:opacity-100 transition-all shadow-lg shadow-black/40">
                                         <span class="material-symbols-outlined text-2xl">chevron_right</span>
                                     </button>
                                 </div>
@@ -115,7 +115,7 @@
                 <div class="px-4 mt-8 animate-fade-in-up" style="animation-delay: 0.1s">
                     <section class="space-y-3">
                         <div class="flex items-center justify-between px-1">
-                            <h3 class="text-[11px] font-bold uppercase tracking-widest text-text-muted" data-t="readingsOfDay">Чтения дня</h3>
+                            <h3 class="text-[11px] font-bold uppercase tracking-widest text-text-muted">Чтения Священного Писания</h3>
                             <span class="material-symbols-outlined text-primary-gold text-xl">menu_book</span>
                         </div>
                         <div id="readings-container" class="glass-card rounded-lg divide-y divide-white/5">
@@ -170,11 +170,23 @@
 
                 <!-- Psalm 50 Snippet -->
                 <div class="px-6 mb-12 animate-fade-in-up" style="animation-delay: 0.2s">
-                    <p class="text-[11px] font-bold text-text-muted text-center mb-4 uppercase tracking-[0.1em] opacity-60">Рекомендуется прочитать Псалом 50</p>
+                    <div class="flex items-center justify-center gap-3 mb-4">
+                        <p data-t="psalm50Recommendation" class="text-[11px] font-bold text-text-muted text-center uppercase tracking-[0.1em] opacity-60 m-0">Рекомендуется прочитать Псалом 50</p>
+                        <button id="psalm-50-play-btn" class="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary transition-all active:scale-95">
+                            <span class="material-symbols-outlined text-lg">play_arrow</span>
+                        </button>
+                    </div>
+
+                    <div id="psalm-50-audio-progress-container" class="hidden mb-6 px-4">
+                        <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                            <div id="psalm-50-audio-progress-bar" class="h-full bg-primary transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+
                     <details class="group cursor-pointer">
                         <summary class="list-none outline-none">
                             <div class="relative">
-                                <p class="text-[15px] italic text-text-muted font-serif leading-loose text-justify line-clamp-3 group-open:line-clamp-none transition-all duration-500">
+                                <p id="psalm-50-text" data-t="psalm50Full" class="text-[15px] italic text-text-muted font-serif leading-loose text-justify line-clamp-3 group-open:line-clamp-none transition-all duration-500">
                                     Помилуй мя, Боже, по велицей милости Твоей, и по множеству щедрот Твоих очисти беззаконие мое...
                                 </p>
                                 <div class="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-bg to-transparent group-open:hidden"></div>
@@ -190,7 +202,13 @@
                         <h2 class="text-xl font-serif font-bold text-primary-gold" data-t="prepSectionTitle">Подготовка</h2>
                         <div class="h-[1px] flex-1 bg-border"></div>
                     </div>
-                    
+
+                    <div class="px-4 mb-8 text-center">
+                        <p class="text-base font-serif italic text-text-muted leading-relaxed max-w-3xl mx-auto">
+                            Исповедь — это не экзамен и не отчет, а искренняя встреча с Отцом, Который ждет нас с распростертыми объятиями. Пусть этот путь поможет вам оставить тяжесть прошлого и с легким сердцем шагнуть навстречу новой жизни.
+                        </p>
+                    </div>
+
                     <div id="preparation-intro-container" class="space-y-4 mb-8">
                         <!-- Rendered by JS -->
                     </div>
@@ -480,16 +498,6 @@
 
                     <!-- Footer Info -->
                     <section class="text-center pt-10 pb-20">
-                        <div class="w-20 h-20 mx-auto mb-6 rounded-[2rem] bg-surface flex items-center justify-center border border-border/50 shadow-inner">
-                            <span class="material-symbols-outlined text-[48px] text-primary-gold opacity-80">church</span>
-                        </div>
-                        <h2 class="text-2xl font-serif font-bold text-text-main tracking-tight">Исповедь</h2>
-                        <p class="text-xs text-text-muted mt-2 font-medium opacity-60">Версия 1.0.4 • 2024</p>
-                        <div class="mt-8 flex justify-center gap-4">
-                            <div class="h-[1px] w-8 bg-border my-auto"></div>
-                            <span class="text-[10px] font-bold text-primary-gold uppercase tracking-[0.3em]">A.M.D.G.</span>
-                            <div class="h-[1px] w-8 bg-border my-auto"></div>
-                        </div>
                     </section>
                 </div>
             </main>
@@ -550,8 +558,9 @@
                 <div class="space-y-6 text-sm text-text-muted leading-relaxed">
                     <p data-t="aboutText1"></p>
                     <div class="p-5 rounded-2xl bg-primary/5 border border-primary/10 text-primary italic font-medium" data-t="aboutImportant"></div>
-                    <div class="pt-6 border-t border-border space-y-2 opacity-60">
-                        <p class="text-[11px] font-bold text-text-main uppercase tracking-widest" data-t="appHelperVersion">Версия 1.0.4</p>
+                    <div class="pt-6 border-t border-border space-y-2 opacity-60 text-center">
+                        <p class="text-[11px] font-bold text-text-main uppercase tracking-widest" data-t="appHelperVersion">Версия 2.0.5</p>
+                        <p class="text-[10px] italic text-text-muted">2026 г. Тюмень</p>
                         <p class="text-[10px] italic text-text-muted" data-t="madeWithPrayer">Создано с молитвой и любовью</p>
                     </div>
                 </div>
