@@ -20,11 +20,56 @@ document.addEventListener('DOMContentLoaded', () => {
         settings: document.getElementById('tab-settings'),
     };
 
-    // --- Global Speech Function (Stub) ---
-    window.toggleSpeech = (text, iconId) => {
-        console.log('[Speech] Toggling speech for:', text.substring(0, 30) + '...');
-        if (typeof showToast === 'function') {
-            showToast(t('audioPlaybackNotAvailable'));
+    // --- Global Speech Function ---
+    window.toggleSpeech = (text, iconId, audioIndex) => {
+        console.log('[Speech] Toggling speech:', iconId, audioIndex);
+        
+        const icon = document.getElementById(iconId);
+        
+        // Если уже играет это аудио
+        if (window.currentAudio && window.currentAudio._preparationIndex === audioIndex) {
+            if (window.currentAudio.paused) {
+                window.currentAudio.play();
+                if (icon) icon.textContent = 'pause';
+            } else {
+                window.currentAudio.pause();
+                if (icon) icon.textContent = 'volume_up';
+            }
+            return;
+        }
+        
+        // Останавливаем предыдущее аудио
+        if (window.currentAudio) {
+            window.currentAudio.pause();
+            window.currentAudio = null;
+        }
+        
+        // Сбрасываем только иконки динамиков (не стрелки!)
+        document.querySelectorAll('#preparation-intro-container button .material-symbols-outlined').forEach(i => {
+            i.textContent = 'volume_up';
+        });
+        
+        // Воспроизводим аудиофайл подготовки
+        if (audioIndex) {
+            const audioUrl = `audio/preparation_${audioIndex}.mp3`;
+            const audio = new Audio(audioUrl);
+            audio._preparationIndex = audioIndex;
+            window.currentAudio = audio;
+            
+            if (icon) icon.textContent = 'pause';
+            
+            audio.play().catch(err => {
+                console.error('[Preparation Audio] Play error:', err);
+                if (icon) icon.textContent = 'volume_up';
+            });
+            
+            audio.addEventListener('ended', () => {
+                if (icon) icon.textContent = 'volume_up';
+                window.currentAudio = null;
+            });
+            
+            audio.addEventListener('play', () => { if (icon) icon.textContent = 'pause'; });
+            audio.addEventListener('pause', () => { if (icon) icon.textContent = 'volume_up'; });
         }
     };
 
@@ -123,8 +168,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let isDigitalMentorEnabled = localStorage.getItem('digitalMentor') === 'true';
 
-    // --- Biometric Protection State ---
-    let isBiometricEnabled = localStorage.getItem('biometricEnabled') === 'true';
 
     // --- Teleprompter State ---
     let isAutoscrolling = false;
@@ -216,20 +259,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Protection for "My Confession" tab — запрашиваем ПИН только если есть грехи в списке
         if (tabId === 'church-today' && isPinEnabled && selectedSins.length > 0) {
-            let authenticated = false;
-
-            if (isBiometricEnabled) {
-                authenticated = await verifyBiometric();
-            }
-
             // Если уже разблокировано в этой сессии, не запрашиваем ПИН снова
             if (!isUnlocked) {
-                if (!authenticated && hashedPin) {
+                if (hashedPin) {
                     pendingTabAfterAuth = 'church-today';
                     openPinPad(false);
                     return;
-                } else if (!authenticated) {
-                    return; // Access denied or cancelled bio without PIN
                 }
             }
         }
@@ -258,51 +293,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function verifyBiometric() {
-        if (!window.PublicKeyCredential) {
-            alert(t('biometricNotSupported'));
-            return false;
-        }
-
-        try {
-            // Standard WebAuthn check for local identity verify. 
-            // Note: In real app, you'd store a credential, but for simple local 
-            // 'is it you' on mobile, some WebViews support simpler 'get'.
-            // Here we use a dummy request to trigger the native prompt if possible.
-            const challenge = new Uint8Array(32);
-            window.crypto.getRandomValues(challenge);
-
-            // This is a minimal WebAuthn call that often triggers biometric prompt on Android
-            const options = {
-                publicKey: {
-                    challenge: challenge,
-                    timeout: 60000,
-                    allowCredentials: [], // Forces it to use platform authenticator if user is registered, 
-                    // or just generic device auth if configured.
-                    userVerification: "required"
-                }
-            };
-
-            // Note: Actual WebAuthn requires a registered credential.
-            // As a "lightweight" alternative for this specific task, 
-            // we'll assume the user might not have a credential registered yet 
-            // or simply simulate the interaction if WebAuthn is unavailable/mocked.
-            // If the user wants "REAL" biometric without a server, WebAuthn is tricky 
-            // without a prior 'create'.
-
-            // Simplified approach for the task: 
-            // Since we can't use NPM packages, we attempt a generic platform verification.
-            // If it fails, we fall back to PIN.
-
-            // Attempting a 'get' with an empty list often prompts for device screen lock/bio
-            // on modern Android/Chrome if 'userVerification' is required.
-            const credential = await navigator.credentials.get(options);
-            return !!credential;
-        } catch (err) {
-            console.error('Biometric error:', err);
-            return false;
-        }
-    }
 
     navButtons.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -506,58 +496,62 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 1. Clear container
         container.innerHTML = '';
-        
-        console.log('Starting renderPreparation. Items count:', preparationData.length);
 
-        const accentColors = {
-            indigo: { bg: 'bg-indigo-500/15', border: 'border-indigo-500/20', icon: 'text-indigo-400' },
-            amber: { bg: 'bg-amber-500/15', border: 'border-amber-500/20', icon: 'text-amber-400' },
-            rose: { bg: 'bg-rose-500/15', border: 'border-rose-500/20', icon: 'text-rose-400' },
-            emerald: { bg: 'bg-emerald-500/15', border: 'border-emerald-500/20', icon: 'text-emerald-400' },
-            sky: { bg: 'bg-sky-500/15', border: 'border-sky-500/20', icon: 'text-sky-400' },
-        };
+        console.log('Starting renderPreparation. Items count:', preparationData.length);
 
         let resultHtml = '';
 
         // 2. Loop through ALL data
         preparationData.forEach((card, index) => {
             console.log(`Rendering card ${index + 1}: ${card.id}`);
-            
+
             const title = t(card.titleKey);
             const body = t(card.bodyKey);
-            const c = accentColors[card.color] || accentColors.indigo;
 
             const scripture = card.scriptureKey ? t(card.scriptureKey) : '';
             const scripture2 = card.scriptureKey2 ? t(card.scriptureKey2) : '';
+            const scripture3 = card.scriptureKey3 ? t(card.scriptureKey3) : '';
             const saints = card.saintsKey ? t(card.saintsKey) : '';
             const advice = card.adviceKey ? t(card.adviceKey) : '';
             const setup = card.setupKey ? t(card.setupKey) : '';
 
-            const speechParts = [body, scripture, scripture2, saints, advice, setup].filter(p => p && p.trim().length > 0);
+            const speechParts = [body, scripture, scripture2, scripture3, saints, advice, setup].filter(p => p && p.trim().length > 0);
             const fullSpeechText = speechParts.join('. ');
-            const quoteClass = "italic text-slate-300 border-l-4 border-primary pl-4 my-4 leading-relaxed text-sm";
+            const quoteClass = "italic text-slate-300/90 border-l-4 border-[#E1C16E]/40 pl-4 my-4 leading-relaxed text-sm shadow-[0_0_10px_rgba(225,193,110,0.1)]";
 
             resultHtml += `
-            <details name="accordion-group" class="group glass-panel rounded-2xl overflow-hidden transition-all duration-500 mb-4">
-                <summary class="cursor-pointer flex items-center gap-4 p-5 select-none list-none [&::-webkit-details-marker]:hidden outline-none">
-                    <div class="w-10 h-10 rounded-xl ${c.bg} border ${c.border} flex items-center justify-center shrink-0">
-                        <span class="material-symbols-outlined ${c.icon} text-xl">${card.icon}</span>
-                    </div>
-                    <span class="flex-1 text-lg font-bold text-white tracking-tight">${title}</span>
-                    <button class="w-8 h-8 rounded-full flex items-center justify-center text-white/30 hover:text-primary transition-all active:scale-90" 
-                            onclick="event.preventDefault(); event.stopPropagation(); window.toggleSpeech(\`${fullSpeechText.replace(/"/g, '&quot;').replace(/'/g, "\\'")}\`, 'tts-icon-${card.id}')">
-                        <span id="tts-icon-${card.id}" class="material-symbols-outlined text-xl">volume_up</span>
+            <details name="accordion-group" class="group glass-panel rounded-2xl overflow-hidden transition-all duration-500 mb-4
+                           bg-gradient-to-br from-[#1a1914] via-[#1f1d1a] to-[#151412]
+                           shadow-[inset_0_0_20px_rgba(225,193,110,0.03),0_4px_20px_rgba(0,0,0,0.4)]
+                           hover:shadow-[inset_0_0_30px_rgba(225,193,110,0.06),0_8px_30px_rgba(225,193,110,0.1)]
+                           group-open:shadow-[inset_0_0_25px_rgba(225,193,110,0.05),0_0_40px_rgba(225,193,110,0.15)]
+                           border border-[#E1C16E]/10 hover:border-[#E1C16E]/20">
+                <summary class="cursor-pointer flex items-center gap-4 p-5 select-none list-none [&::-webkit-details-marker]:hidden outline-none
+                              hover:bg-[#E1C16E]/5 transition-all duration-300">
+                    <span class="flex-1 text-lg font-bold text-[#E1C16E] tracking-tight drop-shadow-[0_0_8px_rgba(225,193,110,0.5)] group-hover:drop-shadow-[0_0_12px_rgba(225,193,110,0.7)] transition-all duration-300">${title}</span>
+                    <button class="w-8 h-8 rounded-full flex items-center justify-center text-white/30 hover:text-[#E1C16E] transition-all active:scale-90"
+                            onclick="event.preventDefault(); event.stopPropagation(); window.toggleSpeech(\`${fullSpeechText.replace(/"/g, '&quot;').replace(/'/g, "\\'")}\`, 'tts-icon-${card.id}', ${index + 1})">
+                        <span id="tts-icon-${card.id}" class="material-symbols-outlined text-xl drop-shadow-[0_0_5px_currentColor]">volume_up</span>
                     </button>
-                    <span class="material-symbols-outlined text-white/30 group-open:rotate-180 transition-transform duration-300 text-xl">expand_more</span>
+                    <span class="material-symbols-outlined text-[#E1C16E]/40 group-open:rotate-180 transition-transform duration-300 text-xl drop-shadow-[0_0_5px_rgba(225,193,110,0.3)]">expand_more</span>
                 </summary>
-                <div class="px-5 pb-5 pt-1">
-                    <div class="w-full h-px bg-white/5 mb-4"></div>
-                    ${scripture ? `<p class="${quoteClass}">${scripture}</p>` : ''}
-                    <p class="text-base text-slate-200 leading-relaxed mb-4">${body}</p>
-                    ${saints ? `<p class="${quoteClass}">${saints}</p>` : ''}
-                    ${advice ? `<p class="text-sm font-bold text-amber-200/80 mb-2">${advice}</p>` : ''}
-                    ${setup ? `<p class="text-sm font-medium text-slate-300 mb-4">${setup}</p>` : ''}
-                    ${scripture2 ? `<p class="${quoteClass}">${scripture2}</p>` : ''}
+                <div class="px-5 pb-5 pt-1 bg-gradient-to-b from-transparent via-[#E1C16E]/[0.02] to-transparent">
+                    <div class="w-full h-px bg-gradient-to-r from-transparent via-[#E1C16E]/20 to-transparent mb-4 shadow-[0_0_10px_rgba(225,193,110,0.2)]"></div>
+                    <p class="text-base text-slate-200/90 leading-relaxed mb-4 text-shadow-subtle">${body}</p>
+                    ${scripture && card.id !== 'prayer_fasting' ? `<p class="${quoteClass}">${scripture}</p>` : ''}
+                    ${scripture && card.id === 'prayer_fasting' ? `<p class="text-base text-slate-200/90 leading-relaxed text-shadow-subtle">${scripture}</p>` : ''}
+                    ${scripture2 && card.id === 'reconciliation' ? `<p class="text-base text-slate-200/90 leading-relaxed text-shadow-subtle">${scripture2}</p>` : ''}
+                    ${scripture2 && card.id === 'prayer_fasting' ? `<p class="text-base text-slate-200/90 leading-relaxed text-shadow-subtle">${scripture2}</p>` : ''}
+                    ${scripture2 && card.id === 'confession_day' ? `<p class="text-base text-slate-200/90 leading-relaxed text-shadow-subtle">${scripture2}</p>` : ''}
+                    ${scripture2 && card.id !== 'reconciliation' && card.id !== 'prayer_fasting' && card.id !== 'confession_day' ? `<p class="${quoteClass}">${scripture2}</p>` : ''}
+                    ${card.id === 'awareness' && saints ? `<p class="text-base text-slate-200/90 leading-relaxed text-shadow-subtle">${saints}</p>` : ''}
+                    ${card.id === 'prayer_fasting' && saints ? `<p class="${quoteClass}">${saints}</p>` : ''}
+                    ${card.id !== 'awareness' && card.id !== 'reconciliation' && card.id !== 'prayer_fasting' && card.id !== 'confession_day' && saints ? `<p class="${quoteClass}">${saints}</p>` : ''}
+                    ${card.id === 'prayer_fasting' && advice ? `<p class="text-base text-slate-200/90 leading-relaxed text-shadow-subtle">${advice}</p>` : ''}
+                    ${card.id === 'confession_day' && advice ? `<p class="text-base text-slate-200/90 leading-relaxed text-shadow-subtle">${advice}</p>` : ''}
+                    ${card.id !== 'prayer_fasting' && card.id !== 'confession_day' && advice ? `<p class="text-sm font-bold text-[#E1C16E]/80 mb-2 drop-shadow-[0_0_5px_rgba(225,193,110,0.3)]">${advice}</p>` : ''}
+                    ${setup ? `<p class="text-base text-slate-200/90 leading-relaxed text-shadow-subtle">${setup}</p>` : ''}
+                    ${scripture3 ? `<p class="${quoteClass}">${scripture3}</p>` : ''}
                 </div>
             </details>
             `;
@@ -1097,6 +1091,11 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.classList.toggle('bg-primary', isTarget);
             btn.classList.toggle('text-white', isTarget);
         });
+        // Обновляем описание режима
+        const viewModeDesc = document.getElementById('view-mode-desc');
+        if (viewModeDesc) {
+            viewModeDesc.textContent = isDetailedView ? t('viewModeDetailedDesc') : t('viewModeSimpleDesc');
+        }
         if (toggleAllBtn) {
             toggleAllBtn.classList.toggle('hidden', !isDetailedView || selectedSins.length === 0);
         }
@@ -1199,7 +1198,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             pinPadSuccessCallback = null;
                         }
 
-                        updateBiometricUIState(); // Enable biometric toggle now that PIN is set
+                        updatePrivacyUI(); // Enable privacy options now that PIN is set
                         showToast(t('pinSuccess'));
                         closePinPad();
                     } else {
@@ -1369,17 +1368,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Сбрасываем переменные состояния
                 isPinEnabled = false;
                 hashedPin = '';
-                isBiometricEnabled = false;
                 selectedSins = [];
                 personalNotes = '';
                 isUnlocked = false;
 
-                // Обновляем UI биометрии
-                if (biometricToggle) {
-                    biometricToggle.checked = false;
-                    biometricToggle.disabled = true;
-                }
-                updateBiometricUIState();
+                updatePrivacyUI();
 
                 // Очищаем личные заметки в интерфейсе
                 if (personalNotesArea) {
@@ -1489,9 +1482,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (storedPinEnabled && !storedHashedPin) {
             console.log('[PIN] Reset: pinEnabled=true but hashedPin is empty');
             localStorage.setItem('pinEnabled', 'false');
-            localStorage.setItem('biometricEnabled', 'false');
             isPinEnabled = false;
-            isBiometricEnabled = false;
         }
         
         // Синхронизируем переменные с localStorage
@@ -1526,7 +1517,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.log('[PIN] Enabling PIN function (PIN already exists)');
                     isPinEnabled = true;
                     localStorage.setItem('pinEnabled', 'true');
-                    updateBiometricUIState();
+                    updatePrivacyUI();
                     showToast(t('pinEnabled'));
                 } else {
                     // ПИНа нет — открываем режим установки
@@ -1538,7 +1529,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         pinToggle.checked = true;
                         isPinEnabled = true;
                         localStorage.setItem('pinEnabled', 'true');
-                        updateBiometricUIState();
+                        updatePrivacyUI();
                         console.log('[PIN] PIN setup success - toggle activated');
                     });
                 }
@@ -1548,14 +1539,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 isPinEnabled = false;
                 localStorage.setItem('pinEnabled', 'false');
 
-                // Также отключаем биометрию
-                isBiometricEnabled = false;
-                localStorage.setItem('biometricEnabled', 'false');
-                if (biometricToggle) {
-                    biometricToggle.checked = false;
-                    biometricToggle.disabled = true;
-                }
-                updateBiometricUIState();
+                updatePrivacyUI();
 
                 showToast(t('pinDisabled'));
             }
@@ -1564,41 +1548,19 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('[PIN] pin-toggle element NOT FOUND in DOM!');
     }
 
-    const biometricToggle = document.getElementById('biometric-toggle');
-    const biometricToggleText = document.getElementById('biometric-toggle-text');
     const changePinContainer = document.getElementById('change-pin-container');
     const changePinBtn = document.getElementById('change-pin-btn');
 
-    function updateBiometricUIState() {
-        if (!biometricToggle) return;
+    function updatePrivacyUI() {
         const pinActive = isPinEnabled && hashedPin;
         
         // Показываем/скрываем кнопку "Изменить ПИН-код"
         if (changePinContainer) {
             changePinContainer.classList.toggle('hidden', !pinActive);
         }
-        
-        biometricToggle.disabled = !pinActive;
-        if (biometricToggleText) {
-            biometricToggleText.classList.toggle('opacity-50', !pinActive);
-        }
-        const parentLabel = biometricToggle.nextElementSibling;
-        if (parentLabel && parentLabel.classList.contains('peer-focus:outline-none')) {
-            // the div with transitions
-            parentLabel.classList.toggle('opacity-50', !pinActive);
-        }
     }
 
-    if (biometricToggle) {
-        biometricToggle.checked = isBiometricEnabled;
-        updateBiometricUIState();
-
-        biometricToggle.addEventListener('change', (e) => {
-            isBiometricEnabled = e.target.checked;
-            localStorage.setItem('biometricEnabled', isBiometricEnabled);
-        });
-    }
-
+    updatePrivacyUI();
     // Обработчик кнопки "Изменить ПИН-код"
     if (changePinBtn) {
         changePinBtn.addEventListener('click', () => {
@@ -2555,10 +2517,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return result;
     }
 
-    // Универсальный сброс UI всех медиа-элементов (чтений и святых)
+    // Универсальный сброс UI всех медиа-элементов
     function resetAllMediaUI() {
-        // Сброс чтений и святых
-        document.querySelectorAll('.reading-row, .saint-row').forEach(row => {
+        // Сброс чтений
+        document.querySelectorAll('.reading-row').forEach(row => {
             const icon = row.querySelector('.play-btn span');
             const hasAudio = row.dataset.hasAudio === 'true';
             if (icon) icon.textContent = hasAudio ? 'play_arrow' : 'volume_up';
@@ -2799,8 +2761,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if ('speechSynthesis' in window) {
                     speechSynthesis.cancel();
                 }
-                
-                resetAllRowsUI();
+
+                resetAllMediaUI();
 
                 if (audioUrl) {
                     icon.textContent = 'pause';
@@ -2902,134 +2864,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
             
-            container.appendChild(row);
-        });
-    }
-
-    // Render saints memory
-    function renderSaints(saints) {
-        const container = document.getElementById('saints-container');
-        if (!container) return;
-
-        container.innerHTML = '';
-
-        if (!saints || saints.length === 0) {
-            container.innerHTML = `
-                <div class="p-4 text-center text-text-muted">
-                    <span class="material-symbols-outlined text-4xl mb-2 opacity-50">brightness_7</span>
-                    <p class="text-sm">${t('noData') || 'Нет данных'}</p>
-                </div>
-            `;
-            return;
-        }
-
-        saints.forEach((saint, index) => {
-            const row = document.createElement('div');
-            row.className = "saint-row p-4 hover:bg-white/5 transition-colors cursor-pointer group";
-            
-            let saintName = '';
-            if (saint.type_of_sanctity && saint.title) {
-                const expandedSanctity = expandSanctityType(saint.type_of_sanctity);
-                const genitiveName = toGenitiveCase(saint.title);
-                saintName = `${expandedSanctity} ${genitiveName}`;
-            } else if (saint.title) {
-                saintName = saint.title;
-            } else if (saint.name) {
-                saintName = saint.name;
-            } else {
-                saintName = saint;
-            }
-
-            const audioUrl = saint.link_mp3 || saint.audio || saint.mp3_remote;
-            row.dataset.hasAudio = audioUrl ? 'true' : 'false';
-
-            row.innerHTML = `
-                <div class="flex items-start gap-4">
-                    <button class="play-btn size-8 rounded-full border border-red-500/30 flex items-center justify-center text-red-500 hover:bg-red-500/10 active:scale-90 transition-all flex-shrink-0">
-                        <span class="material-symbols-outlined text-lg">${audioUrl ? 'play_arrow' : 'volume_up'}</span>
-                    </button>
-                    <div class="flex-1 min-w-0">
-                        <p class="font-serif text-lg text-text-main leading-snug">
-                            ${saintName}
-                        </p>
-                        ${audioUrl ? `
-                        <div class="audio-progress h-1 bg-white/10 rounded-full mt-2 overflow-hidden opacity-0 transition-opacity">
-                            <div class="progress-bar h-full bg-red-500 transition-all duration-300" style="width: 0%"></div>
-                        </div>
-                        ` : ''}
-                    </div>
-                </div>
-            `;
-
-            row.addEventListener('click', () => {
-                const icon = row.querySelector('.play-btn span');
-                const progressBox = row.querySelector('.audio-progress');
-                const progressBar = row.querySelector('.progress-bar');
-
-                // Проверка текущего воспроизведения (МП3)
-                if (window.currentAudio && window.currentAudio._row === row) {
-                    if (window.currentAudio.paused) (window.currentAudio.play(), icon.textContent = 'pause');
-                    else (window.currentAudio.pause(), icon.textContent = 'play_arrow');
-                    return;
-                }
-
-                // Проверка текущего синтеза
-                const isPlayingSameSynth = window._currentSynthRow === row && 'speechSynthesis' in window && speechSynthesis.speaking;
-                
-                // Останавливаем всё старое
-                if (window.currentAudio) (window.currentAudio.pause(), window.currentAudio = null);
-                if ('speechSynthesis' in window) (speechSynthesis.cancel());
-                
-                resetAllMediaUI();
-
-                if (isPlayingSameSynth) {
-                    window._currentSynthRow = null;
-                    return;
-                }
-
-                if (audioUrl) {
-                    icon.textContent = 'pause';
-                    if (progressBox) progressBox.classList.remove('opacity-0');
-                    const audio = new Audio(audioUrl);
-                    audio._row = row;
-                    window.currentAudio = audio;
-                    
-                    audio.addEventListener('timeupdate', () => {
-                        const percent = (audio.currentTime / audio.duration) * 100;
-                        if (progressBar) progressBar.style.width = `${percent}%`;
-                    });
-
-                    audio.addEventListener('ended', () => {
-                        resetAllMediaUI();
-                        window.currentAudio = null;
-                        const next = row.nextElementSibling;
-                        if (next && next.classList.contains('saint-row')) {
-                            next.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            next.click();
-                        }
-                    });
-
-                    audio.play().catch(e => console.error(e));
-                } else {
-                    icon.textContent = 'pause';
-                    window._currentSynthRow = row;
-                    if ('speechSynthesis' in window) {
-                        const utterance = new SpeechSynthesisUtterance(saintName);
-                        utterance.lang = 'ru-RU';
-                        utterance.rate = 0.9;
-                        utterance.onend = () => {
-                            resetAllMediaUI();
-                            window._currentSynthRow = null;
-                            const next = row.nextElementSibling;
-                            if (next && next.classList.contains('saint-row')) {
-                                next.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                next.click();
-                            }
-                        };
-                        speechSynthesis.speak(utterance);
-                    }
-                }
-            });
             container.appendChild(row);
         });
     }
@@ -3296,12 +3130,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             renderIconOfDay(dayIconUrl, data.description, saintsIcons);
-            
+
             console.log('[Calendar] API readings:', data.readings);
             console.log('[Calendar] API texts:', data.texts);
-            
+
             renderReadings(data.readings || [], data.texts || []);
-            renderSaints(data.saints || data.memory || []);
 
         } catch (error) {
             console.error('[Calendar] Error:', error);
