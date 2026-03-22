@@ -6,7 +6,7 @@ import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import { getSinsData, setProfile, getProfile } from './data/sins.js';
 import { translations } from './data/translations.js';
-import { preparationData } from './data/preparation.js';
+import { preparationData, communionPrep } from './data/preparation.js';
 import { quotes } from './data/quotes.js';
 import { prayersData } from './data/prayers.js';
 
@@ -211,6 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateHeader();
         renderCatalog();
         renderPreparation();
+        renderCommunionPrep();
         updateMyList();
         applyFontSize();
         applyViewMode();
@@ -587,6 +588,64 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderRandomQuote();
             });
         }
+    }
+
+    // Render Holy Communion Preparation
+    function renderCommunionPrep() {
+        const container = document.getElementById('communion-prep-container');
+        if (!container) return;
+
+        const card = communionPrep;
+        const title = t(card.titleKey);
+        const body = t(card.bodyKey);
+        const scripture = card.scriptureKey ? t(card.scriptureKey) : '';
+        const scripture2 = card.scriptureKey2 ? t(card.scriptureKey2) : '';
+        const advice = card.adviceKey ? t(card.adviceKey) : '';
+        const setup = card.setupKey ? t(card.setupKey) : '';
+        const scripture3 = card.scriptureKey3 ? t(card.scriptureKey3) : '';
+
+        const speechParts = [body, scripture, scripture2, scripture3, advice, setup].filter(p => p && p.trim().length > 0);
+        const fullSpeechText = speechParts.join('. ');
+        const quoteClass = "italic text-slate-300/90 border-l-4 border-[#E1C16E]/40 pl-4 my-4 leading-relaxed text-sm shadow-[0_0_10px_rgba(225,193,110,0.1)]";
+
+        container.innerHTML = `
+        <details name="communion-accordion" class="group glass-panel rounded-2xl overflow-hidden transition-all duration-500 mb-4
+                       bg-gradient-to-br from-[#1a1914] via-[#1f1d1a] to-[#151412]
+                       shadow-[inset_0_0_20px_rgba(225,193,110,0.03),0_4px_20px_rgba(0,0,0,0.4)]
+                       hover:shadow-[inset_0_0_30px_rgba(225,193,110,0.06),0_8px_30px_rgba(225,193,110,0.1)]
+                       group-open:shadow-[inset_0_0_25px_rgba(225,193,110,0.05),0_0_40px_rgba(225,193,110,0.15)]
+                       border border-[#E1C16E]/10 hover:border-[#E1C16E]/20">
+            <summary class="cursor-pointer flex items-center gap-4 p-5 select-none list-none [&::-webkit-details-marker]:hidden outline-none
+                          hover:bg-[#E1C16E]/5 transition-all duration-300">
+                <span class="flex-1 text-lg font-bold text-[#E1C16E] tracking-tight drop-shadow-[0_0_8px_rgba(225,193,110,0.5)] group-hover:drop-shadow-[0_0_12px_rgba(225,193,110,0.7)] transition-all duration-300">${title}</span>
+                <button class="w-8 h-8 rounded-full flex items-center justify-center text-white/30 hover:text-[#E1C16E] transition-all active:scale-90"
+                        onclick="event.preventDefault(); event.stopPropagation(); window.toggleSpeech(\`${fullSpeechText.replace(/"/g, '&quot;').replace(/'/g, "\\'")}\`, 'tts-icon-${card.id}', 'communion')">
+                    <span id="tts-icon-${card.id}" class="material-symbols-outlined text-xl drop-shadow-[0_0_5px_currentColor]">volume_up</span>
+                </button>
+                <span class="material-symbols-outlined text-[#E1C16E]/40 group-open:rotate-180 transition-transform duration-300 text-xl drop-shadow-[0_0_5px_rgba(225,193,110,0.3)]">expand_more</span>
+            </summary>
+            <div class="px-5 pb-5 pt-1 bg-gradient-to-b from-transparent via-[#E1C16E]/[0.02] to-transparent">
+                <div class="w-full h-px bg-gradient-to-r from-transparent via-[#E1C16E]/20 to-transparent mb-4 shadow-[0_0_10px_rgba(225,193,110,0.2)]"></div>
+                <p class="text-base text-slate-200/90 leading-relaxed mb-4 text-shadow-subtle">${body}</p>
+                ${scripture ? `<p class="${quoteClass}">${scripture}</p>` : ''}
+                ${scripture2 ? `<p class="text-base text-slate-200/90 leading-relaxed text-shadow-subtle">${scripture2}</p>` : ''}
+                ${advice ? `<p class="text-base text-slate-200/90 leading-relaxed text-shadow-subtle">${advice}</p>` : ''}
+                ${setup ? `<p class="text-base text-slate-200/90 leading-relaxed text-shadow-subtle">${setup}</p>` : ''}
+                ${scripture3 ? `<p class="${quoteClass}">${scripture3}</p>` : ''}
+            </div>
+        </details>
+        `;
+
+        // Auto-scroll logic
+        container.querySelectorAll('details').forEach(details => {
+            details.ontoggle = () => {
+                if (details.open) {
+                    setTimeout(() => {
+                        details.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 50);
+                }
+            };
+        });
     }
 
 

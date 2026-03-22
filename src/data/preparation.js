@@ -41,19 +41,20 @@ export const preparationData = [
         setupKey: 'prep_confession_day_setup',
         scriptureKey3: 'prep_confession_day_scripture3',
     },
-    {
-        id: 'holy_communion',
-        icon: 'wine_bar',
-        color: 'amber',
-        titleKey: 'prep_holy_communion_title',
-        bodyKey: 'prep_holy_communion_body',
-        scriptureKey: 'prep_holy_communion_scripture',
-        scriptureKey2: 'prep_holy_communion_scripture2',
-        adviceKey: 'prep_holy_communion_advice',
-        setupKey: 'prep_holy_communion_setup',
-        scriptureKey3: 'prep_holy_communion_scripture3',
-    },
 ];
+
+export const communionPrep = {
+    id: 'holy_communion',
+    icon: 'wine_bar',
+    color: 'amber',
+    titleKey: 'prep_holy_communion_title',
+    bodyKey: 'prep_holy_communion_body',
+    scriptureKey: 'prep_holy_communion_scripture',
+    scriptureKey2: 'prep_holy_communion_scripture2',
+    adviceKey: 'prep_holy_communion_advice',
+    setupKey: 'prep_holy_communion_setup',
+    scriptureKey3: 'prep_holy_communion_scripture3',
+};
 
 export const saintsQuotes = [
     {
