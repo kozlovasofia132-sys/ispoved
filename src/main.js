@@ -45,29 +45,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         // Сбрасываем только иконки динамиков (не стрелки!)
-        document.querySelectorAll('#preparation-intro-container button .material-symbols-outlined').forEach(i => {
+        document.querySelectorAll('#preparation-intro-container button .material-symbols-outlined, #communion-prep-container button .material-symbols-outlined').forEach(i => {
             i.textContent = 'volume_up';
         });
-        
+
         // Воспроизводим аудиофайл подготовки
         if (audioIndex) {
             const audioUrl = `audio/preparation_${audioIndex}.mp3`;
             const audio = new Audio(audioUrl);
             audio._preparationIndex = audioIndex;
             window.currentAudio = audio;
-            
+
             if (icon) icon.textContent = 'pause';
-            
+
             audio.play().catch(err => {
                 console.error('[Preparation Audio] Play error:', err);
                 if (icon) icon.textContent = 'volume_up';
             });
-            
+
             audio.addEventListener('ended', () => {
                 if (icon) icon.textContent = 'volume_up';
                 window.currentAudio = null;
             });
-            
+
             audio.addEventListener('play', () => { if (icon) icon.textContent = 'pause'; });
             audio.addEventListener('pause', () => { if (icon) icon.textContent = 'volume_up'; });
         }
@@ -137,6 +137,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const audioPlayPauseBtn = document.getElementById('audio-play-pause-btn');
     const audioPlayIcon = document.getElementById('audio-play-icon');
     const audioProgress = document.getElementById('audio-progress');
+    const audioProgressContainer = document.getElementById('audio-progress-container');
+
+    console.log('[Audio Debug] Player Bar:', !!audioPlayerBar);
+    console.log('[Audio Debug] Play Button:', !!audioPlayPauseBtn);
 
     const previewIntro = document.getElementById('preview-intro');
     const previewContent = document.getElementById('preview-content');
@@ -179,6 +183,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let isAudioPlaying = false;
     let audioProgressValue = 0;
     let audioIntervalId = null;
+    const currentGlobalAudio = document.getElementById('global-audio-element');
+    let currentPrayerIdInPlayer = null;
 
     // --- Privacy by Design State ---
     let isPinEnabled = localStorage.getItem('pinEnabled') === 'true';
@@ -600,11 +606,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const body = t(card.bodyKey);
         const scripture = card.scriptureKey ? t(card.scriptureKey) : '';
         const scripture2 = card.scriptureKey2 ? t(card.scriptureKey2) : '';
-        const advice = card.adviceKey ? t(card.adviceKey) : '';
         const setup = card.setupKey ? t(card.setupKey) : '';
-        const scripture3 = card.scriptureKey3 ? t(card.scriptureKey3) : '';
 
-        const speechParts = [body, scripture, scripture2, scripture3, advice, setup].filter(p => p && p.trim().length > 0);
+        const speechParts = [body, scripture, scripture2, setup].filter(p => p && p.trim().length > 0);
         const fullSpeechText = speechParts.join('. ');
         const quoteClass = "italic text-slate-300/90 border-l-4 border-[#E1C16E]/40 pl-4 my-4 leading-relaxed text-sm shadow-[0_0_10px_rgba(225,193,110,0.1)]";
 
@@ -619,7 +623,7 @@ document.addEventListener('DOMContentLoaded', () => {
                           hover:bg-[#E1C16E]/5 transition-all duration-300">
                 <span class="flex-1 text-lg font-bold text-[#E1C16E] tracking-tight drop-shadow-[0_0_8px_rgba(225,193,110,0.5)] group-hover:drop-shadow-[0_0_12px_rgba(225,193,110,0.7)] transition-all duration-300">${title}</span>
                 <button class="w-8 h-8 rounded-full flex items-center justify-center text-white/30 hover:text-[#E1C16E] transition-all active:scale-90"
-                        onclick="event.preventDefault(); event.stopPropagation(); window.toggleSpeech(\`${fullSpeechText.replace(/"/g, '&quot;').replace(/'/g, "\\'")}\`, 'tts-icon-${card.id}', 'communion')">
+                        onclick="event.preventDefault(); event.stopPropagation(); window.toggleSpeech(\`${fullSpeechText.replace(/"/g, '&quot;').replace(/'/g, "\\'")}\`, 'tts-icon-${card.id}', 5)">
                     <span id="tts-icon-${card.id}" class="material-symbols-outlined text-xl drop-shadow-[0_0_5px_currentColor]">volume_up</span>
                 </button>
                 <span class="material-symbols-outlined text-[#E1C16E]/40 group-open:rotate-180 transition-transform duration-300 text-xl drop-shadow-[0_0_5px_rgba(225,193,110,0.3)]">expand_more</span>
@@ -629,9 +633,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p class="text-base text-slate-200/90 leading-relaxed mb-4 text-shadow-subtle">${body}</p>
                 ${scripture ? `<p class="${quoteClass}">${scripture}</p>` : ''}
                 ${scripture2 ? `<p class="text-base text-slate-200/90 leading-relaxed text-shadow-subtle">${scripture2}</p>` : ''}
-                ${advice ? `<p class="text-base text-slate-200/90 leading-relaxed text-shadow-subtle">${advice}</p>` : ''}
                 ${setup ? `<p class="text-base text-slate-200/90 leading-relaxed text-shadow-subtle">${setup}</p>` : ''}
-                ${scripture3 ? `<p class="${quoteClass}">${scripture3}</p>` : ''}
             </div>
         </details>
         `;
@@ -1862,6 +1864,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function openPrayersModal(prayerId) {
         if (!prayersReadingModal || !prayerContentArea) return;
 
+        // Reset audio player state when opening new prayer
+        if (currentGlobalAudio) {
+            currentGlobalAudio.pause();
+            currentGlobalAudio.src = '';
+            currentGlobalAudio.dataset.loadedId = '';
+        }
+        currentPrayerIdInPlayer = null;
+        isAudioPlaying = false;
+
         const prayer = prayersData[prayerId];
         if (!prayer) return;
 
@@ -1895,15 +1906,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            if (prayersModalHeaderText) {
-                // Determine title from prayerId or data-t
-                const titleKey = prayerId === 'canons' ? 'threeCanons' :
-                    prayerId === 'theotokosCanon' ? 'theotokosCanon' :
-                        prayerId === 'guardianAngelCanon' ? 'guardianAngelCanon' :
-                            prayerId === 'repentanceCanon' ? 'repentanceCanon' :
-                                (prayerId === 'beforeCommunion' ? 'beforeCommunion' : 'afterCommunion');
-                prayersModalHeaderText.textContent = t(titleKey);
-            }
+            // Hide header text - audio player shows in header instead
+            // if (prayersModalHeaderText) {
+            //     // Determine title from prayerId or data-t
+            //     const titleKey = prayerId === 'canons' ? 'threeCanons' :
+            //         prayerId === 'theotokosCanon' ? 'theotokosCanon' :
+            //             prayerId === 'guardianAngelCanon' ? 'guardianAngelCanon' :
+            //                 prayerId === 'repentanceCanon' ? 'repentanceCanon' :
+            //                     (prayerId === 'beforeCommunion' ? 'beforeCommunion' : 'afterCommunion');
+            //     prayersModalHeaderText.textContent = t(titleKey);
+            // }
             prayersReadingModal.classList.remove('hidden');
             const teleControls = document.getElementById('teleprompter-controls');
             if (teleControls) {
@@ -1915,7 +1927,9 @@ document.addEventListener('DOMContentLoaded', () => {
             prayerScrollArea.scrollTop = 0;
             updatePrayerProgress();
             requestWakeLock();
-            showAudioPlayerBar();
+
+            // Show audio player bar (don't autoplay)
+            showAudioPlayerBar(prayerId);
         }
     }
 
@@ -1931,8 +1945,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     prayerMenuItems.forEach(btn => {
-        btn.addEventListener('click', () => {
+        console.log('[Prayer Menu] Found button:', btn.dataset.prayerId);
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             const prayerId = btn.dataset.prayerId;
+            console.log('[Prayer Menu] Opening:', prayerId);
             openPrayersModal(prayerId);
         });
     });
@@ -1975,28 +1993,135 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Audio Player Bar Logic ---
     function toggleAudioPlayPause() {
-        if (!audioPlayerBar) return;
+        if (!currentGlobalAudio) return;
 
-        // Show stub notification instead of playing audio
-        showToast(t('audioPlaybackNotAvailable'));
+        if (!currentGlobalAudio.src || currentGlobalAudio.dataset.loadedId !== currentPrayerIdInPlayer) {
+            let audioUrl = '';
+            if (currentPrayerIdInPlayer === 'repentanceCanon') {
+                audioUrl = 'https://azbyka.ru/audio/audio1/Molitvy-i-bogosluzhenija/ko_svyatomy_prichacheniyu/prichastie/01-bulchuk_kanon_pokayannyy_ko_gospodu_iisusu_hristu.mp3';
+            } else if (currentPrayerIdInPlayer === 'theotokosCanon') {
+                audioUrl = 'https://pravoslavie-audio.com/wp-content/uploads/2020/12/kanon-molebnyj-ko-presvyatoj-bogoroditse.mp3';
+            } else if (currentPrayerIdInPlayer === 'guardianAngelCanon') {
+                audioUrl = 'https://azbyka.ru/audio/audio1/Molitvy-i-bogosluzhenija/ko_svyatomy_prichacheniyu/prichastie/03-bulchuk_kanon_angelu_hranitelyu.mp3';
+            } else if (currentPrayerIdInPlayer === 'beforeCommunion') {
+                audioUrl = 'https://azbyka.ru/audio/audio1/Molitvy-i-bogosluzhenija/ko_svyatomy_prichacheniyu/prichastie/32_ermakov-posledovanie-ko-svjatomu-prichashheniju.mp3';
+            } else {
+                showToast(t('audioPlaybackNotAvailable'));
+                return;
+            }
 
-        // Reset button state to play icon
-        if (audioPlayIcon) audioPlayIcon.textContent = 'play_arrow';
+            console.log('[Audio Debug] Loading Audio URL:', audioUrl);
+            currentGlobalAudio.src = audioUrl;
+            currentGlobalAudio.dataset.loadedId = currentPrayerIdInPlayer;
+            
+            showToast("Загрузка аудио...");
+
+            // One-time events
+            if (!currentGlobalAudio.dataset.eventsSet) {
+                currentGlobalAudio.addEventListener('timeupdate', () => {
+                    let progress = 0;
+                    let dur = currentGlobalAudio.duration;
+                    
+                    // Fallbacks for streaming Infinity duration bugs
+                    if (!dur || dur === Infinity) {
+                        if (currentPrayerIdInPlayer === 'repentanceCanon') dur = 1011; // 16:51
+                        else if (currentPrayerIdInPlayer === 'theotokosCanon') dur = 900; // ~15:00
+                        else if (currentPrayerIdInPlayer === 'guardianAngelCanon') dur = 900; // ~15:00
+                        else if (currentPrayerIdInPlayer === 'beforeCommunion') dur = 1500; // ~25:00
+                        else dur = 1200; // Fallback 20 mins
+                    }
+
+                    if (dur > 0) {
+                        progress = (currentGlobalAudio.currentTime / dur) * 100;
+                    }
+                    const progressEl = document.getElementById('audio-progress');
+                    if (progressEl && !isNaN(progress)) progressEl.style.width = `${progress}%`;
+                    
+                    const timeEl = document.getElementById('audio-time');
+                    if (timeEl) {
+                        const mins = Math.floor(currentGlobalAudio.currentTime / 60) || 0;
+                        const secs = Math.floor(currentGlobalAudio.currentTime % 60) || 0;
+                        const totalMins = Math.floor(dur / 60) || 0;
+                        const totalSecs = Math.floor(dur % 60) || 0;
+                        timeEl.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')} / ${totalMins.toString().padStart(2, '0')}:${totalSecs.toString().padStart(2, '0')}`;
+                    }
+                });
+
+                if (audioProgressContainer) {
+                    audioProgressContainer.addEventListener('click', (e) => {
+                        let dur = currentGlobalAudio.duration;
+                        if (!dur || dur === Infinity) {
+                            if (currentPrayerIdInPlayer === 'repentanceCanon') dur = 1011;
+                            else if (currentPrayerIdInPlayer === 'theotokosCanon') dur = 900;
+                            else if (currentPrayerIdInPlayer === 'guardianAngelCanon') dur = 900;
+                            else if (currentPrayerIdInPlayer === 'beforeCommunion') dur = 1500;
+                            else dur = 1200;
+                        }
+                        const rect = audioProgressContainer.getBoundingClientRect();
+                        const clickX = e.clientX - rect.left;
+                        const width = rect.width;
+                        const percentage = clickX / width;
+                        currentGlobalAudio.currentTime = dur * percentage;
+                    });
+                }
+
+                currentGlobalAudio.addEventListener('ended', () => {
+                    resetAudioPlayer();
+                });
+
+                currentGlobalAudio.addEventListener('error', (e) => {
+                    console.error('[Audio Debug] Audio error event:', e);
+                    const error = currentGlobalAudio.error;
+                    let errorMsg = "Ошибка загрузки";
+                    if (error) {
+                        switch (error.code) {
+                            case 1: errorMsg = "Загрузка прервана"; break;
+                            case 2: errorMsg = "Ошибка сети"; break;
+                            case 3: errorMsg = "Ошибка декодирования"; break;
+                            case 4: errorMsg = "Файл не найден"; break;
+                        }
+                    }
+                    showToast(errorMsg);
+
+                    // Fallback to alternative URLs
+                    if (currentPrayerIdInPlayer === 'repentanceCanon' && !currentGlobalAudio.src.includes('04-kanon-pokayanny.mp3')) {
+                        showToast("Пробую локально...");
+                        currentGlobalAudio.src = '/04-kanon-pokayanny.mp3';
+                        currentGlobalAudio.play();
+                    } else if (currentPrayerIdInPlayer === 'theotokosCanon') {
+                        // Try alternative URL for Theotokos Canon
+                        if (currentGlobalAudio.src.includes('pravoslavie-audio.com')) {
+                            showToast("Пробую azbyka.ru...");
+                            currentGlobalAudio.src = 'https://azbyka.ru/audio/audio1/Molitvy-i-bogosluzhenija/ko_svyatomy_prichacheniyu/prichastie/02-bulchuk_kanon_molebnyy_ko_presvyatoy_bogorodice.mp3';
+                            currentGlobalAudio.play();
+                        }
+                    }
+                });
+                currentGlobalAudio.dataset.eventsSet = "true";
+            }
+        }
+
+        if (currentGlobalAudio.paused) {
+            console.log('[Audio Debug] Attempting to play...');
+            currentGlobalAudio.play().then(() => {
+                console.log('[Audio Debug] Play started successfully');
+                showToast("Воспроизведение...");
+            }).catch(err => {
+                console.error('[Audio Player] Play error:', err);
+                showToast("Ошибка воспроизведения: " + err.message);
+            });
+            isAudioPlaying = true;
+            if (audioPlayIcon) audioPlayIcon.textContent = 'pause';
+        } else {
+            console.log('[Audio Debug] Pausing...');
+            currentGlobalAudio.pause();
+            isAudioPlaying = false;
+            if (audioPlayIcon) audioPlayIcon.textContent = 'play_arrow';
+        }
     }
 
     function startAudioProgress() {
-        if (audioIntervalId) return;
-
-        audioIntervalId = setInterval(() => {
-            audioProgressValue += 0.5;
-            if (audioProgressValue >= 100) {
-                audioProgressValue = 0;
-                toggleAudioPlayPause(); // Stop when complete
-            }
-            if (audioProgress) {
-                audioProgress.style.width = `${audioProgressValue}%`;
-            }
-        }, 100);
+        // Now handled by timeupdate event for more accuracy
     }
 
     function stopAudioProgress() {
@@ -2007,17 +2132,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function resetAudioPlayer() {
+        if (currentGlobalAudio) {
+            currentGlobalAudio.pause();
+            currentGlobalAudio.src = "";
+            currentGlobalAudio.dataset.loadedId = "";
+        }
         isAudioPlaying = false;
         audioProgressValue = 0;
-        stopAudioProgress();
         if (audioPlayIcon) audioPlayIcon.textContent = 'play_arrow';
         if (audioProgress) audioProgress.style.width = '0%';
+        const timeEl = document.getElementById('audio-time');
+        if (timeEl) timeEl.textContent = '00:00';
     }
 
     // Show audio player bar when prayers modal is opened
-    function showAudioPlayerBar() {
+    function showAudioPlayerBar(prayerId) {
+        console.log('[Audio Debug] showAudioPlayerBar called for:', prayerId);
+        currentPrayerIdInPlayer = prayerId;
         if (audioPlayerBar) {
             audioPlayerBar.classList.remove('hidden');
+        } else {
+            console.warn('[Audio Debug] Cannot show player bar - element missing');
         }
     }
 

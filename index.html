@@ -282,6 +282,11 @@
 
                     <!-- Holy Communion Prep Section -->
                     <div class="px-4 mt-16 mb-8">
+                        <div class="flex items-center gap-4 mb-8">
+                            <div class="h-[1px] flex-1 bg-border"></div>
+                            <h2 class="text-xl font-serif font-bold text-primary-gold" data-t="communionPrepShort">Подготовка к Причастию</h2>
+                            <div class="h-[1px] flex-1 bg-border"></div>
+                        </div>
                         <div id="communion-prep-container" class="space-y-4">
                             <!-- Rendered by JS -->
                         </div>
@@ -289,42 +294,26 @@
 
                     <!-- Prayers Menu -->
                     <div class="px-2 mt-12 mb-20 text-center">
-                        <h3 class="text-[11px] font-bold text-primary-gold uppercase tracking-[0.2em] mb-8" data-t="prayersBtn">Молитвенное правило</h3>
+                        <div class="flex items-center gap-4 mb-8">
+                            <div class="h-[1px] flex-1 bg-border"></div>
+                            <h2 class="text-xl font-serif font-bold text-primary-gold" data-t="prayersBtn">Молитвенное правило</h2>
+                            <div class="h-[1px] flex-1 bg-border"></div>
+                        </div>
                         <div class="space-y-3">
-                            <button data-prayer-id="repentanceCanon" class="w-full p-5 glass-card border border-border flex items-center gap-4 active:scale-[0.98] transition-all text-left group">
-                                <div class="w-12 h-12 rounded-full bg-danger/10 flex items-center justify-center text-danger group-hover:scale-110 transition-transform">
-                                    <span class="material-symbols-outlined text-2xl">local_fire_department</span>
-                                </div>
-                                <span class="font-bold text-text-main flex-1" data-t="repentanceCanon">Покаянный канон</span>
-                                <span class="material-symbols-outlined text-text-muted opacity-40">chevron_right</span>
+                            <button data-prayer-id="repentanceCanon" class="prayer-menu-item w-full p-5 glass-card border border-[#E1C16E]/20 flex items-center gap-4 active:scale-[0.98] transition-all text-left group">
+                                <span class="flex-1 text-xl font-serif font-bold text-primary-gold tracking-tight drop-shadow-[0_0_8px_rgba(225,193,110,0.5)] group-hover:drop-shadow-[0_0_12px_rgba(225,193,110,0.7)] transition-all duration-300">Канон покаянный ко Господу нашему Иисусу Христу</span>
                             </button>
-                            <button data-prayer-id="theotokosCanon" class="w-full p-5 glass-card border border-border flex items-center gap-4 active:scale-[0.98] transition-all text-left group">
-                                <div class="w-12 h-12 rounded-full bg-primary-gold/10 flex items-center justify-center text-primary-gold group-hover:scale-110 transition-transform">
-                                    <span class="material-symbols-outlined text-2xl">stars</span>
-                                </div>
-                                <span class="font-bold text-text-main flex-1" data-t="theotokosCanon">Канон Богородице</span>
-                                <span class="material-symbols-outlined text-text-muted opacity-40">chevron_right</span>
+                            <button data-prayer-id="theotokosCanon" class="prayer-menu-item w-full p-5 glass-card border border-[#E1C16E]/20 flex items-center gap-4 active:scale-[0.98] transition-all text-left group">
+                                <span class="flex-1 text-xl font-serif font-bold text-primary-gold tracking-tight drop-shadow-[0_0_8px_rgba(225,193,110,0.5)] group-hover:drop-shadow-[0_0_12px_rgba(225,193,110,0.7)] transition-all duration-300">Канон молебный ко Пресвятой Богородице</span>
                             </button>
-                            <button data-prayer-id="beforeCommunion" class="w-full p-5 glass-card border border-border flex items-center gap-4 active:scale-[0.98] transition-all text-left group">
-                                <div class="w-12 h-12 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-500 group-hover:scale-110 transition-transform">
-                                    <span class="material-symbols-outlined text-2xl">menu_book</span>
-                                </div>
-                                <span class="font-bold text-text-main flex-1" data-t="beforeCommunion">Последование</span>
-                                <span class="material-symbols-outlined text-text-muted opacity-40">chevron_right</span>
+                            <button data-prayer-id="guardianAngelCanon" class="prayer-menu-item w-full p-5 glass-card border border-[#E1C16E]/20 flex items-center gap-4 active:scale-[0.98] transition-all text-left group">
+                                <span class="flex-1 text-xl font-serif font-bold text-primary-gold tracking-tight drop-shadow-[0_0_8px_rgba(225,193,110,0.5)] group-hover:drop-shadow-[0_0_12px_rgba(225,193,110,0.7)] transition-all duration-300">Канон молебный ко Ангелу Хранителю</span>
                             </button>
-                            <button data-prayer-id="guardianAngelCanon" class="w-full p-5 glass-card border border-border flex items-center gap-4 active:scale-[0.98] transition-all text-left group">
-                                <div class="w-12 h-12 rounded-full bg-cyan-500/10 flex items-center justify-center text-cyan-500 group-hover:scale-110 transition-transform">
-                                    <span class="material-symbols-outlined text-2xl">flare</span>
-                                </div>
-                                <span class="font-bold text-text-main flex-1" data-t="guardianAngelCanon">Канон Ангелу-Хранителю</span>
-                                <span class="material-symbols-outlined text-text-muted opacity-40">chevron_right</span>
+                            <button data-prayer-id="beforeCommunion" class="prayer-menu-item w-full p-5 glass-card border border-[#E1C16E]/20 flex items-center gap-4 active:scale-[0.98] transition-all text-left group">
+                                <span class="flex-1 text-xl font-serif font-bold text-primary-gold tracking-tight drop-shadow-[0_0_8px_rgba(225,193,110,0.5)] group-hover:drop-shadow-[0_0_12px_rgba(225,193,110,0.7)] transition-all duration-300">Последование ко Святому Причащению</span>
                             </button>
-                            <button data-prayer-id="afterCommunion" class="w-full p-5 glass-card border border-border flex items-center gap-4 active:scale-[0.98] transition-all text-left group">
-                                <div class="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 group-hover:scale-110 transition-transform">
-                                    <span class="material-symbols-outlined text-2xl">done_all</span>
-                                </div>
-                                <span class="font-bold text-text-main flex-1" data-t="afterCommunion">Благодарственные молитвы</span>
-                                <span class="material-symbols-outlined text-text-muted opacity-40">chevron_right</span>
+                            <button data-prayer-id="afterCommunion" class="prayer-menu-item w-full p-5 glass-card border border-[#E1C16E]/20 flex items-center gap-4 active:scale-[0.98] transition-all text-left group">
+                                <span class="flex-1 text-xl font-serif font-bold text-primary-gold tracking-tight drop-shadow-[0_0_8px_rgba(225,193,110,0.5)] group-hover:drop-shadow-[0_0_12px_rgba(225,193,110,0.7)] transition-all duration-300">Благодарственные молитвы по Святом Причащении</span>
                             </button>
                     </div>
                 </div>
@@ -757,6 +746,54 @@
 
             <!-- Share Button -->
             <div class="mt-8 flex justify-center">
+                <button id="share-sheet-btn" class="flex items-center gap-3 px-8 py-4 rounded-2xl bg-slate-900 text-white font-bold shadow-lg active:scale-95 transition-all">
+                    <span class="material-symbols-outlined">share</span>
+                    <span>Поделиться</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prayers Reading Modal -->
+    <div id="prayers-reading-modal" class="fixed inset-0 z-[600] bg-bg flex flex-col hidden overflow-hidden transition-all duration-500">
+        <!-- Close Button (Fixed Top Right) -->
+        <button id="close-prayers-modal-btn" class="fixed top-4 right-4 z-[610] w-12 h-12 rounded-full bg-[#E1C16E]/10 backdrop-blur-md flex items-center justify-center text-[#E1C16E] active:scale-90 transition-all shadow-lg border border-[#E1C16E]/30">
+            <span class="material-symbols-outlined text-2xl">close</span>
+        </button>
+
+        <!-- Header with Progress Bar -->
+        <header class="shrink-0 z-[605] bg-bg/90 backdrop-blur-2xl border-b border-border px-5 py-2">
+            <div class="w-full flex flex-col items-center gap-1.5">
+                <h3 id="prayers-modal-header-text" class="text-lg font-serif font-bold text-primary-gold text-center"></h3>
+
+                <!-- Audio Player in Header -->
+                <div id="audio-player-bar" class="self-stretch mr-16 sm:mr-20 bg-[#1a1914]/80 backdrop-blur-xl border border-[#E1C16E]/20 rounded-xl p-2 pr-4 flex items-center gap-2 shadow-lg hidden animate-fade-in">
+                    <button id="audio-play-pause-btn" class="w-8 h-8 rounded-full bg-[#E1C16E]/10 border-2 border-[#E1C16E]/30 flex items-center justify-center text-[#E1C16E] hover:bg-[#E1C16E]/20 active:scale-95 transition-all shrink-0">
+                        <span id="audio-play-icon" class="material-symbols-outlined text-base">play_arrow</span>
+                    </button>
+                    <div class="flex-1 flex flex-col gap-0.5 min-w-0">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[7px] font-bold text-primary-gold uppercase tracking-[0.15em]">Аудио</span>
+                            <span id="audio-time" class="text-[7px] font-bold text-[#E1C16E] tabular-nums">00:00</span>
+                        </div>
+                        <div id="audio-progress-container" class="h-1.5 w-full bg-[#333]/50 rounded-full overflow-hidden border border-white/5 cursor-pointer">
+                            <div id="audio-progress" class="h-full bg-[#E1C16E] w-0 transition-all duration-300 shadow-[0_0_10px_rgba(225,193,110,0.6)] pointer-events-none"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="w-full bg-white/5 h-0.5 rounded-full overflow-hidden">
+                    <div id="prayer-progress-bar" class="h-full bg-primary-gold w-0 transition-all duration-300"></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Scrollable Content -->
+        <div id="prayer-scroll-area" class="flex-1 overflow-y-auto px-6 py-10 no-scrollbar">
+            <div class="max-w-2xl mx-auto">
+                <!-- Hero Image -->
+                <div class="relative w-full h-48 rounded-[40px] overflow-hidden mb-12 bg-black/20 border border-white/5">
                     <img id="prayer-hero-image" src="/56456454.jpg" class="absolute inset-0 w-full h-full object-contain opacity-80 mix-blend-screen" alt="Hero" />
                     <div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-surface-alt to-transparent z-10"></div>
                 </div>
@@ -769,6 +806,8 @@
                 <div class="h-32"></div>
             </div>
         </div>
+
+        <audio id="global-audio-element" preload="auto"></audio>
 
         <!-- Teleprompter Controls -->
         <div id="teleprompter-controls" class="fixed bottom-10 left-1/2 -translate-x-1/2 z-[620] bg-surface/90 backdrop-blur-xl border border-border rounded-[2.5rem] p-3 flex items-center gap-4 shadow-2xl hidden animate-fade-in">
@@ -897,6 +936,7 @@
             </div>
         </div>
     </div>
+
 
     <script type="module" src="/src/main.js"></script>
 </body>

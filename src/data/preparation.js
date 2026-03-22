@@ -51,9 +51,7 @@ export const communionPrep = {
     bodyKey: 'prep_holy_communion_body',
     scriptureKey: 'prep_holy_communion_scripture',
     scriptureKey2: 'prep_holy_communion_scripture2',
-    adviceKey: 'prep_holy_communion_advice',
     setupKey: 'prep_holy_communion_setup',
-    scriptureKey3: 'prep_holy_communion_scripture3',
 };
 
 export const saintsQuotes = [
