@@ -1925,7 +1925,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function openPrayersModal(prayerId) {
-        if (!prayersReadingModal || !prayerContentArea) return;
+        console.log('[Prayer Modal] Opening:', prayerId);
+        console.log('[Prayer Modal] Modal element:', !!prayersReadingModal);
+        console.log('[Prayer Modal] Content area:', !!prayerContentArea);
+        console.log('[Prayer Data] prayersData:', !!prayersData);
+        console.log('[Prayer Data] prayerId data:', prayersData[prayerId]);
+        
+        if (!prayersReadingModal || !prayerContentArea) {
+            console.error('[Prayer Modal] Missing modal or content area!');
+            return;
+        }
 
         // Reset audio player state when opening new prayer
         if (currentGlobalAudio) {
@@ -1937,7 +1946,11 @@ document.addEventListener('DOMContentLoaded', () => {
         isAudioPlaying = false;
 
         const prayer = prayersData[prayerId];
-        if (!prayer) return;
+        if (!prayer) {
+            console.error('[Prayer Modal] No prayer data found for:', prayerId);
+            showToast('Ошибка: текст молитвы не найден');
+            return;
+        }
 
         let content = '';
         if (prayer.content) {
@@ -2014,6 +2027,8 @@ document.addEventListener('DOMContentLoaded', () => {
             e.stopPropagation();
             const prayerId = btn.dataset.prayerId;
             console.log('[Prayer Menu] Opening:', prayerId);
+            console.log('[Prayer Data] Available:', !!prayersData);
+            console.log('[Prayer Data] Content:', prayersData[prayerId]);
             openPrayersModal(prayerId);
         });
     });
