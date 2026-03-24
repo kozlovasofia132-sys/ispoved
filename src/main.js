@@ -4,6 +4,8 @@ import { App } from '@capacitor/app';
 import { TextToSpeech } from '@capacitor-community/text-to-speech';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
+import { StatusBar, Style } from '@capacitor/status-bar';
+import { NavigationBar } from '@capgo/capacitor-navigation-bar';
 import { getSinsData, setProfile, getProfile } from './data/sins.js';
 import { translations } from './data/translations.js';
 import { preparationData, communionPrep } from './data/preparation.js';
@@ -20,34 +22,57 @@ document.addEventListener('DOMContentLoaded', () => {
         settings: document.getElementById('tab-settings'),
     };
 
+    // --- Global Audio Utility ---
+    function stopAllAudio() {
+        // 1. Останавливаем синтез речи (Web Speech API)
+        if ('speechSynthesis' in window) {
+            speechSynthesis.cancel();
+        }
+
+        // 2. Останавливаем динамически созданные объекты Audio (окно-уровень)
+        if (window.currentAudio) {
+            window.currentAudio.pause();
+            window.currentAudio = null;
+        }
+
+        // 3. Останавливаем глобальный аудио-плеер (нижняя панель)
+        const globalAudio = document.getElementById('global-audio-element');
+        if (globalAudio) {
+            globalAudio.pause();
+        }
+
+        // 4. Сбрасываем UI всех медиа-элементов (динамиков, кнопок и т.д.)
+        if (typeof resetAllMediaUI === 'function') resetAllMediaUI();
+        
+        // Сбрасываем иконку основного плеера
+        const playIcon = document.getElementById('audio-play-icon');
+        if (playIcon) playIcon.textContent = 'play_arrow';
+        
+        // Сброс всех динамиков в "Подготовке"
+        document.querySelectorAll('#preparation-intro-container button .material-symbols-outlined, #communion-prep-container button .material-symbols-outlined').forEach(i => {
+            i.textContent = 'volume_up';
+        });
+
+        isAudioPlaying = false;
+        console.log('[Audio] All media stopped.');
+    }
+
     // --- Global Speech Function ---
     window.toggleSpeech = (text, iconId, audioIndex) => {
         console.log('[Speech] Toggling speech:', iconId, audioIndex);
         
         const icon = document.getElementById(iconId);
         
-        // Если уже играет это аудио
-        if (window.currentAudio && window.currentAudio._preparationIndex === audioIndex) {
-            if (window.currentAudio.paused) {
-                window.currentAudio.play();
-                if (icon) icon.textContent = 'pause';
-            } else {
-                window.currentAudio.pause();
-                if (icon) icon.textContent = 'volume_up';
-            }
+        // Если это ТЕКУЩИЙ файл и он ИГРАЕТ — просто ставим на паузу и выходим
+        if (window.currentAudio && window.currentAudio._preparationIndex === audioIndex && !window.currentAudio.paused) {
+            window.currentAudio.pause();
+            if (icon) icon.textContent = 'volume_up';
             return;
         }
         
-        // Останавливаем предыдущее аудио
-        if (window.currentAudio) {
-            window.currentAudio.pause();
-            window.currentAudio = null;
-        }
-        
-        // Сбрасываем только иконки динамиков (не стрелки!)
-        document.querySelectorAll('#preparation-intro-container button .material-symbols-outlined, #communion-prep-container button .material-symbols-outlined').forEach(i => {
-            i.textContent = 'volume_up';
-        });
+        // Во всех остальных случаях (новое аудио или возобновление старого из паузы) 
+        // сначала останавливаем всё остальное
+        stopAllAudio();
 
         // Воспроизводим аудиофайл подготовки
         if (audioIndex) {
@@ -161,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeTab = 'church-empty';
     let selectedSins = JSON.parse(localStorage.getItem('selectedSins')) || [];
     let isLargeFont = localStorage.getItem('isLargeFont') === 'true';
-    let currentTheme = localStorage.getItem('theme') || 'dark';
+    let currentTheme = localStorage.getItem('theme') || 'light';
     let currentLanguage = localStorage.getItem('language') || 'ru';
     let personalNotes = localStorage.getItem('personalReflections') || '';
     let isDetailedView = localStorage.getItem('viewMode') !== 'simple';
@@ -220,6 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderCommunionPrep();
         updateMyList();
         applyFontSize();
+        applyTheme();
         applyViewMode();
         updateLanguageUI();
         applyLanguageFont();
@@ -234,16 +260,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateHeader() {
+        const headerTitle = document.getElementById('main-header-title');
         if (!headerTitle) return;
-        
+
         let headerKey = '';
         switch (activeTab) {
             case 'church-empty': headerKey = 'churchTitle'; break;
-            case 'church-today': headerKey = 'catalog'; break;
-            case 'settings': headerKey = 'settings'; break;
+            case 'church-today': headerKey = 'confessionTitle'; break;
+            case 'settings': headerKey = 'settingsTitle'; break;
             default: headerKey = 'appName';
         }
         headerTitle.textContent = headerKey ? t(headerKey) : '';
+        headerTitle.setAttribute('data-t', headerKey);
     }
 
     // --- Random Quote Function ---
@@ -528,36 +556,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
             resultHtml += `
             <details name="accordion-group" class="group glass-panel rounded-2xl overflow-hidden transition-all duration-500 mb-4
-                           bg-gradient-to-br from-[#1a1914] via-[#1f1d1a] to-[#151412]
-                           shadow-[inset_0_0_20px_rgba(225,193,110,0.03),0_4px_20px_rgba(0,0,0,0.4)]
-                           hover:shadow-[inset_0_0_30px_rgba(225,193,110,0.06),0_8px_30px_rgba(225,193,110,0.1)]
-                           group-open:shadow-[inset_0_0_25px_rgba(225,193,110,0.05),0_0_40px_rgba(225,193,110,0.15)]
-                           border border-[#E1C16E]/10 hover:border-[#E1C16E]/20">
+                           bg-white dark:bg-gradient-to-br dark:from-[#1a1914] dark:via-[#1f1d1a] dark:to-[#151412]
+                           shadow-sm dark:shadow-[inset_0_0_20px_rgba(225,193,110,0.03),0_4px_20px_rgba(0,0,0,0.4)]
+                           hover:shadow-md dark:hover:shadow-[inset_0_0_30px_rgba(225,193,110,0.06),0_8px_30px_rgba(225,193,110,0.1)]
+                           border border-black/5 dark:border-[#E1C16E]/10 hover:border-black/10 dark:hover:border-[#E1C16E]/20">
                 <summary class="cursor-pointer flex items-center gap-4 p-5 select-none list-none [&::-webkit-details-marker]:hidden outline-none
                               hover:bg-[#E1C16E]/5 transition-all duration-300">
                     <span class="flex-1 text-lg font-bold text-[#E1C16E] tracking-tight drop-shadow-[0_0_8px_rgba(225,193,110,0.5)] group-hover:drop-shadow-[0_0_12px_rgba(225,193,110,0.7)] transition-all duration-300">${title}</span>
-                    <button class="w-8 h-8 rounded-full flex items-center justify-center text-white/30 hover:text-[#E1C16E] transition-all active:scale-90"
+                    <button class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 dark:text-white/30 hover:text-primary transition-all active:scale-90"
                             onclick="event.preventDefault(); event.stopPropagation(); window.toggleSpeech(\`${fullSpeechText.replace(/"/g, '&quot;').replace(/'/g, "\\'")}\`, 'tts-icon-${card.id}', ${index + 1})">
-                        <span id="tts-icon-${card.id}" class="material-symbols-outlined text-xl drop-shadow-[0_0_5px_currentColor]">volume_up</span>
+                        <span id="tts-icon-${card.id}" class="material-symbols-outlined text-xl drop-shadow-sm dark:drop-shadow-[0_0_5px_currentColor]">volume_up</span>
                     </button>
-                    <span class="material-symbols-outlined text-[#E1C16E]/40 group-open:rotate-180 transition-transform duration-300 text-xl drop-shadow-[0_0_5px_rgba(225,193,110,0.3)]">expand_more</span>
+                    <span class="material-symbols-outlined text-slate-400 dark:text-[#E1C16E]/40 group-open:rotate-180 transition-transform duration-300 text-xl drop-shadow-sm dark:drop-shadow-[0_0_5px_rgba(225,193,110,0.3)]">expand_more</span>
                 </summary>
                 <div class="px-5 pb-5 pt-1 bg-gradient-to-b from-transparent via-[#E1C16E]/[0.02] to-transparent">
                     <div class="w-full h-px bg-gradient-to-r from-transparent via-[#E1C16E]/20 to-transparent mb-4 shadow-[0_0_10px_rgba(225,193,110,0.2)]"></div>
-                    <p class="text-base text-slate-200/90 leading-relaxed mb-4 text-shadow-subtle">${body}</p>
+                    <p class="text-base text-slate-700 dark:text-slate-200/90 leading-relaxed mb-4">${body}</p>
                     ${scripture && card.id !== 'prayer_fasting' ? `<p class="${quoteClass}">${scripture}</p>` : ''}
-                    ${scripture && card.id === 'prayer_fasting' ? `<p class="text-base text-slate-200/90 leading-relaxed text-shadow-subtle">${scripture}</p>` : ''}
-                    ${scripture2 && card.id === 'reconciliation' ? `<p class="text-base text-slate-200/90 leading-relaxed text-shadow-subtle">${scripture2}</p>` : ''}
-                    ${scripture2 && card.id === 'prayer_fasting' ? `<p class="text-base text-slate-200/90 leading-relaxed text-shadow-subtle">${scripture2}</p>` : ''}
-                    ${scripture2 && card.id === 'confession_day' ? `<p class="text-base text-slate-200/90 leading-relaxed text-shadow-subtle">${scripture2}</p>` : ''}
+                    ${scripture && card.id === 'prayer_fasting' ? `<p class="text-base text-slate-700 dark:text-slate-200/90 leading-relaxed">${scripture}</p>` : ''}
+                    ${scripture2 && card.id === 'reconciliation' ? `<p class="text-base text-slate-700 dark:text-slate-200/90 leading-relaxed">${scripture2}</p>` : ''}
+                    ${scripture2 && card.id === 'prayer_fasting' ? `<p class="text-base text-slate-700 dark:text-slate-200/90 leading-relaxed">${scripture2}</p>` : ''}
+                    ${scripture2 && card.id === 'confession_day' ? `<p class="text-base text-slate-700 dark:text-slate-200/90 leading-relaxed">${scripture2}</p>` : ''}
                     ${scripture2 && card.id !== 'reconciliation' && card.id !== 'prayer_fasting' && card.id !== 'confession_day' ? `<p class="${quoteClass}">${scripture2}</p>` : ''}
-                    ${card.id === 'awareness' && saints ? `<p class="text-base text-slate-200/90 leading-relaxed text-shadow-subtle">${saints}</p>` : ''}
+                    ${card.id === 'awareness' && saints ? `<p class="text-base text-slate-700 dark:text-slate-200/90 leading-relaxed">${saints}</p>` : ''}
                     ${card.id === 'prayer_fasting' && saints ? `<p class="${quoteClass}">${saints}</p>` : ''}
                     ${card.id !== 'awareness' && card.id !== 'reconciliation' && card.id !== 'prayer_fasting' && card.id !== 'confession_day' && saints ? `<p class="${quoteClass}">${saints}</p>` : ''}
-                    ${card.id === 'prayer_fasting' && advice ? `<p class="text-base text-slate-200/90 leading-relaxed text-shadow-subtle">${advice}</p>` : ''}
-                    ${card.id === 'confession_day' && advice ? `<p class="text-base text-slate-200/90 leading-relaxed text-shadow-subtle">${advice}</p>` : ''}
-                    ${card.id !== 'prayer_fasting' && card.id !== 'confession_day' && advice ? `<p class="text-sm font-bold text-[#E1C16E]/80 mb-2 drop-shadow-[0_0_5px_rgba(225,193,110,0.3)]">${advice}</p>` : ''}
-                    ${setup ? `<p class="text-base text-slate-200/90 leading-relaxed text-shadow-subtle">${setup}</p>` : ''}
+                    ${card.id === 'prayer_fasting' && advice ? `<p class="text-base text-slate-700 dark:text-slate-200/90 leading-relaxed">${advice}</p>` : ''}
+                    ${card.id === 'confession_day' && advice ? `<p class="text-base text-slate-700 dark:text-slate-200/90 leading-relaxed">${advice}</p>` : ''}
+                    ${card.id !== 'prayer_fasting' && card.id !== 'confession_day' && advice ? `<p class="text-sm font-bold text-amber-700 dark:text-[#E1C16E]/80 mb-2">${advice}</p>` : ''}
+                    ${setup ? `<p class="text-base text-slate-700 dark:text-slate-200/90 leading-relaxed">${setup}</p>` : ''}
                     ${scripture3 ? `<p class="${quoteClass}">${scripture3}</p>` : ''}
                 </div>
             </details>
@@ -614,26 +641,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         container.innerHTML = `
         <details name="communion-accordion" class="group glass-panel rounded-2xl overflow-hidden transition-all duration-500 mb-4
-                       bg-gradient-to-br from-[#1a1914] via-[#1f1d1a] to-[#151412]
-                       shadow-[inset_0_0_20px_rgba(225,193,110,0.03),0_4px_20px_rgba(0,0,0,0.4)]
-                       hover:shadow-[inset_0_0_30px_rgba(225,193,110,0.06),0_8px_30px_rgba(225,193,110,0.1)]
-                       group-open:shadow-[inset_0_0_25px_rgba(225,193,110,0.05),0_0_40px_rgba(225,193,110,0.15)]
-                       border border-[#E1C16E]/10 hover:border-[#E1C16E]/20">
+                       bg-white dark:bg-gradient-to-br dark:from-[#1a1914] dark:via-[#1f1d1a] dark:to-[#151412]
+                       shadow-sm dark:shadow-[inset_0_0_20px_rgba(225,193,110,0.03),0_4px_20px_rgba(0,0,0,0.4)]
+                       hover:shadow-md dark:hover:shadow-[inset_0_0_30px_rgba(225,193,110,0.06),0_8px_30px_rgba(225,193,110,0.1)]
+                       border border-black/5 dark:border-[#E1C16E]/10 hover:border-black/10 dark:hover:border-[#E1C16E]/20">
             <summary class="cursor-pointer flex items-center gap-4 p-5 select-none list-none [&::-webkit-details-marker]:hidden outline-none
                           hover:bg-[#E1C16E]/5 transition-all duration-300">
                 <span class="flex-1 text-lg font-bold text-[#E1C16E] tracking-tight drop-shadow-[0_0_8px_rgba(225,193,110,0.5)] group-hover:drop-shadow-[0_0_12px_rgba(225,193,110,0.7)] transition-all duration-300">${title}</span>
-                <button class="w-8 h-8 rounded-full flex items-center justify-center text-white/30 hover:text-[#E1C16E] transition-all active:scale-90"
+                <button class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 dark:text-white/30 hover:text-primary transition-all active:scale-90"
                         onclick="event.preventDefault(); event.stopPropagation(); window.toggleSpeech(\`${fullSpeechText.replace(/"/g, '&quot;').replace(/'/g, "\\'")}\`, 'tts-icon-${card.id}', 5)">
-                    <span id="tts-icon-${card.id}" class="material-symbols-outlined text-xl drop-shadow-[0_0_5px_currentColor]">volume_up</span>
+                    <span id="tts-icon-${card.id}" class="material-symbols-outlined text-xl drop-shadow-sm dark:drop-shadow-[0_0_5px_currentColor]">volume_up</span>
                 </button>
-                <span class="material-symbols-outlined text-[#E1C16E]/40 group-open:rotate-180 transition-transform duration-300 text-xl drop-shadow-[0_0_5px_rgba(225,193,110,0.3)]">expand_more</span>
+                <span class="material-symbols-outlined text-slate-400 dark:text-[#E1C16E]/40 group-open:rotate-180 transition-transform duration-300 text-xl drop-shadow-sm dark:drop-shadow-[0_0_5px_rgba(225,193,110,0.3)]">expand_more</span>
             </summary>
             <div class="px-5 pb-5 pt-1 bg-gradient-to-b from-transparent via-[#E1C16E]/[0.02] to-transparent">
                 <div class="w-full h-px bg-gradient-to-r from-transparent via-[#E1C16E]/20 to-transparent mb-4 shadow-[0_0_10px_rgba(225,193,110,0.2)]"></div>
-                <p class="text-base text-slate-200/90 leading-relaxed mb-4 text-shadow-subtle">${body}</p>
+                <p class="text-base text-slate-700 dark:text-slate-200/90 leading-relaxed mb-4">${body}</p>
                 ${scripture ? `<p class="${quoteClass}">${scripture}</p>` : ''}
-                ${scripture2 ? `<p class="text-base text-slate-200/90 leading-relaxed text-shadow-subtle">${scripture2}</p>` : ''}
-                ${setup ? `<p class="text-base text-slate-200/90 leading-relaxed text-shadow-subtle">${setup}</p>` : ''}
+                ${scripture2 ? `<p class="text-base text-slate-700 dark:text-slate-200/90 leading-relaxed">${scripture2}</p>` : ''}
+                ${setup ? `<p class="text-base text-slate-700 dark:text-slate-200/90 leading-relaxed">${setup}</p>` : ''}
             </div>
         </details>
         `;
@@ -1011,7 +1037,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
     }
     setupModal(aboutAppBtn, aboutModal, closeAboutBtn);
-    setupModal(contactDevBtn, contactModal, closeContactBtn);
+    
+    // Contact Dev - открывает модальное окно с контактами (включая MAX)
+    if (contactDevBtn && contactModal) {
+        contactDevBtn.addEventListener('click', () => {
+            contactModal.classList.remove('hidden');
+        });
+        if (closeContactBtn) {
+            closeContactBtn.addEventListener('click', () => {
+                contactModal.classList.add('hidden');
+            });
+        }
+    }
 
     // --- Donation Modal Logic ---
     let selectedAmount = null;
@@ -1115,11 +1152,38 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Appearance Settings ---
-    function applyTheme() {
+    async function applyTheme() {
         const isDark = currentTheme === 'dark';
         document.documentElement.classList.toggle('dark', isDark);
         document.body.classList.toggle('light', !isDark);
         if (themeToggle) themeToggle.checked = isDark;
+        
+        // Обновляем цвет системной панели навигации (meta)
+        const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+        if (themeColorMeta) {
+            themeColorMeta.setAttribute('content', isDark ? '#120F16' : '#fbf9f4');
+        }
+
+        // Native control via Capacitor
+        try {
+            if (Capacitor.isNativePlatform()) {
+                // Status Bar (Top)
+                await StatusBar.setStyle({ style: isDark ? Style.Dark : Style.Light });
+                if (!isDark) {
+                    await StatusBar.setBackgroundColor({ color: '#fbf9f4' });
+                } else {
+                    await StatusBar.setBackgroundColor({ color: '#120F16' });
+                }
+
+                // Navigation Bar (Bottom) - Android
+                if (Capacitor.getPlatform() === 'android') {
+                    await NavigationBar.setColor({ color: isDark ? '#120F16' : '#fbf9f4' });
+                    await NavigationBar.setDarkIcons({ darkIcons: !isDark });
+                }
+            }
+        } catch (err) {
+            console.warn('[Native Theme] Failed to update system bars:', err);
+        }
     }
     if (themeToggle) {
         themeToggle.addEventListener('change', (e) => {
@@ -1147,10 +1211,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function applyViewMode() {
         viewModeButtons.forEach(btn => {
-            const isTarget = (btn.dataset.view === 'detailed' && isDetailedView) ||
+            const isActive = (btn.dataset.view === 'detailed' && isDetailedView) ||
                 (btn.dataset.view === 'simple' && !isDetailedView);
-            btn.classList.toggle('bg-primary', isTarget);
-            btn.classList.toggle('text-white', isTarget);
+            btn.classList.toggle('active', isActive);
         });
         // Обновляем описание режима
         const viewModeDesc = document.getElementById('view-mode-desc');
@@ -1995,6 +2058,17 @@ document.addEventListener('DOMContentLoaded', () => {
     function toggleAudioPlayPause() {
         if (!currentGlobalAudio) return;
 
+        // Если аудиоплеер УЖЕ играет, просто ставим на паузу и выходим
+        if (!currentGlobalAudio.paused && currentGlobalAudio.dataset.loadedId === currentPrayerIdInPlayer) {
+            currentGlobalAudio.pause();
+            isAudioPlaying = false;
+            if (audioPlayIcon) audioPlayIcon.textContent = 'play_arrow';
+            return;
+        }
+
+        // Если же мы собираемся ВКЛЮЧИТЬ аудио — останавливаем всё остальное
+        stopAllAudio();
+
         if (!currentGlobalAudio.src || currentGlobalAudio.dataset.loadedId !== currentPrayerIdInPlayer) {
             let audioUrl = '';
             if (currentPrayerIdInPlayer === 'repentanceCanon') {
@@ -2070,7 +2144,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 currentGlobalAudio.addEventListener('error', (e) => {
-                    console.error('[Audio Debug] Audio error event:', e);
+                    if (!isAudioPlaying) return;
+
+                    // Fallback to alternative URLs
+                    if (currentPrayerIdInPlayer === 'repentanceCanon' && !currentGlobalAudio.src.includes('04-kanon-pokayanny.mp3')) {
+                        currentGlobalAudio.src = '/04-kanon-pokayanny.mp3';
+                        currentGlobalAudio.play();
+                        return; // Stop here if fallback is started
+                    } else if (currentPrayerIdInPlayer === 'theotokosCanon' && currentGlobalAudio.src.includes('pravoslavie-audio.com')) {
+                        currentGlobalAudio.src = 'https://azbyka.ru/audio/audio1/Molitvy-i-bogosluzhenija/ko_svyatomy_prichacheniyu/prichastie/02-bulchuk_kanon_molebnyy_ko_presvyatoy_bogorodice.mp3';
+                        currentGlobalAudio.play();
+                        return;
+                    }
+
+                    // Only show toast if all fallbacks failed
                     const error = currentGlobalAudio.error;
                     let errorMsg = "Ошибка загрузки";
                     if (error) {
@@ -2082,20 +2169,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
                     showToast(errorMsg);
-
-                    // Fallback to alternative URLs
-                    if (currentPrayerIdInPlayer === 'repentanceCanon' && !currentGlobalAudio.src.includes('04-kanon-pokayanny.mp3')) {
-                        showToast("Пробую локально...");
-                        currentGlobalAudio.src = '/04-kanon-pokayanny.mp3';
-                        currentGlobalAudio.play();
-                    } else if (currentPrayerIdInPlayer === 'theotokosCanon') {
-                        // Try alternative URL for Theotokos Canon
-                        if (currentGlobalAudio.src.includes('pravoslavie-audio.com')) {
-                            showToast("Пробую azbyka.ru...");
-                            currentGlobalAudio.src = 'https://azbyka.ru/audio/audio1/Molitvy-i-bogosluzhenija/ko_svyatomy_prichacheniyu/prichastie/02-bulchuk_kanon_molebnyy_ko_presvyatoy_bogorodice.mp3';
-                            currentGlobalAudio.play();
-                        }
-                    }
                 });
                 currentGlobalAudio.dataset.eventsSet = "true";
             }
@@ -2181,68 +2254,60 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Teleprompter / Auto-scroll Logic (Pull-out Panel) ---
+    // --- Teleprompter / Auto-scroll Logic (Auto-hide Panel) ---
     const teleControls = document.getElementById('teleprompter-controls');
     const toggleAutoscrollBtn = document.getElementById('toggle-autoscroll-btn');
     const autoscrollSpeedInput = document.getElementById('autoscroll-speed');
     const autoscrollIcon = document.getElementById('autoscroll-icon');
-    const speedUpBtn = document.getElementById('speed-up-btn');
-    const speedDownBtn = document.getElementById('speed-down-btn');
-    const pullHandle = document.getElementById('tele-pull-handle');
 
-    let isExpandedValue = false;
-    let startX = 0;
-    let currentTranslateX = 0;
+    let autohideTimer = null;
 
-    function setPanelState(expanded) {
+    function resetAutohideTimer() {
         if (!teleControls) return;
-        isExpandedValue = expanded;
-        if (expanded) {
-            teleControls.classList.add('expanded');
-        } else {
-            teleControls.classList.remove('expanded');
-        }
-    }
-
-    // Toggle on click/tap
-    if (teleControls) {
-        teleControls.addEventListener('click', (e) => {
-            // Don't collapse if clicking buttons inside
-            if (e.target.closest('.drawer-content')) return;
-            setPanelState(!isExpandedValue);
-        });
-    }
-
-    // Swipe Logic (Touch)
-    if (teleControls) {
-        teleControls.addEventListener('touchstart', (e) => {
-            startX = e.touches[0].clientX;
-            teleControls.style.transition = 'none';
-        }, { passive: true });
-
-        teleControls.addEventListener('touchmove', (e) => {
-            if (!isExpandedValue) return; // Simple pull logic
-
-            const touchX = e.touches[0].clientX;
-            const deltaX = startX - touchX;
-
-            if (isExpandedValue && deltaX < 0) {
-                // Pushing in
-                const translate = Math.max(deltaX, -80);
-                teleControls.style.transform = `translateY(-50%) translateX(${-translate}px)`;
+        
+        // Показываем панель
+        teleControls.classList.remove('collapsed');
+        
+        // Сбрасываем старый таймер
+        clearTimeout(autohideTimer);
+        
+        // Запускаем новый таймер на 4 секунды бездействия
+        autohideTimer = setTimeout(() => {
+            // Если панель открыта и пользователь её не трогает - прячем вправо
+            if (!teleControls.classList.contains('hidden')) {
+                teleControls.classList.add('collapsed');
             }
-        }, { passive: true });
+        }, 4000);
+    }
 
-        teleControls.addEventListener('touchend', (e) => {
-            teleControls.style.transition = 'all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-            teleControls.style.transform = ''; // Return to CSS defined transforms
-
-            const endX = e.changedTouches[0].clientX;
-            const totalDelta = startX - endX;
-
-            if (totalDelta > 40) setPanelState(true);
-            else if (totalDelta < -40) setPanelState(false);
+    if (teleControls) {
+        // События для сброса таймера при взаимодействии
+        teleControls.addEventListener('mousemove', resetAutohideTimer);
+        teleControls.addEventListener('touchstart', resetAutohideTimer, { passive: true });
+        teleControls.addEventListener('click', (e) => {
+            resetAutohideTimer();
+            // Если кликнули по свернутой панели - просто разворачиваем её
+            if (teleControls.classList.contains('collapsed')) {
+                e.stopPropagation();
+            }
         });
+        
+        if (autoscrollSpeedInput) {
+            autoscrollSpeedInput.addEventListener('input', resetAutohideTimer);
+        }
+
+        // Авто-скрытие при первом открытии модального окна (через 2 сек)
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === 'class') {
+                    const isHidden = teleControls.classList.contains('hidden');
+                    if (!isHidden) {
+                        resetAutohideTimer();
+                    }
+                }
+            });
+        });
+        observer.observe(teleControls, { attributes: true });
     }
 
     function getActiveScrollContainer() {
@@ -2341,9 +2406,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentDate = new Date();
     let currentNavDate = new Date();
 
-    // Format date for display (e.g., "19 марта")
-    function formatDateShort(date) {
-        const day = date.getDate();
+    // Format date for day display (e.g., "19")
+    function formatDateDay(date) {
+        return date.getDate().toString();
+    }
+
+    // Format month for display (e.g., "марта")
+    function formatDateMonth(date) {
         const month = date.toLocaleDateString('ru-RU', { month: 'long' });
         // Convert month from nominative to genitive case
         const monthGenitiveMap = {
@@ -2361,7 +2430,12 @@ document.addEventListener('DOMContentLoaded', () => {
             'декабрь': 'декабря'
         };
         const monthGenitive = monthGenitiveMap[month] || month;
-        return `${day} ${monthGenitive}`;
+        return monthGenitive;
+    }
+
+    // Format date for display (e.g., "19 марта")
+    function formatDateShort(date) {
+        return `${formatDateDay(date)} ${formatDateMonth(date)}`;
     }
 
     // Get Old Style (Julian) date - Julian calendar is 13 days behind Gregorian in 20th-21st centuries
@@ -2369,6 +2443,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const oldStyleDate = new Date(date);
         oldStyleDate.setDate(date.getDate() - 13);
         return formatDateShort(oldStyleDate);
+    }
+
+    // Get Old Style day
+    function getOldStyleDay(date) {
+        const oldStyleDate = new Date(date);
+        oldStyleDate.setDate(date.getDate() - 13);
+        return formatDateDay(oldStyleDate);
+    }
+
+    // Get Old Style month
+    function getOldStyleMonth(date) {
+        const oldStyleDate = new Date(date);
+        oldStyleDate.setDate(date.getDate() - 13);
+        return formatDateMonth(oldStyleDate);
     }
 
     // Format full date (e.g., "Среда, 14 августа 2024 г.")
@@ -2414,7 +2502,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const iconsToShow = saintsIcons.slice(0, 8);
             saintsIconsHtml = `
                 <div class="overflow-x-auto w-full pb-2 no-scrollbar" id="icons-scroll-container">
-                    <div class="flex gap-4 md:gap-6 justify-start flex-shrink-0">
+                    <div class="flex gap-1 justify-start flex-shrink-0">
                         ${iconsToShow.map((icon, index) => `
                             <img src="${icon}" alt="Икона святого ${index + 1}"
                                  class="w-40 h-40 md:w-56 md:h-56 object-contain border border-white/10 shadow-lg hover:scale-110 transition-transform flex-shrink-0"
@@ -2427,10 +2515,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Показываем стрелочки только если икон больше одной
         const navigationArrows = saintsIcons.length > 1 ? `
-            <button id="prev-icon-btn" class="absolute -left-12 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-[#1a1914] rounded-xl border border-[#E1C16E]/20 text-[#E1C16E] flex items-center justify-center hover:bg-[#E1C16E]/10 active:scale-95 active:opacity-100 transition-all shadow-lg shadow-black/40">
+            <button id="prev-icon-btn" class="absolute -left-12 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-[var(--color-surface)] rounded-xl border border-[#E1C16E]/20 text-[#E1C16E] flex items-center justify-center hover:bg-[#E1C16E]/10 active:scale-95 active:opacity-100 transition-all shadow-lg shadow-black/20 dark:shadow-black/40">
                 <span class="material-symbols-outlined text-2xl">chevron_left</span>
             </button>
-            <button id="next-icon-btn" class="absolute -right-12 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-[#1a1914] rounded-xl border border-[#E1C16E]/20 text-[#E1C16E] flex items-center justify-center hover:bg-[#E1C16E]/10 active:scale-95 active:opacity-100 transition-all shadow-lg shadow-black/40">
+            <button id="next-icon-btn" class="absolute -right-12 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-[var(--color-surface)] rounded-xl border border-[#E1C16E]/20 text-[#E1C16E] flex items-center justify-center hover:bg-[#E1C16E]/10 active:scale-95 active:opacity-100 transition-all shadow-lg shadow-black/20 dark:shadow-black/40">
                 <span class="material-symbols-outlined text-2xl">chevron_right</span>
             </button>
         ` : '';
@@ -2740,27 +2828,15 @@ document.addEventListener('DOMContentLoaded', () => {
         playBtn.addEventListener('click', () => {
             const audioUrl = t('psalm50AudioUrl');
             
-            // Если уже играет этот псалом
-            if (window.currentAudio && window.currentAudio._isPsalm50) {
-                if (window.currentAudio.paused) {
-                    window.currentAudio.play();
-                    playBtn.querySelector('span').textContent = 'pause';
-                } else {
-                    window.currentAudio.pause();
-                    playBtn.querySelector('span').textContent = 'play_arrow';
-                }
+            // Если этот псалом уже играет — ставим на паузу
+            if (window.currentAudio && window.currentAudio._isPsalm50 && !window.currentAudio.paused) {
+                window.currentAudio.pause();
+                playBtn.querySelector('span').textContent = 'play_arrow';
                 return;
             }
-
-            // Останавливаем всё остальное
-            if (window.currentAudio) {
-                window.currentAudio.pause();
-                window.currentAudio = null;
-            }
-            if ('speechSynthesis' in window) {
-                speechSynthesis.cancel();
-            }
-            resetAllMediaUI();
+            
+            // Если ВКЛЮЧАЕМ псалом — останавливаем всё остальное
+            stopAllAudio();
 
             // Запускаем аудио Псалма 50
             const audio = new Audio(audioUrl);
@@ -2927,105 +3003,48 @@ document.addEventListener('DOMContentLoaded', () => {
                 const progressBox = row.querySelector('.audio-progress');
                 const progressBar = row.querySelector('.progress-bar');
                 
-                // 1. Проверяем, играет ли уже ЭТО аудио (МП3 файл)
-                if (window.currentAudio && window.currentAudio._row === row) {
-                    if (window.currentAudio.paused) {
-                        window.currentAudio.play();
-                        icon.textContent = 'pause';
-                    } else {
-                        window.currentAudio.pause();
-                        icon.textContent = 'play_arrow';
-                    }
-                    return;
-                }
-                
-                // 2. Проверяем, говорит ли сейчас синтезатор для ЭТОГО чтения
-                if (window._currentSynthRow === row && 'speechSynthesis' in window && speechSynthesis.speaking) {
-                    speechSynthesis.cancel();
-                    window._currentSynthRow = null;
-                resetAllMediaUI();
-                    return;
-                }
-                
-                // 3. Если нажали на новое чтение — останавливаем всё остальное
-                if (window.currentAudio) {
+                // 1. Если ЭТО СТРОКА уже играет — просто ставим на паузу
+                if (window.currentAudio && window.currentAudio._row === row && !window.currentAudio.paused) {
                     window.currentAudio.pause();
-                    window.currentAudio = null;
+                    icon.textContent = 'play_arrow';
+                    return;
                 }
-                if ('speechSynthesis' in window) {
-                    speechSynthesis.cancel();
-                }
-
-                resetAllMediaUI();
+                
+                // 2. Если нажали на новое чтение (или возобновление старого из паузы) 
+                //    — останавливаем всё остальное
+                stopAllAudio();
 
                 if (audioUrl) {
                     icon.textContent = 'pause';
                     if (progressBox) progressBox.classList.remove('opacity-0');
                     window._currentSynthRow = row;
 
-                    // Озвучиваем заголовок И текст через синтезатор
-                    let speechType = reading.type;
-                    if (reading.type === 'Утреня') speechType = 'на утрени';
-                    else if (reading.type === 'Литургия') speechType = 'на Литургии';
-                    else if (reading.type === 'На 6-м часе') speechType = 'на шестом часе';
-                    else if (reading.type === 'На вечерне') speechType = 'на вечерне';
-                    
-                    // Формируем полный текст для синтеза (Тип + Текст)
-                    const fullIntroText = speechType ? `${speechType}: ${formattedText}` : formattedText;
-                    
-                    if ('speechSynthesis' in window) {
-                        const introUtterance = new SpeechSynthesisUtterance(fullIntroText);
-                        introUtterance.lang = 'ru-RU';
-                        introUtterance.rate = 0.9;
-                        
-                        introUtterance.onend = () => {
-                            // Если за время синтеза мы не переключились на другое чтение
-                            if (window._currentSynthRow === row) {
-                                // Запускаем аудиофайл
-                                const audio = new Audio(audioUrl);
-                                audio._row = row;
-                                window.currentAudio = audio;
-                                audio.play().catch(err => console.error("Audio play error:", err));
-                                
-                                audio.addEventListener('timeupdate', () => {
-                                    const percent = (audio.currentTime / audio.duration) * 100;
-                                    if (progressBar) progressBar.style.width = `${percent}%`;
-                                });
-                                
-                                audio.addEventListener('ended', () => {
-                                resetAllMediaUI();
-                                    window.currentAudio = null;
-                                    window._currentSynthRow = null;
-                                    
-                                    // Пытаемся запустить следующее чтение автоматически
-                                    const nextRow = row.nextElementSibling;
-                                    if (nextRow && nextRow.classList.contains('reading-row')) {
-                                        nextRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                        nextRow.click();
-                                    }
-                                });
-                                
-                                audio.addEventListener('play', () => { icon.textContent = 'pause'; });
-                                audio.addEventListener('pause', () => { icon.textContent = 'play_arrow'; });
-                            }
-                        };
-                        speechSynthesis.speak(introUtterance);
-                    } else {
-                        // Если нет синтезатора, сразу аудио
-                        const audio = new Audio(audioUrl);
-                        audio._row = row;
-                        window.currentAudio = audio;
-                        audio.addEventListener('ended', () => {
+                    // Сразу запускаем аудиофайл без синтеза заголовка
+                    const audio = new Audio(audioUrl);
+                    audio._row = row;
+                    window.currentAudio = audio;
+                    audio.play().catch(err => console.error("Audio play error:", err));
+
+                    audio.addEventListener('timeupdate', () => {
+                        const percent = (audio.currentTime / audio.duration) * 100;
+                        if (progressBar) progressBar.style.width = `${percent}%`;
+                    });
+
+                    audio.addEventListener('ended', () => {
                         resetAllMediaUI();
-                            window.currentAudio = null;
-                            const nextRow = row.nextElementSibling;
-                            if (nextRow && nextRow.classList.contains('reading-row')) {
-                                nextRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                nextRow.click();
-                            }
-                        });
-                        audio.play();
-                    }
+                        window.currentAudio = null;
+                        window._currentSynthRow = null;
+
+                        // Пытаемся запустить следующее чтение автоматически
+                        const nextRow = row.nextElementSibling;
+                        if (nextRow && nextRow.classList.contains('reading-row')) {
+                            nextRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            nextRow.click();
+                        }
+                    });
+
+                    audio.addEventListener('play', () => { icon.textContent = 'pause'; });
+                    audio.addEventListener('pause', () => { icon.textContent = 'play_arrow'; });
                 } else {
                     // Обычный синтез всей строки (если нет аудофайла)
                     icon.textContent = 'pause';
@@ -3190,9 +3209,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error('API error');
             const data = await response.json();
 
-            // Update Card Date Display
-            const cardDateText = document.getElementById('card-date-text');
-            if (cardDateText) cardDateText.textContent = formatDateShort(date);
+            // Update New Style Date (day and month separately)
+            const cardDateDay = document.getElementById('card-date-day');
+            const cardDateMonth = document.getElementById('card-date-month');
+            if (cardDateDay) cardDateDay.textContent = formatDateDay(date);
+            if (cardDateMonth) cardDateMonth.textContent = formatDateMonth(date);
 
             // Update Day of Week
             const dayOfWeek = document.getElementById('day-of-week');
@@ -3202,9 +3223,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 dayOfWeek.textContent = dayName;
             }
 
-            // Update Old Style Date
-            const oldStyleDate = document.getElementById('old-style-date');
-            if (oldStyleDate) oldStyleDate.textContent = getOldStyleDate(date);
+            // Update Old Style Date (day and month separately)
+            const oldStyleDateDay = document.getElementById('old-style-date-day');
+            const oldStyleDateMonth = document.getElementById('old-style-date-month');
+            if (oldStyleDateDay) oldStyleDateDay.textContent = getOldStyleDay(date);
+            if (oldStyleDateMonth) oldStyleDateMonth.textContent = getOldStyleMonth(date);
 
             // Update Sedmitsa & Fasting Info
             const sedmitsaText = document.getElementById('sedmitsa-text');

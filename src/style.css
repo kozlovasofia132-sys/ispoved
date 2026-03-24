@@ -5,51 +5,142 @@
 @tailwind utilities;
 
 :root {
-    --color-bg: #f7f6f8;        /* Светлый фон */
-    --color-text-main: #120F16;  /* Темный текст */
-    --color-text-muted: #6b7280; /* Серый текст */
-    --color-surface: #ffffff;    /* Белые карточки */
-    --color-border: #e5e7eb;     /* Светлая граница */
-    --color-primary: #7f19e6;
-    --color-primary-gold: #D4AF37;
+    /* Светлая тема - "The Sacred Digital Archive" */
+    --color-bg: #fbf9f4;        /* Пергамент (Parchment) из stitch_1 */
+    --color-text-main: #1b1c19;  /* Глубокий угольный (чернила) */
+    --color-text-muted: #5c5d59; /* Приглушённый серо-коричневый */
+    --color-surface: #ffffff;    /* Чистый белый для карточек */
+    --color-surface-alt: #eae8e3; /* Вторичный фон */
+    --color-border: rgba(120, 86, 0, 0.2); /* Тонкая золотая граница (outline_variant 20%) */
+    --color-primary: #E1C16E;    /* Золотой акцент */
+    --color-primary-container: #C5A059;
+    --color-primary-dark: #9A7632;
+    --color-primary-gold: #E1C16E;
+    --color-accent-red: #8B3A3A; /* Гармоничный красный для буквиц */
+    --color-on-primary-fixed: #3D2B1F; /* Тёмно-коричневый текст на золоте */
 }
 
 .dark {
     --color-bg: #120F16;        /* Темный фон */
     --color-text-main: #ffffff;  /* Белый текст */
-    --color-text-muted: #ab9db8; 
+    --color-text-muted: #ab9db8;
     --color-surface: #2a1f33;    /* Темные карточки */
-    --color-surface-alt: #352940; 
+    --color-surface-alt: #352940;
     --color-border: rgba(255, 255, 255, 0.05);
-    --color-primary-gold: #D4AF37;
+    --color-primary: #E1C16E;    /* Золотой акцент */
+    --color-primary-dark: #C5A059; /* Тёмный золотой для нажатия */
+    --color-primary-gold: #E1C16E;
     --color-danger: #F87171;
+    --color-accent-red: #F87171;
+}
+
+/* Принудительный темный режим для окон чтения молитв */
+#reading-mode-modal, #prayers-reading-modal {
+    --color-bg: #120F16;
+    --color-surface: #1a1914;
+    --color-surface-alt: #1e1d18;
+    --color-text-main: #f3f4f6;
+    --color-text-muted: #ababab;
+    --color-border: rgba(225, 193, 110, 0.2);
+    background-color: var(--color-bg) !important;
+    color: var(--color-text-main) !important;
+}
+#reading-mode-modal *, #prayers-reading-modal * {
+    border-color: var(--color-border) !important;
 }
 
 @layer base {
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+  }
   body {
-    background-color: var(--color-bg);
     color: var(--color-text-main);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-family: 'Inter', sans-serif;
   }
+  
+  /* Заголовки с эффектом свечения свечи */
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--color-primary-gold);
+    text-shadow: 0 0 12px rgba(225, 193, 110, 0.4);
+  }
+}
+
+/* Единая стеклянная шапка для всех вкладок */
+.main-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 50;
+  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.8); /* Светлая тема - чистый белый с размытием */
+  border-bottom: 1px solid var(--color-border);
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: 12px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.main-header h1 {
+  font-family: 'Ruslan Display', serif !important;
+  color: var(--color-primary-gold) !important;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+  padding: 0 16px;
+}
+
+.dark .main-header {
+  background: rgba(18, 15, 22, 0.85);
+  border-bottom: 1px solid rgba(225, 193, 110, 0.15);
+}
+
+/* Нижний навигационный бар */
+#bottom-nav {
+  background-color: var(--color-bg) !important;
+  border-top: 1px solid var(--color-border);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 @layer components {
   .glass-panel, .glass-card {
     background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: 1.5rem;
+    border: 0.5px solid var(--color-border); /* "Ghost Border" - тонкая золотая граница */
+    border-radius: 0.375rem; /* md radius - как в книге */
     overflow: hidden;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    box-shadow: 0 1px 3px rgba(27, 28, 25, 0.06); /* Очень мягкая тень */
     transition: all 0.2s ease;
   }
 
   .dark .glass-panel, .dark .glass-card {
-    background-color: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background-color: #1c1522 !important; /* Темно-фиолетовый */
+    border: 1px solid rgba(225, 193, 110, 0.2) !important; /* Золотая граница */
     backdrop-filter: blur(24px);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Date Card Enhancements */
+  #date-display-btn, #old-style-date-btn {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  
+  #date-display-btn:hover, #old-style-date-btn:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+  }
+  
+  #date-display-btn p, #old-style-date-btn p {
+    transition: all 0.3s ease;
+  }
+  
+  #date-display-btn:hover p[id*="day"], #old-style-date-btn:hover p[id*="day"] {
+    transform: scale(1.1);
+    text-shadow: 0 0 15px rgba(225, 193, 110, 0.4);
   }
 
   /* Icons */
@@ -62,6 +153,51 @@
     font-size: 24px;
     font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 48;
   }
+  
+  /* Золотистые иконки в навигации */
+  .nav-btn .material-symbols-outlined {
+    color: var(--color-text-muted);
+    transition: all 0.3s ease;
+  }
+  
+  .nav-btn.active .material-symbols-outlined {
+    color: var(--color-primary-gold);
+  }
+
+  /* Стили для выезжающей панели телесуфлера */
+  @keyframes fadeInRight {
+      from { opacity: 0; transform: translateY(-50%) translateX(50px); }
+      to { opacity: 1; transform: translateY(-50%) translateX(0); }
+  }
+
+  .animate-fade-in-right {
+      animation: fadeInRight 0.5s ease-out forwards;
+  }
+
+  #teleprompter-controls {
+      transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+      will-change: transform, opacity;
+  }
+
+  #teleprompter-controls.collapsed {
+      transform: translateY(-50%) translateX(calc(100% - 12px)) !important;
+      opacity: 0.4;
+  }
+
+  #teleprompter-controls.collapsed:hover, #teleprompter-controls.collapsed:active {
+      transform: translateY(-50%) translateX(calc(100% - 32px)) !important;
+      opacity: 0.8;
+  }
+
+  /* Текст навигации - светлая тема */
+  .nav-btn span:not(.material-symbols-outlined) {
+    color: var(--color-text-muted);
+    transition: all 0.3s ease;
+  }
+  
+  .nav-btn.active span:not(.material-symbols-outlined) {
+    color: var(--color-primary-gold);
+  }
 
   /* Golden Gradient Text Effect */
   .golden-text {
@@ -72,36 +208,135 @@
     font-family: 'Lora', serif;
     font-weight: 700;
   }
+  
+  /* Текст молитв и грехов - золотистый */
+  .prayer-text, .sin-text, .canon-text {
+    color: var(--color-text-main) !important;
+  }
+  
+  /* Второстепенный текст */
+  .text-muted, .text-secondary {
+    color: var(--color-text-muted) !important;
+  }
 
-  /* Button Styles */
+  /* Button Styles - эффект свечи */
   .btn-primary {
-    background-color: var(--color-primary);
-    color: white;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-container) 100%);
+    color: var(--color-on-primary-fixed); /* Тёмно-коричневый текст для контраста */
     font-weight: 700;
-    border-radius: 1rem;
+    border-radius: 0.375rem; /* md radius - как в книге */
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     padding: 1rem 1.5rem;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(120, 86, 0, 0.15);
+    border: none;
   }
-  .btn-primary:active { transform: scale(0.95); }
+  .btn-primary:active {
+    transform: scale(0.95);
+    filter: brightness(0.9);
+  }
+  .btn-primary:hover {
+    filter: brightness(1.05);
+  }
 
   .btn-outline {
-    border: 2px solid var(--color-primary);
+    border: 1px solid var(--color-primary);
     color: var(--color-primary);
     font-weight: 700;
-    border-radius: 1rem;
+    border-radius: 0.375rem;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
     transition: all 0.2s ease;
     padding: 1rem 1.5rem;
+    background: transparent;
   }
   .btn-outline:active { transform: scale(0.95); }
+
+  /* Segmented Control Buttons - эффект свечи */
+  .font-size-btn.active,
+  .view-mode-btn.active,
+  .profile-btn.active,
+  .lang-btn.active {
+    background: linear-gradient(135deg, #E1C16E 0%, #C5A059 100%) !important;
+    color: #3D2B1F !important; /* Тёмно-коричневый текст */
+    font-weight: 700;
+    box-shadow: 0 0 10px rgba(225, 193, 110, 0.3); /* Свечение свечи */
+    border: 1px solid rgba(225, 193, 110, 0.5);
+    border-radius: 22px !important;
+    transition: all 0.3s ease;
+  }
+
+  .font-size-btn.active:hover,
+  .view-mode-btn.active:hover,
+  .profile-btn.active:hover,
+  .lang-btn.active:hover {
+    filter: brightness(1.1);
+  }
+
+  /* Toggle Switch - эффект свечи */
+  .peer:checked + div {
+    background: linear-gradient(135deg, #E1C16E 0%, #C5A059 100%);
+    box-shadow: 0 0 12px rgba(225, 193, 110, 0.5);
+    border: 1px solid rgba(225, 193, 110, 0.3);
+  }
+  
+  /* Неактивное состояние тумблера - более видимое */
+  .peer:not(:checked) + div {
+    background-color: rgba(255, 255, 255, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Кружок тумблера - контрастный */
+  .peer:checked + div::after,
+  .peer:not(:checked) + div::after {
+    background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 8px rgba(255, 255, 255, 0.5);
+  }
+  
+  /* Тёмная тема - неактивное состояние ещё более видимое */
+  .dark .peer:not(:checked) + div {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  /* Неактивные сегментированные кнопки - светлые */
+  .font-size-btn:not(.active),
+  .view-mode-btn:not(.active),
+  .profile-btn:not(.active),
+  .lang-btn:not(.active) {
+    background-color: var(--color-surface-alt) !important;
+    color: var(--color-text-muted) !important;
+    border: 1px solid var(--color-border);
+    border-radius: 22px !important;
+  }
+
+  .font-size-btn:not(.active):hover,
+  .view-mode-btn:not(.active):hover,
+  .profile-btn:not(.active):hover,
+  .lang-btn:not(.active):hover {
+    background-color: #f5f3ee !important;
+  }
+
+  /* Dark mode segmented buttons container */
+  .dark .bg-black\/20,
+  .dark .bg-\[rgba\(0\,0\,0\,0\.2\)\] {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+  }
+  
+  /* Dark mode icon containers - золотые иконки */
+  .dark .bg-white\/5 {
+    background-color: rgba(225, 193, 110, 0.1) !important;
+  }
+  
+  .dark .text-primary {
+    color: #E1C16E !important;
+  }
 }
 
 @layer utilities {
@@ -164,8 +399,6 @@
 /* Audio Bars */
 
 #bottom-nav {
-  background-color: var(--color-bg);
-  border-top: 1px solid var(--color-border);
   z-index: 50;
   position: fixed;
   bottom: 0;
@@ -198,9 +431,9 @@
 
 /* Swatch colors for settings */
 [data-profile].bg-primary, [data-lang].bg-primary, [data-font].bg-primary, [data-view].bg-primary {
-  background-color: var(--color-primary) !important;
-  color: white !important;
-  box-shadow: 0 8px 20px -6px rgba(127, 25, 230, 0.5);
+  background: linear-gradient(135deg, #F5E6BE 0%, #E1C16E 50%, #C5A059 100%) !important;
+  color: #3D2B1F !important;
+  box-shadow: 0 8px 20px -6px rgba(225, 193, 110, 0.5);
   transform: scale(1.02);
 }
 
@@ -210,7 +443,7 @@
 }
 
 .font-size-btn.bg-primary, .view-mode-btn.bg-primary, .lang-btn.bg-primary, .profile-btn.bg-primary {
-  color: white;
+  color: #3D2B1F;
 }
 
 /* My List Sins Cards (Premium) */
@@ -349,9 +582,9 @@ summary::-webkit-details-marker {
 .main-play-btn {
   width: 60px;
   height: 60px;
-  background: linear-gradient(135deg, #7f19e6 0%, #6c15c4 100%);
+  background: linear-gradient(135deg, #F5E6BE 0%, #E1C16E 50%, #C5A059 100%);
   border: none;
-  box-shadow: 0 0 20px rgba(127, 25, 230, 0.3);
+  box-shadow: 0 0 20px rgba(225, 193, 110, 0.4);
 }
 
 .main-play-btn span {
@@ -457,18 +690,21 @@ summary::-webkit-details-marker {
   font-family: 'EB Garamond', 'Lora', serif;
   font-size: clamp(24px, 5vw, 32px);
   font-weight: 700;
-  color: #f3f4f6;
+  color: var(--color-primary-gold);
   line-height: 1.3;
   margin-bottom: 12px;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.light .canon-title { color: #1a1a1a; text-shadow: none; }
+.dark .canon-title {
+  color: var(--color-primary-gold);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
 
 .canon-subtitle {
   font-family: 'Lora', serif;
   font-size: 14px;
-  color: #ab9db8;
+  color: var(--color-text-muted);
   font-style: italic;
   letter-spacing: 0.05em;
   text-transform: lowercase;
@@ -503,17 +739,21 @@ summary::-webkit-details-marker {
   font-family: 'EB Garamond', 'Lora', serif;
   font-size: clamp(20px, 5vw, 22px);
   line-height: 1.75;
-  color: #e8e8e8;
+  color: var(--color-text-main);
   padding: 12px 16px !important;
   margin: 16px 0 !important;
-  background: rgba(225, 193, 110, 0.08);
-  border-left: 4px solid #E1C16E;
+  background: var(--color-surface-alt);
+  border-left: 4px solid var(--color-primary-gold);
   border-radius: 0 16px 16px 0;
-  box-shadow: inset 4px 0 10px rgba(0,0,0,0.2);
+  opacity: 0.95;
 }
 
-.irmos-label { color: #ffffff !important; margin-right: 6px; }
-.irmos-text { color: #E1C16E !important; font-style: italic; }
+.dark .irmos {
+  background: rgba(225, 193, 110, 0.08);
+}
+
+.irmos-label { color: var(--color-primary-gold) !important; margin-right: 6px; font-weight: bold; }
+.irmos-text { color: var(--color-primary-gold) !important; font-style: italic; font-weight: 500; }
 
 .zapev, .slava-full, .i-nyne-full {
   color: #ef4444 !important;
@@ -529,7 +769,7 @@ summary::-webkit-details-marker {
   font-family: 'EB Garamond', 'Lora', serif;
   font-size: clamp(20px, 5vw, 22px);
   line-height: 1.75;
-  color: #ffffff !important;
+  color: var(--color-text-main) !important;
   margin: 0 0 12px 0 !important;
 }
 
@@ -552,15 +792,16 @@ summary::-webkit-details-marker {
 }
 
 .calendar-day span {
-    color: white;
+    color: var(--color-text-main);
     font-weight: 500;
     position: relative;
     z-index: 10;
     font-size: 15px;
+    transition: color 0.3s ease;
 }
 
 .calendar-day:hover:not(.other-month) {
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: var(--color-surface-alt);
     border-radius: 9999px;
 }
 
@@ -580,16 +821,17 @@ summary::-webkit-details-marker {
     border: 1px solid rgba(212, 175, 55, 0.4); /* primary-gold @ 40% */
 }
 
-.calendar-day.important::before {
+.calendar-day.today::before {
     content: '';
     position: absolute;
-    inset: 6px;
+    inset: 4px;
     border-radius: 9999px;
-    border: 2px solid #D4AF37;
+    border: 2px solid var(--color-primary-gold);
 }
 
-.calendar-day.selected { border-radius: 9999px; background-color: rgba(255, 255, 255, 0.1); }
-.calendar-day.other-month { opacity: 0.2; pointer-events: none; }
+.calendar-day.selected { border-radius: 9999px; background-color: var(--color-primary-gold); }
+.calendar-day.selected span { color: var(--color-on-primary-fixed) !important; font-weight: 700; }
+.calendar-day.other-month { opacity: 0.15; pointer-events: none; }
 
 .calendar-day.has-fast::after {
     content: '';
@@ -599,8 +841,8 @@ summary::-webkit-details-marker {
     width: 6px;
     height: 6px;
     border-radius: 9999px;
-    background-color: #7f19e6;
-    box-shadow: 0 0 4px rgba(127, 25, 230, 0.8);
+    background-color: #E1C16E;
+    box-shadow: 0 0 4px rgba(225, 193, 110, 0.8);
 }
 
 /* Container Styles */
@@ -660,4 +902,69 @@ summary::-webkit-details-marker {
     font-family: 'Ruslan Display', serif !important;
     font-weight: 400;
     letter-spacing: 0.02em;
+}
+
+
+/* Текст навигации */
+.nav-btn span:not(.material-symbols-outlined) {
+    color: var(--color-text-muted);
+    transition: all 0.3s ease;
+}
+
+.nav-btn.active span:not(.material-symbols-outlined) {
+    color: var(--color-primary-gold);
+    text-shadow: 0 0 8px rgba(225, 193, 110, 0.5);
+}
+
+/* Settings Headings - золотой вязью */
+#tab-settings h3 {
+    font-family: 'Ruslan Display', serif !important;
+    color: var(--color-primary-gold) !important;
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-shadow: 0 0 12px rgba(225, 193, 110, 0.4);
+    margin-bottom: 0.75rem;
+}
+
+/* Settings Section Headers - золотой текст */
+#tab-settings .text-text-main,
+#tab-settings .font-bold.text-text-main {
+    color: #E1C16E !important;
+}
+
+/* Settings Icons - золотые */
+#tab-settings .material-symbols-outlined {
+    color: var(--color-primary-gold) !important;
+}
+
+/* Active Navigation Icons */
+.nav-btn.active .material-symbols-outlined {
+    color: var(--color-primary-gold) !important;
+}
+
+/* Golden glow effect for active elements */
+.nav-btn.active,
+.prayer-menu-item.active {
+    text-shadow: 0 0 10px rgba(225, 193, 110, 0.5);
+}
+
+/* Кнопки молитв - эффект свечи при наведении */
+.prayer-menu-item {
+    transition: all 0.3s ease;
+}
+
+.prayer-menu-item:hover {
+    box-shadow: 0 0 20px rgba(225, 193, 110, 0.3);
+    border-color: rgba(225, 193, 110, 0.4);
+}
+
+.prayer-menu-item:active {
+    filter: brightness(0.95);
+    transform: scale(0.98);
+}
+
+/* Буквицы и запевы - красный (киноварь) */
+.canon-initial,
+.canon-red {
+    color: var(--color-accent-red) !important;
 }

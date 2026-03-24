@@ -4,9 +4,10 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        mavenLocal()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:9.0.1'
+        classpath 'com.android.tools.build:gradle:8.7.3'
     }
 }
 
@@ -15,4 +16,49 @@ allprojects {
         google()
         mavenCentral()
     }
+
+    tasks.withType(JavaCompile).configureEach {
+        javaCompiler = javaToolchains.compilerFor {
+            languageVersion = JavaLanguageVersion.of(17)
+        }
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            project.android {
+                compileOptions {
+                    sourceCompatibility JavaVersion.VERSION_17
+                    targetCompatibility JavaVersion.VERSION_17
+                }
+            }
+        }
+    }
+}
+
+subprojects {
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            // Принудительно задаем Toolchain для Java
+            project.android {
+                compileOptions {
+                    sourceCompatibility JavaVersion.VERSION_17
+                    targetCompatibility JavaVersion.VERSION_17
+                }
+                compileSdk 35
+            }
+
+            // Принудительно задаем Toolchain для Kotlin
+            if (project.plugins.hasPlugin('kotlin-android')) {
+                kotlin {
+                    jvmToolchain(17)
+                }
+            }
+        }
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
 }
