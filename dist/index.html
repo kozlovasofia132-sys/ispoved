@@ -20,12 +20,12 @@
             text-shadow: 0 0 1px rgba(255, 255, 255, 0.1), 0 0 2px rgba(255, 255, 255, 0.05);
         }
     </style>
-  <script type="module" crossorigin src="/assets/index-CZN6vpAE.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-DPJHcOF6.css">
+  <script type="module" crossorigin src="/assets/index-Ck4zmG7-.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-Rbl9NgGH.css">
 <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
 
 <body class="bg-bg font-sans antialiased text-text-main min-h-screen flex flex-col overflow-hidden transition-colors duration-300">
-    <div class="w-full h-full flex flex-col relative overflow-hidden">
+    <div class="w-full h-full flex flex-col relative app-wrapper">
         <!-- Unified Main Header -->
         <header class="main-header">
             <h1 id="main-header-title" data-t="churchTitle">Православный церковный календарь</h1>
@@ -317,6 +317,7 @@
                             <button data-prayer-id="afterCommunion" class="prayer-menu-item w-full p-5 glass-card border border-[#E1C16E]/20 flex items-center gap-4 active:scale-[0.98] transition-all text-left group">
                                 <span class="flex-1 text-xl font-serif font-bold text-primary-gold tracking-tight drop-shadow-[0_0_8px_rgba(225,193,110,0.5)] group-hover:drop-shadow-[0_0_12px_rgba(225,193,110,0.7)] transition-all duration-300">Благодарственные молитвы по Святом Причащении</span>
                             </button>
+                        </div>
                     </div>
                 </div>
             </main>
@@ -326,12 +327,12 @@
                 <!-- Spacer for fixed header -->
                 <div class="h-[52px]"></div>
 
-                <div class="px-4 space-y-8 animate-fade-in-up">
+                <div class="px-4 space-y-10 animate-fade-in-up">
                     <!-- Appearance Section -->
                     <section>
-                        <div class="flex items-center gap-3 mb-4 px-2">
-                            <span class="material-symbols-outlined text-primary-gold text-lg">palette</span>
-                            <h3 class="text-[11px] font-bold text-primary-gold uppercase tracking-[0.2em]" data-t="sectionAppearance">Внешний вид</h3>
+                        <div class="flex items-center gap-3 mb-6 px-2">
+                            <span class="material-symbols-outlined text-primary-gold text-2xl">palette</span>
+                            <h3 class="font-serif text-2xl font-bold text-text-main dark:text-primary-gold italic" data-t="sectionAppearance">Настройки вида</h3>
                         </div>
                         <div class="glass-card divide-y divide-white/5 rounded-[32px] overflow-hidden">
                             <!-- Theme Toggle -->
@@ -381,9 +382,9 @@
 
                     <!-- Age Profile Section -->
                     <section>
-                        <div class="flex items-center gap-3 mb-4 px-2">
-                            <span class="material-symbols-outlined text-primary-gold text-lg">person</span>
-                            <h3 class="text-[11px] font-bold text-primary-gold uppercase tracking-[0.2em]" data-t="sectionProfile">Возраст</h3>
+                        <div class="flex items-center gap-3 mb-6 px-2">
+                            <span class="material-symbols-outlined text-primary-gold text-2xl">person</span>
+                            <h3 class="font-serif text-2xl font-bold text-text-main dark:text-primary-gold italic" data-t="sectionProfile">Профиль верующего</h3>
                         </div>
                         <div class="glass-card p-2 grid grid-cols-3 gap-2 rounded-[32px] overflow-hidden">
                             <button data-profile="adult" class="profile-btn py-4 rounded-[22px] text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95" data-t="profileAdult">Взрослый</button>
@@ -394,9 +395,9 @@
 
                     <!-- Language Section -->
                     <section>
-                        <div class="flex items-center gap-3 mb-4 px-2">
-                            <span class="material-symbols-outlined text-primary-gold text-lg">language</span>
-                            <h3 class="text-[11px] font-bold text-primary-gold uppercase tracking-[0.2em]" data-t="sectionLanguage">Язык</h3>
+                        <div class="flex items-center gap-3 mb-6 px-2">
+                            <span class="material-symbols-outlined text-primary-gold text-2xl">language</span>
+                            <h3 class="font-serif text-2xl font-bold text-text-main dark:text-primary-gold italic" data-t="sectionLanguage">Язык богослужения</h3>
                         </div>
                         <div class="glass-card p-2 grid grid-cols-2 gap-2 rounded-[32px] overflow-hidden">
                             <button data-lang="ru" class="lang-btn py-5 rounded-[22px] text-[11px] font-bold uppercase tracking-widest transition-all active:scale-95">Русский</button>
@@ -406,9 +407,9 @@
 
                     <!-- Privacy Section -->
                     <section>
-                        <div class="flex items-center gap-3 mb-4 px-2">
-                            <span class="material-symbols-outlined text-primary-gold text-lg">security</span>
-                            <h3 class="text-[11px] font-bold text-primary-gold uppercase tracking-[0.2em]" data-t="sectionPrivacy">Приватность</h3>
+                        <div class="flex items-center gap-3 mb-6 px-2">
+                            <span class="material-symbols-outlined text-primary-gold text-2xl">security</span>
+                            <h3 class="font-serif text-2xl font-bold text-text-main dark:text-primary-gold italic" data-t="sectionPrivacy">Хранение данных</h3>
                         </div>
                         <div class="glass-card divide-y divide-white/5 rounded-[32px] overflow-hidden">
                             <!-- PIN Code Entry -->
@@ -429,9 +430,9 @@
 
                     <!-- App Section -->
                     <section>
-                        <div class="flex items-center gap-3 mb-4 px-2">
-                            <span class="material-symbols-outlined text-primary-gold text-lg">info</span>
-                            <h3 class="text-[11px] font-bold text-primary-gold uppercase tracking-[0.2em]" data-t="sectionApp">Приложение</h3>
+                        <div class="flex items-center gap-3 mb-6 px-2">
+                            <span class="material-symbols-outlined text-primary-gold text-2xl">info</span>
+                            <h3 class="font-serif text-2xl font-bold text-text-main dark:text-primary-gold italic" data-t="sectionApp">Об приложении</h3>
                         </div>
                         <div class="glass-card divide-y divide-white/5 rounded-[32px] overflow-hidden">
                             <!-- About Item -->
@@ -467,9 +468,9 @@
 
                     <!-- Experimental Features -->
                     <section class="opacity-80">
-                        <div class="flex items-center gap-3 mb-4 px-2">
-                            <span class="material-symbols-outlined text-primary-gold text-lg">science</span>
-                            <h3 class="text-[11px] font-bold text-primary-gold uppercase tracking-[0.2em]" data-t="experimentalFeaturesTitle">Экспериментальные функции</h3>
+                        <div class="flex items-center gap-3 mb-6 px-2">
+                            <span class="material-symbols-outlined text-primary-gold text-2xl">science</span>
+                            <h3 class="font-serif text-2xl font-bold text-text-main dark:text-primary-gold italic" data-t="experimentalFeaturesTitle">Новые возможности</h3>
                         </div>
                         <div class="glass-card border-primary-gold/20 rounded-[32px] overflow-hidden">
                             <div class="flex items-start gap-4 p-6">
@@ -551,7 +552,7 @@
                     <p class="whitespace-pre-line" data-t="aboutDescription"></p>
                     <div class="p-5 rounded-2xl bg-primary-gold/10 border border-primary-gold/20 text-primary-gold italic font-medium" data-t="aboutImportant"></div>
                     <div class="pt-6 border-t border-border space-y-2 opacity-60 text-center">
-                        <p class="text-[11px] font-bold text-text-main uppercase tracking-widest" data-t="appHelperVersion">Версия 2.0.10</p>
+                        <p class="text-[11px] font-bold text-text-main uppercase tracking-widest" data-t="appHelperVersion">Версия 2.0.12</p>
                         <p class="text-[10px] italic text-text-muted">2026 г. Тюмень</p>
                         <p class="text-[10px] italic text-text-muted" data-t="madeWithPrayer">Создано с молитвой и любовью</p>
                     </div>
@@ -801,20 +802,34 @@
 
         <audio id="global-audio-element" preload="auto"></audio>
 
-        <!-- Teleprompter Controls (Vertical, Right Side) -->
-        <div id="teleprompter-controls" class="fixed right-6 top-[60%] -translate-y-1/2 z-[620] bg-surface/80 backdrop-blur-3xl border border-primary-gold/20 rounded-[3rem] py-8 px-4 flex flex-col items-center gap-10 shadow-3xl hidden animate-fade-in-right">
-            <!-- Play/Pause Button -->
-            <button id="toggle-autoscroll-btn" class="w-16 h-16 rounded-3xl bg-primary-gold text-white flex items-center justify-center shadow-xl shadow-primary-gold/20 active:scale-90 transition-all group">
-                <span id="autoscroll-icon" class="material-symbols-outlined text-4xl group-hover:scale-110 transition-transform">play_arrow</span>
-            </button>
-            
-            <!-- Speed Control Vertical -->
-            <div class="flex flex-col items-center gap-8 border-t border-primary-gold/10 pt-8">
-                <span class="text-[9px] font-bold text-text-muted uppercase tracking-[0.2em] mb-4" data-t="readingSpeed">Скорость</span>
-                <div class="relative h-44 w-8 flex items-center justify-center">
-                    <input type="range" id="autoscroll-speed" min="0" max="100" value="30" 
-                           class="absolute w-44 h-1.5 accent-primary-gold cursor-pointer bg-white/5 rounded-full" 
-                           style="transform: rotate(-90deg); -webkit-appearance: none;">
+        <!-- Золотистый ярлычок (всегда виден когда открыта молитва) -->
+        <button id="teleprompter-handle" class="fixed -right-8 top-[60%] -translate-y-1/2 z-[630] w-16 h-16 bg-primary-gold/30 backdrop-blur-md border-l-2 border-t-2 border-b-2 border-primary-gold/50 rounded-l-2xl flex items-center justify-start shadow-lg active:scale-95 transition-all pl-1">
+            <span id="handle-icon" class="material-symbols-outlined text-primary-gold text-3xl font-bold">chevron_left</span>
+        </button>
+        
+        <!-- Основная панель (скрывается) -->
+        <div id="teleprompter-controls" class="fixed right-0 top-[60%] -translate-y-1/2 z-[620] flex transition-all duration-300 hidden" style="width: 280px; touch-action: none;">
+            <div class="teleprompter-panel ml-4 bg-surface/90 backdrop-blur-3xl border border-primary-gold/20 rounded-[3rem] py-8 px-4 flex flex-col items-center gap-6 shadow-3xl transition-all duration-300 transform translate-x-full opacity-0" id="teleprompter-panel" style="touch-action: none;">
+                <!-- Speed Control Vertical -->
+                <div class="flex flex-col items-center gap-6">
+                    <div class="flex flex-col items-center gap-3">
+                        <button id="toggle-autoscroll-btn" class="w-10 h-10 rounded-xl bg-primary-gold text-white flex items-center justify-center shadow-lg shadow-primary-gold/20 active:scale-90 transition-all">
+                            <span id="autoscroll-icon" class="material-symbols-outlined text-2xl">play_arrow</span>
+                        </button>
+                    </div>
+                    <div class="flex flex-col items-center gap-3">
+                        <button id="speed-up-btn" class="w-10 h-10 rounded-xl bg-white/5 border border-primary-gold/20 flex items-center justify-center text-primary-gold active:scale-90 transition-all">
+                            <span class="material-symbols-outlined text-2xl">add</span>
+                        </button>
+                        <div class="relative h-44 w-8 flex items-center justify-center">
+                            <input type="range" id="autoscroll-speed" min="0" max="100" value="30"
+                                   class="absolute w-44 h-1.5 accent-primary-gold cursor-pointer bg-white/5 rounded-full"
+                                   style="transform: rotate(-90deg); -webkit-appearance: none;">
+                        </div>
+                        <button id="speed-down-btn" class="w-10 h-10 rounded-xl bg-white/5 border border-primary-gold/20 flex items-center justify-center text-primary-gold active:scale-90 transition-all">
+                            <span class="material-symbols-outlined text-2xl">remove</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

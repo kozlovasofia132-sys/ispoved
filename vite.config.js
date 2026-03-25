@@ -4,7 +4,31 @@ import { VitePWA } from 'vite-plugin-pwa';
 export default defineConfig({
     server: {
         host: true,
-        port: 5173
+        port: 5173,
+        hmr: {
+            overlay: false
+        },
+        watch: {
+            ignored: [
+                '**/android/**',
+                '**/node_modules/**',
+                '**/.git/**',
+                '**/dist/**'
+            ]
+        }
+    },
+    esbuild: {
+        loader: 'js',
+        include: /^src\/.*\.js$/,
+        exclude: [/node_modules/, /\.agents\//, /my-video\//, /\.jsx$/, /\.tsx$/],
+        jsx: 'preserve'
+    },
+    optimizeDeps: {
+        esbuildOptions: {
+            loader: {
+                '.js': 'js'
+            }
+        }
     },
     plugins: [
         VitePWA({

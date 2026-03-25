@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,700;1,400;1,700&family=Newsreader:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -54,7 +54,17 @@
     margin: 0;
     padding: 0;
     height: 100%;
-    overflow: hidden;
+  }
+  html {
+    overflow: clip; /* clip не создаёт scroll-контейнер — fixed-элементы работают корректно */
+  }
+  body {
+    overflow: hidden; /* hidden только для body чтобы предотвратить прокрутку */
+  }
+  /* Внешний wrapper используем overflow:clip вместо hidden
+     чтобы не создавать конкурирующий GPU-слой, который мог рисоваться поверх fixed-модалей */
+  .app-wrapper {
+    overflow: clip;
   }
   body {
     color: var(--color-text-main);
@@ -68,6 +78,61 @@
     color: var(--color-primary-gold);
     text-shadow: 0 0 12px rgba(225, 193, 110, 0.4);
   }
+}
+
+/* Stitch_1 Typography Classes */
+.font-headline {
+  font-family: 'Newsreader', serif;
+}
+
+.font-body {
+  font-family: 'Lora', serif;
+}
+
+.font-label {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Stitch_1 Color Variables (from DESIGN.md) */
+:root {
+  --on-surface: #1b1c19;
+  --on-surface-variant: #4f4535;
+  --surface-container-low: #f5f3ee;
+  --surface-container-highest: #e4e2dd;
+  --secondary: #934b19;
+}
+
+/* Ghost Border utility */
+.ghost-border {
+  border: 0.5px solid rgba(211, 196, 175, 0.2);
+}
+
+/* Liturgical Glow effect */
+.liturgical-glow {
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 80px;
+  height: 80px;
+  background: var(--color-primary);
+  opacity: 0.1;
+  filter: blur(40px);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Drop cap style for readings */
+.drop-cap {
+  position: absolute;
+  left: -1.5rem;
+  top: -1rem;
+  font-family: 'Newsreader', serif;
+  font-size: 6rem;
+  line-height: 1;
+  color: var(--color-primary);
+  opacity: 0.2;
+  pointer-events: none;
+  font-weight: 700;
 }
 
 /* Единая стеклянная шапка для всех вкладок */
@@ -850,16 +915,122 @@ summary::-webkit-details-marker {
     transition: all 0.5s ease;
 }
 
-#date-picker-modal.hidden { display: none; }
+/* === MODAL DISPLAY RULES === */
+/* These explicit rules ensure modals show/hide correctly regardless of Tailwind specificity */
+
+#date-picker-modal.hidden { display: none !important; }
 #date-picker-modal {
     position: fixed;
     inset: 0;
-    z-index: 100;
+    z-index: 1000;
     display: flex;
     align-items: center;
     justify-content: center;
     background-color: rgba(0, 0, 0, 0.8);
     backdrop-filter: blur(24px);
+}
+
+/* Prayers Reading Modal */
+#prayers-reading-modal.hidden { display: none !important; }
+#prayers-reading-modal:not(.hidden),
+#prayers-reading-modal.modal-active {
+    display: flex !important;
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 99999 !important;
+    background-color: #120F16 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    /* Override transition-all */
+    transition: none !important;
+}
+
+/* PIN Pad Modal */
+#pin-pad-modal.hidden { display: none !important; }
+#pin-pad-modal:not(.hidden),
+#pin-pad-modal.modal-active {
+    display: flex !important;
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 99999 !important;
+    background-color: #120F16 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transition: none !important;
+}
+
+/* Reading Mode Modal */
+#reading-mode-modal.hidden { display: none !important; }
+#reading-mode-modal:not(.hidden),
+#reading-mode-modal.modal-active {
+    display: flex !important;
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 99999 !important;
+    background-color: #120F16 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transition: none !important;
+}
+
+/* Confirm Modal */
+#confirm-modal.hidden { display: none !important; }
+#confirm-modal:not(.hidden) {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Prayer Modal (bottom sheet) */
+#prayer-modal.hidden { display: none !important; }
+#prayer-modal:not(.hidden) {
+    display: flex !important;
+}
+
+/* Donate Modal */
+#donate-modal.hidden { display: none !important; }
+#donate-modal:not(.hidden) {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+/* About Modal */
+#about-modal.hidden { display: none !important; }
+#about-modal:not(.hidden) {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Contact Modal */
+#contact-modal.hidden { display: none !important; }
+#contact-modal:not(.hidden) {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Clear Modal */
+#clear-modal.hidden { display: none !important; }
+#clear-modal:not(.hidden) {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Preview Modal */
+#preview-modal.hidden { display: none !important; }
+#preview-modal:not(.hidden) {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+/* PIN Pad Close Button */
+#pin-pad-close-btn.hidden { display: none !important; }
+#pin-pad-close-btn:not(.hidden) {
+    display: flex !important;
 }
 /* Audio Player in Header - Compact Design */
 #audio-player-bar {

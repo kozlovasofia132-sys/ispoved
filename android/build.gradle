@@ -40,7 +40,7 @@ allprojects {
 subprojects {
     afterEvaluate { project ->
         if (project.hasProperty('android')) {
-            // Принудительно задаем Toolchain для Java
+            // Java Toolchain configuration
             project.android {
                 compileOptions {
                     sourceCompatibility JavaVersion.VERSION_17
@@ -49,7 +49,16 @@ subprojects {
                 compileSdk 35
             }
 
-            // Принудительно задаем Toolchain для Kotlin
+            // Ensure Java Toolchain is set if java plugin is present
+            if (project.plugins.hasPlugin('java')) {
+                java {
+                    toolchain {
+                        languageVersion = JavaLanguageVersion.of(17)
+                    }
+                }
+            }
+
+            // Kotlin Toolchain configuration
             if (project.plugins.hasPlugin('kotlin-android')) {
                 kotlin {
                     jvmToolchain(17)

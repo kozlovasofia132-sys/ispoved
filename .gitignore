@@ -10,3 +10,13 @@ yarn-error.log*
 .DS_Store
 *.pem
 *.key
+temp_data/
+stitch/
+android/build/
+android/app/build/
+*.pdf
+*.png
+*.mp3
+*.exe
+*.pom
+*.mockup
