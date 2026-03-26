@@ -8,6 +8,9 @@ import { StatusBar, Style } from '@capacitor/status-bar';
 import { NavigationBar } from '@capgo/capacitor-navigation-bar';
 import { getSinsData, setProfile, getProfile } from './data/sins.js';
 import { translations } from './data/translations.js';
+
+// Глобальная переменная для текущей даты навигации (объявлена здесь для избежания TDZ)
+let currentNavDate;
 import { preparationData, communionPrep } from './data/preparation.js';
 import { quotes } from './data/quotes.js';
 import { prayersData } from './data/prayers.js';
@@ -31,6 +34,19 @@ document.addEventListener('DOMContentLoaded', () => {
         settings: document.getElementById('tab-settings'),
     };
 
+    // --- Header Date ---
+    function updateHeaderDate() {
+        const dateEl = document.getElementById('header-date');
+        if (!dateEl) return;
+
+        const dateToUse = (typeof currentNavDate !== 'undefined' && currentNavDate) ? currentNavDate : new Date();
+        const options = { day: 'numeric', month: 'long', year: 'numeric' };
+        const dateStr = dateToUse.toLocaleDateString('ru-RU', options);
+
+        // Делаем первую букву заглавной
+        dateEl.textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+    }
+
     // --- Global Audio Utility ---
     function stopAllAudio() {
         // 1. Останавливаем синтез речи (Web Speech API)
@@ -52,11 +68,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 4. Сбрасываем UI всех медиа-элементов (динамиков, кнопок и т.д.)
         if (typeof resetAllMediaUI === 'function') resetAllMediaUI();
-        
+
         // Сбрасываем иконку основного плеера
         const playIcon = document.getElementById('audio-play-icon');
         if (playIcon) playIcon.textContent = 'play_arrow';
-        
+
         // Сброс всех динамиков в "Подготовке"
         document.querySelectorAll('#preparation-intro-container button .material-symbols-outlined, #communion-prep-container button .material-symbols-outlined').forEach(i => {
             i.textContent = 'volume_up';
@@ -69,16 +85,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Global Speech Function ---
     window.toggleSpeech = (text, iconId, audioIndex) => {
         console.log('[Speech] Toggling speech:', iconId, audioIndex);
-        
+
         const icon = document.getElementById(iconId);
-        
+
         // Если это ТЕКУЩИЙ файл и он ИГРАЕТ — просто ставим на паузу и выходим
         if (window.currentAudio && window.currentAudio._preparationIndex === audioIndex && !window.currentAudio.paused) {
             window.currentAudio.pause();
             if (icon) icon.textContent = 'volume_up';
             return;
         }
-        
+
         // Во всех остальных случаях (новое аудио или возобновление старого из паузы) 
         // сначала останавливаем всё остальное
         stopAllAudio();
@@ -280,6 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'settings': headerKey = 'settingsTitle'; break;
             default: headerKey = 'appName';
         }
+
         headerTitle.textContent = headerKey ? t(headerKey) : '';
         headerTitle.setAttribute('data-t', headerKey);
     }
@@ -287,39 +304,47 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Random Quote Function ---
     function renderRandomQuote() {
         if (!quoteTextEl || !quoteAuthorEl || quotes.length === 0) return;
-        
+
         const randomIndex = Math.floor(Math.random() * quotes.length);
         const quote = quotes[randomIndex];
-        
+
         quoteTextEl.textContent = `«${quote.text}»`;
         quoteAuthorEl.textContent = quote.author;
-        
+
         console.log('Цитата обновлена:', quote);
     }
 
 
     // --- Tab Navigation ---
     async function switchTab(tabId) {
-        if (!tabContents[tabId]) return;
+        console.log('[switchTab] Called with tabId:', tabId);
+        if (!tabContents[tabId]) {
+            console.error('[switchTab] Tab not found:', tabId);
+            return;
+        }
 
         // Protection for "My Confession" tab — запрашиваем ПИН только если есть грехи в списке
         if (tabId === 'church-today' && isPinEnabled && selectedSins.length > 0) {
+            console.log('[switchTab] PIN required. isPinEnabled:', isPinEnabled, 'selectedSins.length:', selectedSins.length, 'isUnlocked:', isUnlocked);
             // Если уже разблокировано в этой сессии, не запрашиваем ПИН снова
             if (!isUnlocked) {
                 if (hashedPin) {
                     pendingTabAfterAuth = 'church-today';
+                    console.log('[switchTab] Opening PIN pad');
                     openPinPad(false);
                     return;
                 }
             }
         }
 
+        console.log('[switchTab] Switching to tab:', tabId);
         activeTab = tabId;
         pendingTabAfterAuth = null;
 
         Object.keys(tabContents).forEach(id => {
             if (tabContents[id]) {
                 tabContents[id].classList.toggle('hidden', id !== tabId);
+                console.log('[switchTab] Tab', id, 'hidden:', tabContents[id].classList.contains('hidden'));
             }
         });
 
@@ -327,6 +352,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const isTarget = btn.getAttribute('data-tab') === tabId;
             btn.classList.toggle('active', isTarget);
         });
+
+        // Обновляем дату только для вкладки Церковный календарь
+        const headerDateContainer = document.getElementById('header-date-container');
+        if (headerDateContainer) {
+            if (tabId === 'church-empty') {
+                headerDateContainer.style.display = '';
+                headerDateContainer.classList.remove('hidden');
+                updateHeaderDate();
+            } else {
+                headerDateContainer.style.display = 'none';
+                headerDateContainer.classList.add('hidden');
+            }
+        }
 
         updateHeader();
         if (tabId === 'church-today' && typeof window.autoResizeNotes === 'function') {
@@ -442,7 +480,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (isPinEnabled && selectedSins.length > 0 && !isUnlocked) {
                         // Закрываем accordion до авторизации
                         details.open = false;
-                        
+
                         pendingTabAfterAuth = 'catalog';
                         openPinPad(false, () => {
                             // После успешной проверки открываем accordion
@@ -453,7 +491,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         });
                         return;
                     }
-                    
+
                     setTimeout(() => {
                         details.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }, 50);
@@ -604,7 +642,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 3. Update DOM once
         container.innerHTML = resultHtml;
-        
+
         console.log('renderPreparation finished. Current container children:', container.children.length);
 
         // Auto-scroll logic
@@ -897,7 +935,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (openReadModeBtn && readingModeModal) {
         openReadModeBtn.addEventListener('click', () => {
             populateReadingMode();
-            
+
             // Force show modal with !important styles
             readingModeModal.classList.remove('hidden');
             readingModeModal.classList.add('flex');
@@ -912,7 +950,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 teleControls.classList.add('hidden');
                 teleControls.style.display = 'none';
             }
-            
+
             const modalScrollArea = readingModeModal.querySelector('.overflow-y-auto');
             if (modalScrollArea) modalScrollArea.scrollTop = 0;
             requestWakeLock();
@@ -935,32 +973,32 @@ document.addEventListener('DOMContentLoaded', () => {
     if (finishConfessionBtn) {
         finishConfessionBtn.addEventListener('click', () => {
             console.log('[Confession] Finishing confession');
-            
+
             // Очищаем список грехов
             selectedSins = [];
             localStorage.setItem('selectedSins', '[]');
-            
+
             // Очищаем личные заметки
             personalNotes = '';
             localStorage.setItem('personalReflections', '');
             if (personalNotesArea) {
                 personalNotesArea.value = '';
             }
-            
+
             // Закрываем модальное окно чтения
             readingModeModal.classList.add('hidden');
             releaseWakeLock();
-            
+
             // Обновляем отображение
             renderCatalog();
             updateMyList();
-            
+
             // Переключаемся на вкладку Исповедь
             switchTab('church-today');
-            
+
             // Показываем уведомление
             showToast(t('confessionCompleted'));
-            
+
             console.log('[Confession] Confession completed');
         });
     }
@@ -1062,7 +1100,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
     }
     setupModal(aboutAppBtn, aboutModal, closeAboutBtn);
-    
+
     // Contact Dev - открывает модальное окно с контактами (включая MAX)
     if (contactDevBtn && contactModal) {
         contactDevBtn.addEventListener('click', () => {
@@ -1106,15 +1144,15 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.addEventListener('click', () => {
             const amount = btn.dataset.amount;
             selectedAmount = amount;
-            
+
             donateAmountBtns.forEach(b => {
                 b.classList.remove('bg-[#7f19e6]', 'text-white');
                 b.classList.add('border-[#7f19e6]/50');
             });
-            
+
             btn.classList.remove('border-[#7f19e6]/50');
             btn.classList.add('bg-[#7f19e6]', 'text-white');
-            
+
             if (amount === 'custom' && customAmountContainer) {
                 customAmountContainer.classList.remove('hidden');
             } else if (customAmountContainer) {
@@ -1127,19 +1165,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (donateSubmitBtn) {
         donateSubmitBtn.addEventListener('click', () => {
             let finalAmount = selectedAmount;
-            
+
             if (selectedAmount === 'custom' && customAmountInput) {
                 finalAmount = customAmountInput.value;
             }
-            
+
             if (!finalAmount || finalAmount === 'custom') {
                 alert(t('donationSuccess') || 'Функция оплаты временно недоступна. Спасибо за вашу поддержку!');
                 return;
             }
-            
+
             // Show success message (temporary stub)
             alert(t('donationSuccess') || 'Функция оплаты временно недоступна. Спасибо за вашу поддержку!');
-            
+
             // Close modal after action
             if (donateModal) donateModal.classList.add('hidden');
         });
@@ -1182,7 +1220,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.documentElement.classList.toggle('dark', isDark);
         document.body.classList.toggle('light', !isDark);
         if (themeToggle) themeToggle.checked = isDark;
-        
+
         // Обновляем цвет системной панели навигации (meta)
         const themeColorMeta = document.querySelector('meta[name="theme-color"]');
         if (themeColorMeta) {
@@ -1495,11 +1533,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (pinClearBtn) {
         pinClearBtn.addEventListener('click', () => {
             console.log('[PIN] Clear button clicked - showing confirm modal');
-            
+
             // Показываем модальное окно подтверждения сброса
             showConfirmModal(t('pinResetConfirm'), () => {
                 console.log('[PIN] User confirmed full reset');
-                
+
                 // Очищаем все данные в localStorage
                 localStorage.setItem('selectedSins', '[]');
                 localStorage.setItem('personalReflections', '');
@@ -1543,13 +1581,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (pinCancel) {
         pinCancel.addEventListener('click', () => {
             const wasSetup = pinPadModal.classList.contains('setup-mode');
-            
+
             // Если отменили процесс изменения ПИН — сбрасываем флаг
             if (isChangingPin) {
                 isChangingPin = false;
                 console.log('[PIN] Cancelled PIN change process');
             }
-            
+
             closePinPad();
 
             // Если отменили настройку ПИН - выключаем тумблер
@@ -1627,11 +1665,11 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('pinEnabled', 'false');
             isPinEnabled = false;
         }
-        
+
         // Синхронизируем переменные с localStorage
         isPinEnabled = storedPinEnabled && !!storedHashedPin;
         hashedPin = storedHashedPin || '';
-        
+
         console.log('[PIN] After reset: isPinEnabled=', isPinEnabled, 'hashedPin=', hashedPin);
     }
 
@@ -1641,7 +1679,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // === ОБРАБОТЧИК TUMBLER'А ПИН-КОДА ===
     if (pinToggle) {
         console.log('[PIN] pinToggle found, isPinEnabled=', isPinEnabled, 'hashedPin=', hashedPin);
-        
+
         // Устанавливаем начальное состояние тумблера — включен, если функция ПИН активна
         pinToggle.checked = isPinEnabled && !!hashedPin;
         console.log('[PIN] Initial toggle state:', pinToggle.checked);
@@ -1696,7 +1734,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updatePrivacyUI() {
         const pinActive = isPinEnabled && hashedPin;
-        
+
         // Показываем/скрываем кнопку "Изменить ПИН-код"
         if (changePinContainer) {
             changePinContainer.classList.toggle('hidden', !pinActive);
@@ -2003,9 +2041,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     heroImage.src = '/56456454.jpg';
                 }
-                
+
                 console.log('[Prayer Modal] Hero image set:', heroImage.src);
-                
+
                 // Check if image loads
                 heroImage.onload = () => {
                     console.log('[Prayer Modal] Hero image loaded successfully');
@@ -2037,11 +2075,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // === TELEPROMPTER - ВКЛЮЧЕН С АВТО-СКРЫТИЕМ ===
             const teleControls = document.getElementById('teleprompter-controls');
-            
+
             if (teleControls) {
                 teleControls.classList.remove('hidden');
                 teleControls.style.display = 'flex';
-                
+
                 // Применяем сохранённую позицию
                 applyPanelPosition();
             }
@@ -2055,7 +2093,7 @@ document.addEventListener('DOMContentLoaded', () => {
             requestAnimationFrame(() => {
                 if (prayerScrollArea) {
                     prayerScrollArea.scrollTop = 0;
-                    
+
                     // Force height calculation
                     const modal = document.getElementById('prayers-reading-modal');
                     const header = modal?.querySelector('header');
@@ -2063,11 +2101,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         const modalHeight = modal.clientHeight;
                         const headerHeight = header.clientHeight;
                         const scrollAreaHeight = modalHeight - headerHeight;
-                        
+
                         prayerScrollArea.style.height = scrollAreaHeight + 'px';
                         prayerScrollArea.style.flex = 'none';
                     }
-                    
+
                     updatePrayerProgress();
                 }
 
@@ -2089,7 +2127,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const teleControls = document.getElementById('teleprompter-controls');
             if (teleControls) teleControls.classList.add('hidden');
-            
+
             releaseWakeLock();
             hideAudioPlayerBar();
         }
@@ -2177,7 +2215,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('[Audio Debug] Loading Audio URL:', audioUrl);
             currentGlobalAudio.src = audioUrl;
             currentGlobalAudio.dataset.loadedId = currentPrayerIdInPlayer;
-            
+
             showToast("Загрузка аудио...");
 
             // One-time events
@@ -2185,7 +2223,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentGlobalAudio.addEventListener('timeupdate', () => {
                     let progress = 0;
                     let dur = currentGlobalAudio.duration;
-                    
+
                     // Fallbacks for streaming Infinity duration bugs
                     if (!dur || dur === Infinity) {
                         if (currentPrayerIdInPlayer === 'repentanceCanon') dur = 1011; // 16:51
@@ -2200,7 +2238,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     const progressEl = document.getElementById('audio-progress');
                     if (progressEl && !isNaN(progress)) progressEl.style.width = `${progress}%`;
-                    
+
                     const timeEl = document.getElementById('audio-time');
                     if (timeEl) {
                         const mins = Math.floor(currentGlobalAudio.currentTime / 60) || 0;
@@ -2360,7 +2398,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let autohideTimer = null;
     let isPanelExpanded = false; // Состояние панели (развёрнута/свёрнута)
-    
+
     // === Переменные для перетаскивания панели ===
     let isDragging = false;
     let dragStartX = 0;
@@ -2368,7 +2406,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let panelStartX = 0;
     let panelStartY = 0;
     let savedPanelPosition = null; // {right: number, top: number}
-    
+
     // === Функции для сохранения/загрузки позиции ===
     function loadPanelPosition() {
         const saved = localStorage.getItem('teleprompterPosition');
@@ -2382,7 +2420,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return null;
     }
-    
+
     function savePanelPosition() {
         if (teleControls) {
             const rect = teleControls.getBoundingClientRect();
@@ -2393,7 +2431,7 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('teleprompterPosition', JSON.stringify(position));
         }
     }
-    
+
     function applyPanelPosition() {
         const position = loadPanelPosition();
         if (position && teleControls) {
@@ -2409,12 +2447,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Показываем панель
         const panel = teleControls.querySelector('.teleprompter-panel');
         const handleIcon = document.getElementById('handle-icon');
-        
+
         if (panel) {
             panel.classList.remove('translate-x-full', 'opacity-0');
             panel.classList.add('translate-x-0', 'opacity-100');
         }
-        
+
         // Меняем иконку на стрелку вправо
         if (handleIcon) handleIcon.textContent = 'chevron_right';
         isPanelExpanded = true;
@@ -2430,21 +2468,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }, 4000);
     }
-    
+
     function collapseTeleprompterPanel() {
         const panel = teleControls.querySelector('.teleprompter-panel');
         const handleIcon = document.getElementById('handle-icon');
-        
+
         if (panel) {
             panel.classList.add('translate-x-full', 'opacity-0');
             panel.classList.remove('translate-x-0', 'opacity-100');
         }
-        
+
         // Меняем иконку на стрелку влево
         if (handleIcon) handleIcon.textContent = 'chevron_left';
         isPanelExpanded = false;
     }
-    
+
     function toggleTeleprompterPanel() {
         if (isPanelExpanded) {
             collapseTeleprompterPanel();
@@ -2456,65 +2494,65 @@ document.addEventListener('DOMContentLoaded', () => {
     if (teleControls) {
         // === Обработчики для перетаскивания панели ===
         const teleprompterPanel = document.getElementById('teleprompter-panel');
-        
+
         function startDrag(e) {
             isDragging = true;
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
             dragStartX = clientX;
             dragStartY = clientY;
-            
+
             const rect = teleControls.getBoundingClientRect();
             panelStartX = window.innerWidth - rect.right;
             panelStartY = rect.top;
-            
+
             // Останавливаем таймер авто-скрытия на время перетаскивания
             clearTimeout(autohideTimer);
-            
+
             // Предотвращаем всплытие события, чтобы не срабатывали другие обработчики
             if (e.touches) {
                 e.stopPropagation();
             }
-            
+
             teleControls.style.transition = 'none';
             if (teleprompterPanel) teleprompterPanel.style.transition = 'none';
         }
-        
+
         function drag(e) {
             if (!isDragging) return;
             e.preventDefault();
-            
+
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            
+
             const deltaX = dragStartX - clientX;
             const deltaY = dragStartY - clientY;
-            
+
             const newRight = panelStartX + deltaX;
             const newTop = panelStartY + deltaY;
-            
+
             teleControls.style.right = newRight + 'px';
             teleControls.style.top = newTop + 'px';
             teleControls.style.transform = 'none';
         }
-        
+
         function endDrag() {
             if (isDragging) {
                 isDragging = false;
                 teleControls.style.transition = 'all duration-300';
                 if (teleprompterPanel) teleprompterPanel.style.transition = 'all duration-300';
                 savePanelPosition(); // Сохраняем позицию
-                
+
                 // Запускаем таймер авто-скрытия после того, как отпустили панель
                 resetAutohideTimer();
             }
         }
-        
+
         // Мышь
         teleControls.addEventListener('mousedown', startDrag);
         document.addEventListener('mousemove', drag);
         document.addEventListener('mouseup', endDrag);
-        
+
         // Тач
         teleControls.addEventListener('touchstart', (e) => {
             startDrag(e);
@@ -2522,7 +2560,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, { passive: true });
         teleControls.addEventListener('touchmove', drag, { passive: false });
         teleControls.addEventListener('touchend', endDrag);
-        
+
         // Обработчик для ярлычка
         const teleprompterHandle = document.getElementById('teleprompter-handle');
         if (teleprompterHandle) {
@@ -2531,7 +2569,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 toggleTeleprompterPanel();
             });
         }
-        
+
         // События для сброса таймера при явном взаимодействии
         teleControls.addEventListener('touchstart', resetAutohideTimer, { passive: true });
         teleControls.addEventListener('click', (e) => {
@@ -2560,7 +2598,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (container) {
             // Накапливаем дробную часть в аккумуляторе
             preciseScrollTop += autoscrollSpeed * deltaTime;
-            
+
             // Берём целую часть для прокрутки
             const scrollAmount = Math.floor(preciseScrollTop);
             if (scrollAmount >= 1) {
@@ -2599,17 +2637,17 @@ document.addEventListener('DOMContentLoaded', () => {
     function setupManualScrollSync(container) {
         if (!container) return;
         let scrollTimeout = null;
-        
+
         container.addEventListener('scroll', () => {
             // Если автоскролл активен - временно останавливаем при ручном скролле
             if (isAutoscrolling) {
                 // Не вызываем stopAutoscroll(), просто приостанавливаем
                 preciseScrollTop = 0; // Сбрасываем аккумулятор
             }
-            
+
             // Сбрасываем таймер
             clearTimeout(scrollTimeout);
-            
+
             // Если пользователь не скроллит 1 секунду - возобновляем автоскролл
             if (isAutoscrolling) {
                 scrollTimeout = setTimeout(() => {
@@ -2633,7 +2671,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const val = parseInt(autoscrollSpeedInput.value);
         // Map 0-100 to 0-50 speed (медленная прокрутка для чтения молитв)
         const newSpeed = (val / 100) * 50;
-        
+
         // Просто обновляем скорость, без перезапуска
         autoscrollSpeed = newSpeed;
     }
@@ -2680,7 +2718,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize auto-pause for prayer modal
     setupAutoPause(prayerScrollArea);
     setupManualScrollSync(prayerScrollArea);
-    
+
     // Initialize auto-pause for reading mode modal
     const readingModeScrollArea = readingModeModal.querySelector('.overflow-y-auto');
     setupAutoPause(readingModeScrollArea);
@@ -2688,7 +2726,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // === Church Tab - Orthodox Calendar (Azbyka.ru API) ===
     let currentDate = new Date();
-    let currentNavDate = new Date();
+    // currentNavDate объявлена глобально в начале файла
 
     // Format date for day display (e.g., "19")
     function formatDateDay(date) {
@@ -2766,78 +2804,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = document.getElementById('icon-of-day-container');
         const iconBlock = document.getElementById('icon-of-day-block');
 
-        if (!container) return;
-
-        // Если нет икон святых, скрываем блок
-        if (!saintsIcons || saintsIcons.length === 0) {
-            if (iconBlock) iconBlock.style.display = 'none';
-            return;
-        }
-
-        // Показываем блок
-        if (iconBlock) {
-            iconBlock.style.display = 'block';
-            iconBlock.classList.remove('hidden');
-        }
-
-        // Рендерим иконы святых (первые 6-8)
-        let saintsIconsHtml = '';
-        if (saintsIcons && saintsIcons.length > 0) {
-            const iconsToShow = saintsIcons.slice(0, 8);
-            saintsIconsHtml = `
-                <div class="overflow-x-auto w-full pb-2 no-scrollbar" id="icons-scroll-container">
-                    <div class="flex gap-1 justify-start flex-shrink-0">
-                        ${iconsToShow.map((icon, index) => `
-                            <img src="${icon}" alt="Икона святого ${index + 1}"
-                                 class="w-40 h-40 md:w-56 md:h-56 object-contain border border-white/10 shadow-lg hover:scale-110 transition-transform flex-shrink-0"
-                                 loading="lazy" />
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        // Показываем стрелочки только если икон больше одной
-        const navigationArrows = saintsIcons.length > 1 ? `
-            <button id="prev-icon-btn" class="absolute -left-12 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-[var(--color-surface)] rounded-xl border border-[#E1C16E]/20 text-[#E1C16E] flex items-center justify-center hover:bg-[#E1C16E]/10 active:scale-95 active:opacity-100 transition-all shadow-lg shadow-black/20 dark:shadow-black/40">
-                <span class="material-symbols-outlined text-2xl">chevron_left</span>
-            </button>
-            <button id="next-icon-btn" class="absolute -right-12 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-[var(--color-surface)] rounded-xl border border-[#E1C16E]/20 text-[#E1C16E] flex items-center justify-center hover:bg-[#E1C16E]/10 active:scale-95 active:opacity-100 transition-all shadow-lg shadow-black/20 dark:shadow-black/40">
-                <span class="material-symbols-outlined text-2xl">chevron_right</span>
-            </button>
-        ` : '';
-
-        container.innerHTML = `
-            <div class="relative flex flex-col items-center py-4 px-2 group w-full">
-                ${navigationArrows}
-                <div class="w-full flex items-center justify-center">
-                    ${saintsIconsHtml}
-                </div>
-            </div>
-        `;
-
-        // Добавляем обработчики для стрелочек
-        setTimeout(() => {
-            const prevBtn = document.getElementById('prev-icon-btn');
-            const nextBtn = document.getElementById('next-icon-btn');
-            const scrollContainer = document.getElementById('icons-scroll-container');
-
-            if (prevBtn && nextBtn && scrollContainer) {
-                const scrollAmount = 200; // Ширина иконки + отступ
-
-                prevBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    scrollContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-                });
-
-                nextBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    scrollContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-                });
-            }
-        }, 100);
+        // Скрываем блок с иконами святых
+        if (iconBlock) iconBlock.style.display = 'none';
+        if (container) container.innerHTML = '';
     }
 
     // Render fasting tag - упрощённая логика: ПОСТ или МЯСОЕД
@@ -2848,11 +2817,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Определяем, есть ли пост: если fastingType не 'no_fast' или есть описание поста
         const isFast = fastingType && fastingType !== 'no_fast' && fastingType !== 'unknown';
-        
+
         // Проверяем описание на наличие слов "пост"
-        const hasFastInDescription = fastingDescription && 
-            (fastingDescription.toLowerCase().includes('пост') || 
-             fastingDescription.toLowerCase().includes('fast'));
+        const hasFastInDescription = fastingDescription &&
+            (fastingDescription.toLowerCase().includes('пост') ||
+                fastingDescription.toLowerCase().includes('fast'));
 
         const isFastDay = isFast || hasFastInDescription;
 
@@ -2914,7 +2883,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Разбиваем текст на части по точкам с пробелами
         const parts = cleanText.split('. ');
-        
+
         console.log('[parseReadingsText] Parts:', parts);
 
         let currentServiceType = '';
@@ -2925,11 +2894,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Дополнительно разбиваем часть по ". " если есть несколько чтений
             const subParts = part.split(/\.\s+(?=[А-Я])/);
-            
+
             for (let subPart of subParts) {
                 subPart = subPart.trim();
                 if (!subPart) continue;
-                
+
                 // Проверяем, есть ли тип службы в начале части
                 for (const [abbrev, fullName] of Object.entries(serviceTypes)) {
                     const regex = new RegExp(`^${abbrev.replace('.', '\\.')}\\s*[:–-]\\s*`, 'i');
@@ -2950,9 +2919,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 while ((match = regex.exec(subPart)) !== null) {
                     const [, book, chapter1, startVerse, chapter2, endVerse, zachalo] = match;
-                    
+
                     console.log('[parseReadingsText] Match found:', { book, chapter1, startVerse, chapter2, endVerse, zachalo });
-                    
+
                     // Если есть вторая глава, используем её для конца диапазона
                     const endVerseFinal = endVerse || chapter2;
                     const chapter = chapter1;
@@ -3105,19 +3074,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const playBtn = document.getElementById('psalm-50-play-btn');
         const progressContainer = document.getElementById('psalm-50-audio-progress-container');
         const progressBar = document.getElementById('psalm-50-audio-progress-bar');
-        
+
         if (!playBtn) return;
 
         playBtn.addEventListener('click', () => {
             const audioUrl = t('psalm50AudioUrl');
-            
+
             // Если этот псалом уже играет — ставим на паузу
             if (window.currentAudio && window.currentAudio._isPsalm50 && !window.currentAudio.paused) {
                 window.currentAudio.pause();
                 playBtn.querySelector('span').textContent = 'play_arrow';
                 return;
             }
-            
+
             // Если ВКЛЮЧАЕМ псалом — останавливаем всё остальное
             stopAllAudio();
 
@@ -3125,7 +3094,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const audio = new Audio(audioUrl);
             audio._isPsalm50 = true;
             window.currentAudio = audio;
-            
+
             if (progressContainer) progressContainer.classList.remove('hidden');
             playBtn.querySelector('span').textContent = 'pause';
 
@@ -3151,134 +3120,202 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Render readings
     // Render readings (Stitch_1 Style)
-function renderReadings(readings, texts) {
-const container = document.getElementById('readings-container');
-if (!container) return;
+    function getDeclension(number, titles) {
+        const cases = [2, 0, 1, 1, 1, 2];
+        return titles[(number % 100 > 4 && number % 100 < 20) ? 2 : cases[(number % 10 < 5) ? number % 10 : 5]];
+    }
 
-// Если readings пустой, пробуем распарсить texts
-if ((!readings || readings.length === 0) && texts && texts.length > 0) {
-    const textData = texts[0].text;
-    const parsedReadings = parseReadingsText(textData);
-    if (parsedReadings.length > 0) {
-        readings = parsedReadings;
-        
-        // Привязываем MP3 ссылки из refs, если количество совпадает
-        if (texts[0].refs && texts[0].refs.length === readings.length) {
-            readings.forEach((r, i) => {
-                const ref = texts[0].refs[i];
-                const bookPart = ref.split('.')[0];
-                // Формируем ссылку по шаблону Азбуки
-                r.link_mp3 = 'https://azbyka.ru/audio/audio1/zachala/' + bookPart + '/' + ref + '.mp3';
-            });
+    function renderReadings(readings, texts) {
+        const container = document.getElementById('readings-container');
+        const readingsCount = document.getElementById('readings-count');
+        if (!container) return;
+
+        // Если readings пустой, пробуем распарсить texts
+        if ((!readings || readings.length === 0) && texts && texts.length > 0) {
+            const textData = texts[0].text;
+            const parsedReadings = parseReadingsText(textData);
+            if (parsedReadings.length > 0) {
+                readings = parsedReadings;
+
+                // Привязываем MP3 ссылки из refs, если количество совпадает
+                if (texts[0].refs && texts[0].refs.length === readings.length) {
+                    readings.forEach((r, i) => {
+                        const ref = texts[0].refs[i];
+                        const bookPart = ref.split('.')[0];
+                        // Формируем ссылку по шаблону Азбуки
+                        r.link_mp3 = 'https://azbyka.ru/audio/audio1/zachala/' + bookPart + '/' + ref + '.mp3';
+                    });
+                }
+            }
         }
+
+        // Расшифровка сокращений книг
+        const bookNames = {
+            'Евр.': 'Послание к Евреям',
+            'Евр': 'Послание к Евреям',
+            'Мк.': 'Евангелие от Марка',
+            'Мк': 'Евангелие от Марка',
+            'Мф.': 'Евангелие от Матфея',
+            'Мф': 'Евангелие от Матфея',
+            'Лк.': 'Евангелие от Луки',
+            'Лк': 'Евангелие от Луки',
+            'Ин.': 'Евангелие от Иоанна',
+            'Ин': 'Евангелие от Иоанна',
+            '1Кор.': '1-е послание к Коринфянам',
+            '1Кор': '1-е послание к Коринфянам',
+            '2Кор.': '2-е послание к Коринфянам',
+            '2Кор': '2-е послание к Коринфянам',
+            '1Фес.': '1-е послание к Фессалоникийцам',
+            '2Фес.': '2-е послание к Фессалоникийцам',
+            '1Тим.': '1-е послание к Тимофею',
+            '2Тим.': '2-е послание к Тимофею',
+            '1Пет.': '1-е послание Петра',
+            '2Пет.': '2-е послание Петра',
+            '1Ин.': '1-е послание Иоанна',
+            '2Ин.': '2-е послание Иоанна',
+            '3Ин.': '3-е послание Иоанна',
+            'Гал.': 'Послание к Галатам',
+            'Гал': 'Послание к Галатам',
+            'Еф.': 'Послание к Ефесянам',
+            'Еф': 'Послание к Ефесянам',
+            'Флп.': 'Послание к Филиппийцам',
+            'Флп': 'Послание к Филиппийцам',
+            'Кол.': 'Послание к Колоссянам',
+            'Кол': 'Послание к Колоссянам',
+            'Рим.': 'Послание к Римлянам',
+            'Рим': 'Послание к Римлянам',
+            'Деян.': 'Деяния святых Апостолов',
+            'Деян': 'Деяния святых Апостолов',
+            'Иак.': 'Послание Иакова',
+            'Иуд.': 'Послание Иуды',
+            'Тит.': 'Послание к Титу',
+            'Флм.': 'Послание к Филимону',
+            'Откр.': 'Откровение Иоанна Богослова'
+        };
+
+        function formatReadingText(text) {
+            if (!text) return '';
+
+            let formatted = text;
+
+            // Заменяем "зач." на "зачало"
+            formatted = formatted.replace(/(\d+)\s*зач\./g, '$1 зачало');
+
+            // Форматируем главы и стихи
+            const chapterVerseMatch = formatted.match(/,\s*([IVX]+),\s*(\d+)\s*[–-]\s*(\d+)/);
+            if (chapterVerseMatch) {
+                const [, chapter, startVerse, endVerse] = chapterVerseMatch;
+                formatted = formatted.replace(
+                    /,\s*[IVX]+,\s*\d+\s*[–-]\s*\d+/,
+                    ', глава ' + chapter + ', стихи ' + startVerse + '–' + endVerse
+                );
+            }
+
+            return formatted;
+        }
+
+        // Очищаем контейнер
+        container.innerHTML = '';
+
+        if (!readings || readings.length === 0) {
+            container.innerHTML = '<div class="text-center text-on-surface-variant/60"><span class="material-symbols-outlined text-4xl mb-3 block">auto_stories</span><p class="text-sm font-label font-bold uppercase tracking-widest">' + (t('noReadings') || 'Чтений на этот день не запланировано') + '</p></div>';
+            return;
+        }
+
+        // Drop cap letters for each reading type
+        const dropCapLetters = {
+            'Апостольское чтение': 'А',
+            'Евангельское чтение': 'Е',
+            'Утреня': 'У',
+            'Литургия': 'Л',
+            'На 6-м часе': 'Н',
+            'На вечерне': 'Н'
+        };
+
+        let html = '<div class="space-y-12">';
+
+        readings.forEach((reading, index) => {
+            const audioUrl = reading.link_mp3 || reading.audio || reading.mp3_remote;
+            const formattedText = formatReadingText(reading.text || reading);
+            const dropCapLetter = dropCapLetters[reading.type] || (reading.type ? reading.type[0].toUpperCase() : '');
+            const typeLabel = reading.type.charAt(0).toUpperCase() + reading.type.slice(1);
+
+            html += `
+            <div class="group relative transition-all duration-300 hover:translate-x-2 flex items-start justify-between gap-4">
+                <span class="absolute -left-6 -top-6 font-headline text-6xl transition-opacity duration-300 group-hover:opacity-30" style="color: var(--color-primary); opacity: 0.2; pointer-events: none;">${dropCapLetter}</span>
+                <div class="space-y-2 flex-1">
+                    <span class="font-label text-[10px] font-bold uppercase tracking-widest transition-colors duration-300 group-hover:text-primary" style="color: var(--color-secondary);">${typeLabel}</span>
+                    <h5 class="font-headline text-2xl transition-colors duration-300 group-hover:text-primary" style="color: var(--color-on-surface);">${formattedText}</h5>
+                </div>
+                ${audioUrl ? `<button class="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary transition-all duration-300 active:scale-95 hover:bg-primary/20 hover:scale-110 reading-audio-btn" data-audio-url="${audioUrl}">
+                    <span class="material-symbols-outlined text-xl">volume_up</span>
+                </button>` : ''}
+            </div>
+            `;
+        });
+
+        html += '</div>';
+        container.innerHTML = html;
+
+        // Обновляем счётчик чтений
+        if (readingsCount) {
+            const count = readings.length || 0;
+            const countText = count + ' ' + getDeclension(count, ['чтение', 'чтения', 'чтений']);
+            readingsCount.textContent = countText;
+        }
+
+        // Добавляем обработчики для кнопок воспроизведения
+        setTimeout(() => {
+            document.querySelectorAll('.reading-audio-btn').forEach(btn => {
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const audioUrl = this.getAttribute('data-audio-url');
+                    const icon = this.querySelector('.material-symbols-outlined');
+
+                    if (!audioUrl) return;
+
+                    // Если аудио уже играет — останавливаем
+                    if (window.currentAudio && window.currentAudio._readingUrl === audioUrl && !window.currentAudio.paused) {
+                        window.currentAudio.pause();
+                        window.currentAudio = null;
+                        icon.textContent = 'volume_up';
+                        return;
+                    }
+
+                    // Останавливаем всё остальное аудио
+                    stopAllAudio();
+
+                    // Запускаем новое аудио
+                    const audio = new Audio(audioUrl);
+                    audio._readingUrl = audioUrl;
+                    window.currentAudio = audio;
+
+                    icon.textContent = 'pause';
+
+                    audio.play().catch(err => {
+                        console.error('[Reading Audio] Play error:', err);
+                        icon.textContent = 'volume_up';
+                    });
+
+                    audio.addEventListener('ended', () => {
+                        icon.textContent = 'volume_up';
+                        window.currentAudio = null;
+                    });
+
+                    audio.addEventListener('error', () => {
+                        console.error('[Reading Audio] Error loading:', audioUrl);
+                        icon.textContent = 'volume_off';
+                        window.currentAudio = null;
+                    });
+                });
+            });
+        }, 100);
     }
-}
 
-// Расшифровка сокращений книг
-const bookNames = {
-    'Евр.': 'Послание к Евреям',
-    'Евр': 'Послание к Евреям',
-    'Мк.': 'Евангелие от Марка',
-    'Мк': 'Евангелие от Марка',
-    'Мф.': 'Евангелие от Матфея',
-    'Мф': 'Евангелие от Матфея',
-    'Лк.': 'Евангелие от Луки',
-    'Лк': 'Евангелие от Луки',
-    'Ин.': 'Евангелие от Иоанна',
-    'Ин': 'Евангелие от Иоанна',
-    '1Кор.': '1-е послание к Коринфянам',
-    '1Кор': '1-е послание к Коринфянам',
-    '2Кор.': '2-е послание к Коринфянам',
-    '2Кор': '2-е послание к Коринфянам',
-    '1Фес.': '1-е послание к Фессалоникийцам',
-    '2Фес.': '2-е послание к Фессалоникийцам',
-    '1Тим.': '1-е послание к Тимофею',
-    '2Тим.': '2-е послание к Тимофею',
-    '1Пет.': '1-е послание Петра',
-    '2Пет.': '2-е послание Петра',
-    '1Ин.': '1-е послание Иоанна',
-    '2Ин.': '2-е послание Иоанна',
-    '3Ин.': '3-е послание Иоанна',
-    'Гал.': 'Послание к Галатам',
-    'Гал': 'Послание к Галатам',
-    'Еф.': 'Послание к Ефесянам',
-    'Еф': 'Послание к Ефесянам',
-    'Флп.': 'Послание к Филиппийцам',
-    'Флп': 'Послание к Филиппийцам',
-    'Кол.': 'Послание к Колоссянам',
-    'Кол': 'Послание к Колоссянам',
-    'Рим.': 'Послание к Римлянам',
-    'Рим': 'Послание к Римлянам',
-    'Деян.': 'Деяния святых Апостолов',
-    'Деян': 'Деяния святых Апостолов',
-    'Иак.': 'Послание Иакова',
-    'Иуд.': 'Послание Иуды',
-    'Тит.': 'Послание к Титу',
-    'Флм.': 'Послание к Филимону',
-    'Откр.': 'Откровение Иоанна Богослова'
-};
-
-function formatReadingText(text) {
-    if (!text) return '';
-
-    let formatted = text;
-
-    // Заменяем "зач." на "зачало"
-    formatted = formatted.replace(/(\d+)\s*зач\./g, '$1 зачало');
-
-    // Форматируем главы и стихи
-    const chapterVerseMatch = formatted.match(/,\s*([IVX]+),\s*(\d+)\s*[–-]\s*(\d+)/);
-    if (chapterVerseMatch) {
-        const [, chapter, startVerse, endVerse] = chapterVerseMatch;
-        formatted = formatted.replace(
-            /,\s*[IVX]+,\s*\d+\s*[–-]\s*\d+/,
-            ', глава ' + chapter + ', стихи ' + startVerse + '–' + endVerse
-        );
-    }
-
-    return formatted;
-}
-
-// Очищаем контейнер и обёртку с drop caps
-const readingsList = document.getElementById('readings-list');
-if (readingsList) readingsList.innerHTML = '';
-
-container.innerHTML = '';
-
-if (!readings || readings.length === 0) {
-    container.innerHTML = '<div class="p-8 text-center text-text-muted opacity-60"><span class="material-symbols-outlined text-4xl mb-3 block">auto_stories</span><p class="text-sm font-serif italic">' + (t('noReadings') || 'Чтений на этот день не запланировано') + '</p></div>';
-    return;
-}
-
-// Drop cap letters for each reading type
-const dropCapLetters = {
-    'Апостольское чтение': 'А',
-    'Евангельское чтение': 'Е',
-    'Утреня': 'У',
-    'Литургия': 'Л',
-    'На 6-м часе': 'Ч',
-    'На вечерне': 'В'
-};
-
-readings.forEach((reading, index) => {
-    const audioUrl = reading.link_mp3 || reading.audio || reading.mp3_remote;
-    const formattedText = formatReadingText(reading.text || reading);
-    const dropCapLetter = dropCapLetters[reading.type] || (reading.type ? reading.type[0] : '');
-    const typeLabel = reading.type;
-
-    const readingBlock = document.createElement('div');
-    readingBlock.className = 'relative';
-    readingBlock.innerHTML = '<span class="absolute -left-6 -top-4 font-headline text-6xl text-primary opacity-20 pointer-events-none">' + dropCapLetter + '</span><div class="space-y-2"><span class="font-label text-[10px] font-bold uppercase tracking-widest text-secondary">' + typeLabel + '</span><h5 class="font-headline text-2xl text-on-surface">' + formattedText + '</h5></div>';
-
-    readingsList.appendChild(readingBlock);
-});
-
-}
-
-// Расшифровка сокращений святости
-function expandSanctityType(sanctityType) {
+    // Расшифровка сокращений святости
+    function expandSanctityType(sanctityType) {
         if (!sanctityType) return '';
-        
+
         const sanctityMap = {
             'прпп.': 'преподобные',
             'прп.': 'преподобный',
@@ -3313,21 +3350,28 @@ function expandSanctityType(sanctityType) {
             'прмч.': 'преподобномученик',
             'прмцц.': 'преподобномученицы',
             'прмц.': 'преподобномученица',
-            'равноап.': 'равноапостольный'
+            'равноап.': 'равноапостольный',
+            'блгв.': 'благоверный',
+            'вел. кн.': 'великий князь',
+            'блгв. вел. кн.': 'благоверный великий князь',
+            'кн.': 'князь',
+            'кнг.': 'княгиня',
+            'црц.': 'царица',
+            'цр.': 'царь'
         };
-        
+
         // Проверяем точное совпадение (с учётом регистра)
         const lowerSanctity = sanctityType.toLowerCase();
         if (sanctityMap[lowerSanctity]) {
             return sanctityMap[lowerSanctity];
         }
-        
+
         // Особые случаи с дополнительными словами
         // "ап. от 70-ти" → "апостол от 70-ти"
         if (lowerSanctity.includes('ап. от 70')) {
             return sanctityType.replace(/ап\./gi, 'апостол');
         }
-        
+
         // Если не нашли, возвращаем как есть
         return sanctityType;
     }
@@ -3335,9 +3379,9 @@ function expandSanctityType(sanctityType) {
     // Преобразование имени из именительного падежа в родительный
     function toGenitiveCase(name) {
         if (!name) return '';
-        
+
         let result = name.trim();
-        
+
         // Словарь имён для склонения (именительный -> родительный)
         const firstNames = {
             'Афана́сий': 'Афана́сия',
@@ -3352,7 +3396,7 @@ function expandSanctityType(sanctityType) {
             'Иоа́нн': 'Иоа́нна',
             'Ерм': 'Е́рма'
         };
-        
+
         // Словарь прозваний для склонения
         const surnames = {
             'Никомидийский': 'Никомидийского',
@@ -3401,14 +3445,15 @@ function expandSanctityType(sanctityType) {
         if (!container) return;
 
         if (countEl) {
-            countEl.textContent = saints.length + ' ' + (saints.length === 1 ? 'святой' : (saints.length < 5 ? 'святых' : 'святых'));
+            const countText = saints.length + ' ' + getDeclension(saints.length, ['святой', 'святых', 'святых']);
+            countEl.textContent = countText;
         }
 
         if (!saints || saints.length === 0) {
             container.innerHTML = `
-                <div class="p-8 text-center text-text-muted opacity-60">
+                <div class="col-span-full p-8 text-center" style="color: var(--color-on-surface-variant); opacity: 0.6;">
                     <span class="material-symbols-outlined text-4xl mb-3 block">auto_stories</span>
-                    <p class="text-sm font-serif italic">Нет данных о святых</p>
+                    <p class="text-sm font-label font-bold uppercase tracking-widest">Нет данных о святых</p>
                 </div>
             `;
             return;
@@ -3422,28 +3467,28 @@ function expandSanctityType(sanctityType) {
             const expandedSanctity = expandSanctityType(sanctityType);
             const genitiveName = toGenitiveCase(saintName);
             const fullName = expandedSanctity ? expandedSanctity + ' ' + genitiveName : genitiveName;
-            
+
             // Get saint icon
-            const iconUrl = saint.imgs && saint.imgs.length > 0 
+            const iconUrl = saint.imgs && saint.imgs.length > 0
                 ? (saint.imgs[0].preview_absolute_url_2x || saint.imgs[0].original_absolute_url)
                 : null;
 
             const saintCard = document.createElement('div');
             saintCard.className = 'group bg-surface-container-low p-4 rounded-lg flex items-center gap-4 hover:bg-surface-container-lowest transition-colors border border-transparent hover:border-outline-variant/20';
-            
+
             saintCard.innerHTML = `
-                <div class="w-12 h-12 rounded-full overflow-hidden bg-surface-container-highest flex items-center justify-center border-2 border-primary/20">
+                <div class="w-16 h-20 overflow-hidden bg-surface-container-highest flex items-center justify-center border-2 border-primary/20 flex-shrink-0">
                     ${iconUrl
-                        ? '<img class="w-full h-full object-cover" src="' + iconUrl + '" alt="' + saintName + '">'
-                        : '<span class="material-symbols-outlined text-primary-container" style="font-variation-settings: \'FILL\' 1;">person</span>'
-                    }
+                    ? '<img class="w-full h-full object-contain" src="' + iconUrl + '" alt="' + saintName + '">'
+                    : '<span class="material-symbols-outlined" style="font-variation-settings: \'FILL\' 1; color: var(--color-primary-container);">person</span>'
+                }
                 </div>
-                <div class="flex-1">
-                    <h4 class="font-body font-bold text-sm text-on-surface">${fullName}</h4>
-                    <p class="font-label text-[10px] text-on-surface-variant/70 uppercase tracking-widest mt-0.5">${expandedSanctity || 'Святой'}</p>
+                <div class="flex-1 min-w-0">
+                    <h4 class="font-serif font-bold text-sm leading-tight" style="color: var(--color-on-surface); word-break: break-word;">${fullName}</h4>
+                    <p class="font-label text-[10px] uppercase tracking-widest mt-0.5" style="color: var(--color-on-surface-variant); opacity: 0.7;">${expandedSanctity || 'Святой'}</p>
                 </div>
             `;
-            
+
             container.appendChild(saintCard);
         });
     }
@@ -3461,7 +3506,7 @@ function expandSanctityType(sanctityType) {
     // Load calendar data for specific date
     async function loadCalendarDate(date) {
         const dateStr = getDateString(date);
-        
+
         try {
             const response = await fetch(`https://azbyka.ru/days/api/day/${dateStr}.json`);
             if (!response.ok) throw new Error('API error');
@@ -3500,7 +3545,7 @@ function expandSanctityType(sanctityType) {
                 const fastingInfo = [];
                 const fastingType = data.fasting?.type || data.fasting?.fasting || '';
                 const voice = data.fasting?.voice || null;
-                
+
                 if (fastingType && fastingType !== 'no_fast' && fastingType !== 'unknown') {
                     fastingInfo.push('Постный день');
                 }
@@ -3566,7 +3611,7 @@ function expandSanctityType(sanctityType) {
                 description: data.description,
                 texts: data.texts
             });
-            
+
             console.log('[Calendar] texts[0].text:', data.texts?.[0]?.text);
 
             // --- Редактирование: Улучшенная логика извлечения иконки ---
@@ -3649,7 +3694,7 @@ function expandSanctityType(sanctityType) {
     function fetchMonthData(year, month) {
         const key = `${year}-${month}`;
         if (liturgicalCache[key]) return;
-        
+
         liturgicalCache[key] = { status: 'loading', days: {} };
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         let fetched = 0;
@@ -3657,21 +3702,21 @@ function expandSanctityType(sanctityType) {
         for (let d = 1; d <= daysInMonth; d++) {
             const date = new Date(year, month, d);
             const dateStr = getDateString(date);
-            
+
             fetch(`https://azbyka.ru/days/api/day/${dateStr}.json`)
                 .then(res => res.json())
                 .then(data => {
                     const fastingType = data.fasting;
                     const fastingDescription = data.fastingDescription || data.description || '';
-                    const isFast = (fastingType && fastingType !== 'no_fast' && fastingType !== 'unknown') || 
-                                 fastingDescription.toLowerCase().includes('пост');
-                    
+                    const isFast = (fastingType && fastingType !== 'no_fast' && fastingType !== 'unknown') ||
+                        fastingDescription.toLowerCase().includes('пост');
+
                     liturgicalCache[key].days[d] = {
                         isFast: isFast,
                         isHoliday: (data.priority && data.priority > 3) || (data.holy_day && data.holy_day.length > 0)
                     };
                 })
-                .catch(() => {})
+                .catch(() => { })
                 .finally(() => {
                     fetched++;
                     if (fetched === daysInMonth) {
@@ -3741,7 +3786,7 @@ function expandSanctityType(sanctityType) {
 
             const cell = document.createElement('div');
             cell.className = `calendar-day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}`;
-            
+
             // 1. Try to use API data from Cache
             if (liturgicalCache[cacheKey] && liturgicalCache[cacheKey].days[day]) {
                 const api = liturgicalCache[cacheKey].days[day];
@@ -3767,7 +3812,7 @@ function expandSanctityType(sanctityType) {
             const span = document.createElement('span');
             span.textContent = day;
             cell.appendChild(span);
-            
+
             cell.addEventListener('click', () => {
                 currentNavDate = new Date(year, month, day);
                 localStorage.setItem('selectedDate', currentNavDate.toISOString());
@@ -3836,6 +3881,8 @@ function expandSanctityType(sanctityType) {
             } else {
                 renderCalendar(currentCalendarDate);
             }
+            // Обновляем дату в заголовке
+            updateHeaderDate();
         });
     }
 
@@ -3850,12 +3897,14 @@ function expandSanctityType(sanctityType) {
             } else {
                 renderCalendar(currentCalendarDate);
             }
+            // Обновляем дату в заголовке
+            updateHeaderDate();
         });
     }
 
     // Re-initialize when language changes
     const originalUpdateAppLanguage = updateAppLanguage;
-    updateAppLanguage = function() {
+    updateAppLanguage = function () {
         originalUpdateAppLanguage.call(this);
     };
 
@@ -3882,7 +3931,7 @@ function expandSanctityType(sanctityType) {
             console.log('[Profile] Switched to:', profile);
         });
     });
-    
+
     // Set initial profile button state
     const currentProfile = getProfile();
     profileButtons.forEach(btn => {

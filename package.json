@@ -1,7 +1,7 @@
 {
   "name": "ispoved",
   "private": true,
-  "version": "2.0.13",
+  "version": "2.0.14",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,7 +9,10 @@
     "preview": "vite preview",
     "cap:sync": "node sync-version.js && npx cap sync",
     "sync-version": "node sync-version.js",
-    "sync-github": "node sync-github.js"
+    "sync-github": "node sync-github.js",
+    "release": "node release.js",
+    "release:minor": "node release.js minor",
+    "release:major": "node release.js major"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.18",

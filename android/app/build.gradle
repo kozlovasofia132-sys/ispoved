@@ -9,8 +9,8 @@ android {
         applicationId "com.piskunov.ispoved"
         minSdk rootProject.ext.minSdkVersion
         targetSdk rootProject.ext.targetSdkVersion
-        versionCode 20013
-        versionName "2.0.13"
+        versionCode 20014
+        versionName "2.0.14"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

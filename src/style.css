@@ -5,78 +5,175 @@
 @tailwind utilities;
 
 :root {
-    /* Светлая тема - "The Sacred Digital Archive" */
-    --color-bg: #fbf9f4;        /* Пергамент (Parchment) из stitch_1 */
-    --color-text-main: #1b1c19;  /* Глубокий угольный (чернила) */
-    --color-text-muted: #5c5d59; /* Приглушённый серо-коричневый */
-    --color-surface: #ffffff;    /* Чистый белый для карточек */
-    --color-surface-alt: #eae8e3; /* Вторичный фон */
-    --color-border: rgba(120, 86, 0, 0.2); /* Тонкая золотая граница (outline_variant 20%) */
-    --color-primary: #E1C16E;    /* Золотой акцент */
-    --color-primary-container: #C5A059;
-    --color-primary-dark: #9A7632;
-    --color-primary-gold: #E1C16E;
-    --color-accent-red: #8B3A3A; /* Гармоничный красный для буквиц */
-    --color-on-primary-fixed: #3D2B1F; /* Тёмно-коричневый текст на золоте */
+  /* Светлая тема - "The Sacred Digital Archive" (Stitch Design) */
+  --color-bg: #fbf9f4;
+  /* Пергамент (Parchment) */
+  --color-text-main: #1b1c19;
+  /* On Background */
+  --color-on-surface: #1b1c19;
+  /* On Surface */
+  --color-text-muted: #4f4535;
+  /* On Surface Variant */
+  --color-surface: #ffffff;
+  /* Surface Container Lowest */
+  --color-surface-alt: #eae8e3;
+  /* Surface Container High */
+  --color-surface-container: #f0eee9;
+  /* Surface Container */
+  --color-surface-container-low: #f5f3ee;
+  /* Surface Container Low */
+  --color-surface-container-lowest: #ffffff;
+  /* Surface Container Lowest */
+  --color-surface-container-high: #eae8e3;
+  /* Surface Container High */
+  --color-surface-container-highest: #e4e2dd;
+  /* Surface Container Highest */
+  --color-on-surface-variant: #4f4535;
+  /* On Surface Variant */
+  --color-border: rgba(211, 196, 175, 0.2);
+  /* Outline Variant 20% */
+  --color-outline: #817563;
+  /* Outline */
+  --color-outline-variant: #d3c4af;
+  /* Outline Variant */
+  --color-primary: #785600;
+  /* Primary из шаблона 14 Августа */
+  --color-primary-container: #986d00;
+  /* Primary Container */
+  --color-primary-fixed: #ffdea6;
+  /* Primary Fixed */
+  --color-primary-fixed-dim: #f7bd48;
+  /* Primary Fixed Dim */
+  --color-on-primary: #3D2B1F;
+  /* On Primary */
+  --color-on-primary-container: #fffbff;
+  /* On Primary Container */
+  --color-on-primary-fixed: #271900;
+  /* On Primary Fixed */
+  --color-on-primary-fixed-variant: #5d4200;
+  /* On Primary Fixed Variant */
+  --color-secondary: #934b19;
+  /* Secondary */
+  --color-secondary-container: #ffa26a;
+  /* Secondary Container */
+  --color-on-secondary: #ffffff;
+  /* On Secondary */
+  --color-on-secondary-container: #783603;
+  /* On Secondary Container */
+  --color-tertiary: #735c00;
+  /* Tertiary */
+  --color-tertiary-container: #cca72f;
+  /* Tertiary Container */
+  --color-on-tertiary: #ffffff;
+  /* On Tertiary */
+  --color-error: #ba1a1a;
+  /* Error */
+  --color-error-container: #ffdad6;
+  /* Error Container */
+  --color-on-error: #ffffff;
+  /* On Error */
+  --color-accent-red: #ba1a1a;
+  /* Error для киновари */
 }
 
 .dark {
-    --color-bg: #120F16;        /* Темный фон */
-    --color-text-main: #ffffff;  /* Белый текст */
-    --color-text-muted: #ab9db8;
-    --color-surface: #2a1f33;    /* Темные карточки */
-    --color-surface-alt: #352940;
-    --color-border: rgba(255, 255, 255, 0.05);
-    --color-primary: #E1C16E;    /* Золотой акцент */
-    --color-primary-dark: #C5A059; /* Тёмный золотой для нажатия */
-    --color-primary-gold: #E1C16E;
-    --color-danger: #F87171;
-    --color-accent-red: #F87171;
+  /* Тёмная тема (Stitch Design) */
+  --color-bg: #120F16;
+  --color-text-main: #ffffff;
+  --color-on-surface: #ffffff;
+  /* On Surface для тёмной темы */
+  --color-text-muted: #ab9db8;
+  --color-surface: #2a1f33;
+  --color-surface-alt: #352940;
+  --color-surface-container: #1e1d18;
+  --color-surface-container-low: #1a1914;
+  --color-surface-container-lowest: #120F16;
+  --color-surface-container-high: #2a2924;
+  --color-surface-container-highest: #34332e;
+  --color-on-surface-variant: #ab9db8;
+  /* On Surface Variant для тёмной темы */
+  --color-border: rgba(255, 255, 255, 0.05);
+  --color-outline: #817563;
+  --color-outline-variant: rgba(211, 196, 175, 0.15);
+  --color-primary: #ffdea6;
+  /* Primary Fixed из шаблона 14 Августа */
+  --color-primary-container: #986d00;
+  --color-primary-fixed: #ffdea6;
+  --color-primary-fixed-dim: #f7bd48;
+  --color-primary-gold: #E1C16E;
+  /* Для совместимости */
+  --color-on-primary: #3D2B1F;
+  --color-on-primary-container: #fffbff;
+  --color-secondary: #ffb68c;
+  --color-secondary-container: #783603;
+  --color-tertiary: #e9c349;
+  --color-tertiary-container: #574500;
+  --color-error: #ffb4ab;
+  --color-error-container: #93000a;
+  --color-accent-red: #F87171;
 }
 
 /* Принудительный темный режим для окон чтения молитв */
-#reading-mode-modal, #prayers-reading-modal {
-    --color-bg: #120F16;
-    --color-surface: #1a1914;
-    --color-surface-alt: #1e1d18;
-    --color-text-main: #f3f4f6;
-    --color-text-muted: #ababab;
-    --color-border: rgba(225, 193, 110, 0.2);
-    background-color: var(--color-bg) !important;
-    color: var(--color-text-main) !important;
+#reading-mode-modal,
+#prayers-reading-modal {
+  --color-bg: #120F16;
+  --color-surface: #1a1914;
+  --color-surface-alt: #1e1d18;
+  --color-text-main: #f3f4f6;
+  --color-text-muted: #ababab;
+  --color-border: rgba(225, 193, 110, 0.2);
+  background-color: var(--color-bg) !important;
+  color: var(--color-text-main) !important;
 }
-#reading-mode-modal *, #prayers-reading-modal * {
-    border-color: var(--color-border) !important;
+
+#reading-mode-modal *,
+#prayers-reading-modal * {
+  border-color: var(--color-border) !important;
 }
 
 @layer base {
-  html, body {
+
+  html,
+  body {
     margin: 0;
     padding: 0;
     height: 100%;
   }
+
   html {
-    overflow: clip; /* clip не создаёт scroll-контейнер — fixed-элементы работают корректно */
+    overflow: clip;
+    /* clip не создаёт scroll-контейнер — fixed-элементы работают корректно */
   }
+
   body {
-    overflow: hidden; /* hidden только для body чтобы предотвратить прокрутку */
+    overflow: hidden;
+    /* hidden только для body чтобы предотвратить прокрутку */
   }
+
   /* Внешний wrapper используем overflow:clip вместо hidden
      чтобы не создавать конкурирующий GPU-слой, который мог рисоваться поверх fixed-модалей */
   .app-wrapper {
     overflow: clip;
   }
+
   body {
     color: var(--color-text-main);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-family: 'Inter', sans-serif;
   }
-  
-  /* Заголовки с эффектом свечения свечи */
-  h1, h2, h3, h4, h5, h6 {
-    color: var(--color-primary-gold);
-    text-shadow: 0 0 12px rgba(225, 193, 110, 0.4);
+
+  /* Заголовки с эффектом свечения свечи (Stitch Design) */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: var(--color-primary);
+    font-family: 'Newsreader', serif;
+    font-style: italic;
+    text-shadow: none;
   }
 }
 
@@ -135,34 +232,50 @@
   font-weight: 700;
 }
 
-/* Единая стеклянная шапка для всех вкладок */
+/* Единая стеклянная шапка для всех вкладок (Stitch Design) */
 .main-header {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   z-index: 50;
-  backdrop-filter: blur(20px);
-  background: rgba(255, 255, 255, 0.8); /* Светлая тема - чистый белый с размытием */
-  border-bottom: 1px solid var(--color-border);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  background: rgba(255, 255, 255, 0.8);
+  border-bottom: 1px solid rgba(211, 196, 175, 0.2);
   padding-top: env(safe-area-inset-top);
-  padding-bottom: 12px;
+  padding-bottom: 4px;
   text-align: center;
   transition: all 0.3s ease;
+  box-shadow: 0 1px 3px 0 rgba(120, 86, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
 }
 
 .main-header h1 {
-  font-family: 'Ruslan Display', serif !important;
-  color: var(--color-primary-gold) !important;
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-family: 'Newsreader', serif !important;
+  color: #92400e !important;
+  /* text-amber-800 из Tailwind */
+  font-size: 1.25rem !important;
+  /* text-xl = 20px */
+  font-weight: 700 !important;
+  /* font-bold */
+  font-style: normal !important;
+  /* без курсива как в шаблоне */
   margin: 0;
   padding: 0 16px;
 }
 
 .dark .main-header {
   background: rgba(18, 15, 22, 0.85);
-  border-bottom: 1px solid rgba(225, 193, 110, 0.15);
+  border-bottom: 1px solid rgba(211, 196, 175, 0.15);
+}
+
+.dark .main-header h1 {
+  color: #fbbf24 !important;
+  /* text-amber-400 из Tailwind */
 }
 
 /* Нижний навигационный бар */
@@ -173,37 +286,48 @@
 }
 
 @layer components {
-  .glass-panel, .glass-card {
-    background-color: var(--color-surface);
-    border: 0.5px solid var(--color-border); /* "Ghost Border" - тонкая золотая граница */
-    border-radius: 0.375rem; /* md radius - как в книге */
+
+  .glass-panel,
+  .glass-card {
+    background-color: var(--color-surface-container-low);
+    border: 0.5px solid var(--color-outline-variant);
+    /* Ghost Border */
+    border-radius: 0.5rem;
+    /* lg radius */
     overflow: hidden;
-    box-shadow: 0 1px 3px rgba(27, 28, 25, 0.06); /* Очень мягкая тень */
+    box-shadow: 0 1px 3px 0 rgba(120, 86, 0, 0.05);
     transition: all 0.2s ease;
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
   }
 
-  .dark .glass-panel, .dark .glass-card {
-    background-color: #1c1522 !important; /* Темно-фиолетовый */
-    border: 1px solid rgba(225, 193, 110, 0.2) !important; /* Золотая граница */
+  .dark .glass-panel,
+  .dark .glass-card {
+    background-color: #1c1522 !important;
+    border: 1px solid rgba(211, 196, 175, 0.2) !important;
     backdrop-filter: blur(24px);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   }
 
   /* Date Card Enhancements */
-  #date-display-btn, #old-style-date-btn {
+  #date-display-btn,
+  #old-style-date-btn {
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
-  
-  #date-display-btn:hover, #old-style-date-btn:hover {
+
+  #date-display-btn:hover,
+  #old-style-date-btn:hover {
     transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   }
-  
-  #date-display-btn p, #old-style-date-btn p {
+
+  #date-display-btn p,
+  #old-style-date-btn p {
     transition: all 0.3s ease;
   }
-  
-  #date-display-btn:hover p[id*="day"], #old-style-date-btn:hover p[id*="day"] {
+
+  #date-display-btn:hover p[id*="day"],
+  #old-style-date-btn:hover p[id*="day"] {
     transform: scale(1.1);
     text-shadow: 0 0 15px rgba(225, 193, 110, 0.4);
   }
@@ -218,50 +342,62 @@
     font-size: 24px;
     font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 48;
   }
-  
+
   /* Золотистые иконки в навигации */
   .nav-btn .material-symbols-outlined {
     color: var(--color-text-muted);
     transition: all 0.3s ease;
   }
-  
+
   .nav-btn.active .material-symbols-outlined {
     color: var(--color-primary-gold);
   }
 
   /* Стили для выезжающей панели телесуфлера */
   @keyframes fadeInRight {
-      from { opacity: 0; transform: translateY(-50%) translateX(50px); }
-      to { opacity: 1; transform: translateY(-50%) translateX(0); }
+    from {
+      opacity: 0;
+      transform: translateY(-50%) translateX(50px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(-50%) translateX(0);
+    }
   }
 
   .animate-fade-in-right {
-      animation: fadeInRight 0.5s ease-out forwards;
+    animation: fadeInRight 0.5s ease-out forwards;
   }
 
   #teleprompter-controls {
-      transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
-      will-change: transform, opacity;
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+    will-change: transform, opacity;
   }
 
   #teleprompter-controls.collapsed {
-      transform: translateY(-50%) translateX(calc(100% - 12px)) !important;
-      opacity: 0.4;
+    transform: translateY(-50%) translateX(calc(100% - 12px)) !important;
+    opacity: 0.4;
   }
 
-  #teleprompter-controls.collapsed:hover, #teleprompter-controls.collapsed:active {
-      transform: translateY(-50%) translateX(calc(100% - 32px)) !important;
-      opacity: 0.8;
+  #teleprompter-controls.collapsed:hover,
+  #teleprompter-controls.collapsed:active {
+    transform: translateY(-50%) translateX(calc(100% - 32px)) !important;
+    opacity: 0.8;
   }
 
-  /* Текст навигации - светлая тема */
+  /* Текст навигации - светлая тема (Stitch Design) */
   .nav-btn span:not(.material-symbols-outlined) {
-    color: var(--color-text-muted);
+    color: var(--color-on-surface-variant);
     transition: all 0.3s ease;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
-  
+
   .nav-btn.active span:not(.material-symbols-outlined) {
-    color: var(--color-primary-gold);
+    color: var(--color-primary);
   }
 
   /* Golden Gradient Text Effect */
@@ -273,23 +409,28 @@
     font-family: 'Lora', serif;
     font-weight: 700;
   }
-  
+
   /* Текст молитв и грехов - золотистый */
-  .prayer-text, .sin-text, .canon-text {
+  .prayer-text,
+  .sin-text,
+  .canon-text {
     color: var(--color-text-main) !important;
   }
-  
+
   /* Второстепенный текст */
-  .text-muted, .text-secondary {
+  .text-muted,
+  .text-secondary {
     color: var(--color-text-muted) !important;
   }
 
   /* Button Styles - эффект свечи */
   .btn-primary {
     background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-container) 100%);
-    color: var(--color-on-primary-fixed); /* Тёмно-коричневый текст для контраста */
+    color: var(--color-on-primary-fixed);
+    /* Тёмно-коричневый текст для контраста */
     font-weight: 700;
-    border-radius: 0.375rem; /* md radius - как в книге */
+    border-radius: 0.375rem;
+    /* md radius - как в книге */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -299,10 +440,12 @@
     box-shadow: 0 4px 12px rgba(120, 86, 0, 0.15);
     border: none;
   }
+
   .btn-primary:active {
     transform: scale(0.95);
     filter: brightness(0.9);
   }
+
   .btn-primary:hover {
     filter: brightness(1.05);
   }
@@ -320,7 +463,10 @@
     padding: 1rem 1.5rem;
     background: transparent;
   }
-  .btn-outline:active { transform: scale(0.95); }
+
+  .btn-outline:active {
+    transform: scale(0.95);
+  }
 
   /* Segmented Control Buttons - эффект свечи */
   .font-size-btn.active,
@@ -328,9 +474,11 @@
   .profile-btn.active,
   .lang-btn.active {
     background: linear-gradient(135deg, #E1C16E 0%, #C5A059 100%) !important;
-    color: #3D2B1F !important; /* Тёмно-коричневый текст */
+    color: #3D2B1F !important;
+    /* Тёмно-коричневый текст */
     font-weight: 700;
-    box-shadow: 0 0 10px rgba(225, 193, 110, 0.3); /* Свечение свечи */
+    box-shadow: 0 0 10px rgba(225, 193, 110, 0.3);
+    /* Свечение свечи */
     border: 1px solid rgba(225, 193, 110, 0.5);
     border-radius: 22px !important;
     transition: all 0.3s ease;
@@ -344,28 +492,28 @@
   }
 
   /* Toggle Switch - эффект свечи */
-  .peer:checked + div {
+  .peer:checked+div {
     background: linear-gradient(135deg, #E1C16E 0%, #C5A059 100%);
     box-shadow: 0 0 12px rgba(225, 193, 110, 0.5);
     border: 1px solid rgba(225, 193, 110, 0.3);
   }
-  
+
   /* Неактивное состояние тумблера - более видимое */
-  .peer:not(:checked) + div {
+  .peer:not(:checked)+div {
     background-color: rgba(255, 255, 255, 0.3) !important;
     border: 1px solid rgba(255, 255, 255, 0.4);
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
   }
 
   /* Кружок тумблера - контрастный */
-  .peer:checked + div::after,
-  .peer:not(:checked) + div::after {
+  .peer:checked+div::after,
+  .peer:not(:checked)+div::after {
     background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 8px rgba(255, 255, 255, 0.5);
   }
-  
+
   /* Тёмная тема - неактивное состояние ещё более видимое */
-  .dark .peer:not(:checked) + div {
+  .dark .peer:not(:checked)+div {
     background-color: rgba(255, 255, 255, 0.2) !important;
     border: 1px solid rgba(255, 255, 255, 0.3);
   }
@@ -393,23 +541,34 @@
   .dark .bg-\[rgba\(0\,0\,0\,0\.2\)\] {
     background-color: rgba(255, 255, 255, 0.05) !important;
   }
-  
+
   /* Dark mode icon containers - золотые иконки */
   .dark .bg-white\/5 {
     background-color: rgba(225, 193, 110, 0.1) !important;
   }
-  
+
   .dark .text-primary {
     color: #E1C16E !important;
   }
 }
 
 @layer utilities {
-  .font-sans { font-family: 'Inter', sans-serif !important; }
-  .font-serif { font-family: 'Lora', serif !important; }
-  
-  .no-scrollbar::-webkit-scrollbar { display: none; }
-  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  .font-sans {
+    font-family: 'Inter', sans-serif !important;
+  }
+
+  .font-serif {
+    font-family: 'Lora', serif !important;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 /* Specific reading mode header styling */
@@ -428,8 +587,15 @@
 
 /* Animations from old file */
 @keyframes fadeInKeyUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-fade-in-up {
@@ -477,96 +643,105 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.25rem;
-  padding: 0.75rem;
+  gap: 0.125rem;
+  padding: 0.5rem;
   font-size: 0.75rem;
   font-weight: 600;
   transition: all 0.2s ease;
-  color: var(--color-text-muted);
+  color: var(--color-on-surface-variant);
 }
 
 .nav-btn.active {
-  color: var(--color-primary-gold);
+  color: var(--color-primary);
 }
 
 .nav-btn.active .material-symbols-outlined {
   font-variation-settings: 'FILL' 1;
-  color: var(--color-primary-gold);
+  color: var(--color-primary);
 }
 
 /* Swatch colors for settings */
-[data-profile].bg-primary, [data-lang].bg-primary, [data-font].bg-primary, [data-view].bg-primary {
+[data-profile].bg-primary,
+[data-lang].bg-primary,
+[data-font].bg-primary,
+[data-view].bg-primary {
   background: linear-gradient(135deg, #F5E6BE 0%, #E1C16E 50%, #C5A059 100%) !important;
   color: #3D2B1F !important;
   box-shadow: 0 8px 20px -6px rgba(225, 193, 110, 0.5);
   transform: scale(1.02);
 }
 
-.font-size-btn, .view-mode-btn, .lang-btn, .profile-btn {
+.font-size-btn,
+.view-mode-btn,
+.lang-btn,
+.profile-btn {
   @apply transition-all duration-500 ease-out;
   color: var(--color-text-muted);
 }
 
-.font-size-btn.bg-primary, .view-mode-btn.bg-primary, .lang-btn.bg-primary, .profile-btn.bg-primary {
+.font-size-btn.bg-primary,
+.view-mode-btn.bg-primary,
+.lang-btn.bg-primary,
+.profile-btn.bg-primary {
   color: #3D2B1F;
 }
 
 /* My List Sins Cards (Premium) */
 .sin-card-wrapper {
-    @apply relative mb-3 transition-all duration-500;
+  @apply relative mb-3 transition-all duration-500;
 }
 
 .sin-card-main {
-    @apply glass-card bg-white/5 border border-white/5 rounded-3xl overflow-hidden shadow-lg shadow-black/20;
+  @apply glass-card bg-white/5 border border-white/5 rounded-3xl overflow-hidden shadow-lg shadow-black/20;
 }
 
 .sin-card-header {
-    @apply flex items-center justify-between p-5 cursor-pointer hover:bg-white/[0.03] transition-colors;
+  @apply flex items-center justify-between p-5 cursor-pointer hover:bg-white/[0.03] transition-colors;
 }
 
 .sin-card-title {
-    @apply text-base font-bold text-text-main flex-1 pr-4 leading-snug;
+  @apply text-base font-bold text-text-main flex-1 pr-4 leading-snug;
 }
 
 .sin-card-indicator {
-    @apply text-text-muted opacity-40 transition-transform duration-500;
+  @apply text-text-muted opacity-40 transition-transform duration-500;
 }
 
 .sin-card-wrapper.open .sin-card-indicator {
-    @apply rotate-180 opacity-100 text-primary;
+  @apply rotate-180 opacity-100 text-primary;
 }
 
 .sin-card-body {
-    @apply h-0 opacity-0 overflow-hidden px-5 pb-5 transition-all duration-500 ease-in-out;
+  @apply h-0 opacity-0 overflow-hidden px-5 pb-5 transition-all duration-500 ease-in-out;
 }
 
 .sin-card-wrapper.open .sin-card-body {
-    @apply h-auto opacity-100;
+  @apply h-auto opacity-100;
 }
 
 .details-label {
-    @apply text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2 block;
+  @apply text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2 block;
 }
 
 .sin-note-input {
-    @apply w-full bg-white/5 border border-white/5 rounded-2xl p-4 text-sm text-text-main outline-none transition-all;
+  @apply w-full bg-white/5 border border-white/5 rounded-2xl p-4 text-sm text-text-main outline-none transition-all;
 }
 
 .sin-note-input::placeholder {
-    @apply text-text-muted opacity-40;
+  @apply text-text-muted opacity-40;
 }
 
 .sin-note-input:focus {
-    @apply border-primary;
-    box-shadow: 0 0 0 2px rgba(127, 25, 230, 0.2);
+  @apply border-primary;
+  box-shadow: 0 0 0 2px rgba(127, 25, 230, 0.2);
 }
 
 .sin-card-wrapper.simple-view .sin-card-header {
-    @apply py-4;
+  @apply py-4;
 }
 
 .delete-inline-btn {
-    @apply transition-transform active:scale-90 hover:scale-110;
+  @apply transition-transform active:scale-90 hover:scale-110;
 }
 
 /* Common Modal Styling */
@@ -593,7 +768,8 @@
 }
 
 /* Forms */
-input[type="text"], textarea {
+input[type="text"],
+textarea {
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   color: var(--color-text-main);
@@ -603,7 +779,9 @@ input[type="text"], textarea {
   outline: none;
   transition: all 0.2s ease;
 }
-input[type="text"]:focus, textarea:focus {
+
+input[type="text"]:focus,
+textarea:focus {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 2px rgba(127, 25, 230, 0.2);
 }
@@ -627,7 +805,8 @@ summary::-webkit-details-marker {
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.drawer-btn:hover, .drawer-step-btn:hover {
+.drawer-btn:hover,
+.drawer-step-btn:hover {
   background: rgba(255, 255, 255, 0.1);
   transform: scale(1.1);
 }
@@ -747,8 +926,17 @@ summary::-webkit-details-marker {
 }
 
 @keyframes crossGlow {
-  0%, 100% { opacity: 0.8; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.05); }
+
+  0%,
+  100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
 }
 
 .canon-title {
@@ -775,10 +963,17 @@ summary::-webkit-details-marker {
   text-transform: lowercase;
 }
 
-.canon-content { padding: 0 8px; }
+.canon-content {
+  padding: 0 8px;
+}
 
 /* RUBRICS */
-.canon-song, .canon-sedalen, .canon-kontakion, .canon-ikos, .canon-prayer, .canon-label {
+.canon-song,
+.canon-sedalen,
+.canon-kontakion,
+.canon-ikos,
+.canon-prayer,
+.canon-label {
   font-family: 'EB Garamond', 'Lora', serif;
   font-size: clamp(24px, 6vw, 30px);
   font-weight: 700 !important;
@@ -789,7 +984,10 @@ summary::-webkit-details-marker {
   position: relative;
 }
 
-.canon-song::before, .canon-song::after, .canon-label::before, .canon-label::after {
+.canon-song::before,
+.canon-song::after,
+.canon-label::before,
+.canon-label::after {
   content: '✦';
   position: absolute;
   top: 50%;
@@ -797,8 +995,16 @@ summary::-webkit-details-marker {
   color: rgba(225, 193, 110, 0.4);
   font-size: 14px;
 }
-.canon-song::before, .canon-label::before { left: calc(50% - 80px); }
-.canon-song::after, .canon-label::after { right: calc(50% - 80px); }
+
+.canon-song::before,
+.canon-label::before {
+  left: calc(50% - 80px);
+}
+
+.canon-song::after,
+.canon-label::after {
+  right: calc(50% - 80px);
+}
 
 .irmos {
   font-family: 'EB Garamond', 'Lora', serif;
@@ -817,10 +1023,21 @@ summary::-webkit-details-marker {
   background: rgba(225, 193, 110, 0.08);
 }
 
-.irmos-label { color: var(--color-primary-gold) !important; margin-right: 6px; font-weight: bold; }
-.irmos-text { color: var(--color-primary-gold) !important; font-style: italic; font-weight: 500; }
+.irmos-label {
+  color: var(--color-primary-gold) !important;
+  margin-right: 6px;
+  font-weight: bold;
+}
 
-.zapev, .slava-full, .i-nyne-full {
+.irmos-text {
+  color: var(--color-primary-gold) !important;
+  font-style: italic;
+  font-weight: 500;
+}
+
+.zapev,
+.slava-full,
+.i-nyne-full {
   color: #ef4444 !important;
   font-style: italic !important;
   font-family: 'EB Garamond', 'Lora', serif;
@@ -846,296 +1063,330 @@ summary::-webkit-details-marker {
 
 /* Premium Calendar Styles */
 .calendar-day {
-    position: relative;
-    width: 48px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
+  position: relative;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .calendar-day span {
-    color: var(--color-text-main);
-    font-weight: 500;
-    position: relative;
-    z-index: 10;
-    font-size: 15px;
-    transition: color 0.3s ease;
+  color: var(--color-text-main);
+  font-weight: 500;
+  position: relative;
+  z-index: 10;
+  font-size: 15px;
+  transition: color 0.3s ease;
 }
 
 .calendar-day:hover:not(.other-month) {
-    background-color: var(--color-surface-alt);
-    border-radius: 9999px;
+  background-color: var(--color-surface-alt);
+  border-radius: 9999px;
 }
 
 .calendar-day.has-holiday::before {
-    content: '';
-    position: absolute;
-    inset: 6px;
-    border-radius: 9999px;
-    border: 1px solid rgba(239, 68, 68, 0.5); /* red-500 @ 50% */
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: 9999px;
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  /* red-500 @ 50% */
 }
 
 .calendar-day.has-memorial::before {
-    content: '';
-    position: absolute;
-    inset: 6px;
-    border-radius: 9999px;
-    border: 1px solid rgba(212, 175, 55, 0.4); /* primary-gold @ 40% */
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: 9999px;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  /* primary-gold @ 40% */
 }
 
 .calendar-day.today::before {
-    content: '';
-    position: absolute;
-    inset: 4px;
-    border-radius: 9999px;
-    border: 2px solid var(--color-primary-gold);
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 9999px;
+  border: 2px solid var(--color-primary-gold);
 }
 
-.calendar-day.selected { border-radius: 9999px; background-color: var(--color-primary-gold); }
-.calendar-day.selected span { color: var(--color-on-primary-fixed) !important; font-weight: 700; }
-.calendar-day.other-month { opacity: 0.15; pointer-events: none; }
+.calendar-day.selected {
+  border-radius: 9999px;
+  background-color: var(--color-primary-gold);
+}
+
+.calendar-day.selected span {
+  color: var(--color-on-primary-fixed) !important;
+  font-weight: 700;
+}
+
+.calendar-day.other-month {
+  opacity: 0.15;
+  pointer-events: none;
+}
 
 .calendar-day.has-fast::after {
-    content: '';
-    position: absolute;
-    top: 6px;
-    right: 6px;
-    width: 6px;
-    height: 6px;
-    border-radius: 9999px;
-    background-color: #E1C16E;
-    box-shadow: 0 0 4px rgba(225, 193, 110, 0.8);
+  content: '';
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background-color: #E1C16E;
+  box-shadow: 0 0 4px rgba(225, 193, 110, 0.8);
 }
 
 /* Container Styles */
 #calendar-container {
-    transition: all 0.5s ease;
+  transition: all 0.5s ease;
 }
 
 /* === MODAL DISPLAY RULES === */
 /* These explicit rules ensure modals show/hide correctly regardless of Tailwind specificity */
 
-#date-picker-modal.hidden { display: none !important; }
+#date-picker-modal.hidden {
+  display: none !important;
+}
+
 #date-picker-modal {
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(24px);
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(24px);
 }
 
 /* Prayers Reading Modal */
-#prayers-reading-modal.hidden { display: none !important; }
+#prayers-reading-modal.hidden {
+  display: none !important;
+}
+
 #prayers-reading-modal:not(.hidden),
 #prayers-reading-modal.modal-active {
-    display: flex !important;
-    position: fixed !important;
-    inset: 0 !important;
-    z-index: 99999 !important;
-    background-color: #120F16 !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    /* Override transition-all */
-    transition: none !important;
+  display: flex !important;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 99999 !important;
+  background-color: #120F16 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  /* Override transition-all */
+  transition: none !important;
 }
 
 /* PIN Pad Modal */
-#pin-pad-modal.hidden { display: none !important; }
+#pin-pad-modal.hidden {
+  display: none !important;
+}
+
 #pin-pad-modal:not(.hidden),
 #pin-pad-modal.modal-active {
-    display: flex !important;
-    position: fixed !important;
-    inset: 0 !important;
-    z-index: 99999 !important;
-    background-color: #120F16 !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    transition: none !important;
+  display: flex !important;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 99999 !important;
+  background-color: #120F16 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transition: none !important;
 }
 
 /* Reading Mode Modal */
-#reading-mode-modal.hidden { display: none !important; }
+#reading-mode-modal.hidden {
+  display: none !important;
+}
+
 #reading-mode-modal:not(.hidden),
 #reading-mode-modal.modal-active {
-    display: flex !important;
-    position: fixed !important;
-    inset: 0 !important;
-    z-index: 99999 !important;
-    background-color: #120F16 !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    transition: none !important;
+  display: flex !important;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 99999 !important;
+  background-color: #120F16 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transition: none !important;
 }
 
 /* Confirm Modal */
-#confirm-modal.hidden { display: none !important; }
+#confirm-modal.hidden {
+  display: none !important;
+}
+
 #confirm-modal:not(.hidden) {
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Prayer Modal (bottom sheet) */
-#prayer-modal.hidden { display: none !important; }
+#prayer-modal.hidden {
+  display: none !important;
+}
+
 #prayer-modal:not(.hidden) {
-    display: flex !important;
+  display: flex !important;
 }
 
 /* Donate Modal */
-#donate-modal.hidden { display: none !important; }
+#donate-modal.hidden {
+  display: none !important;
+}
+
 #donate-modal:not(.hidden) {
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
 }
 
 /* About Modal */
-#about-modal.hidden { display: none !important; }
+#about-modal.hidden {
+  display: none !important;
+}
+
 #about-modal:not(.hidden) {
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Contact Modal */
-#contact-modal.hidden { display: none !important; }
+#contact-modal.hidden {
+  display: none !important;
+}
+
 #contact-modal:not(.hidden) {
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Clear Modal */
-#clear-modal.hidden { display: none !important; }
+#clear-modal.hidden {
+  display: none !important;
+}
+
 #clear-modal:not(.hidden) {
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Preview Modal */
-#preview-modal.hidden { display: none !important; }
+#preview-modal.hidden {
+  display: none !important;
+}
+
 #preview-modal:not(.hidden) {
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
 }
 
 /* PIN Pad Close Button */
-#pin-pad-close-btn.hidden { display: none !important; }
-#pin-pad-close-btn:not(.hidden) {
-    display: flex !important;
+#pin-pad-close-btn.hidden {
+  display: none !important;
 }
+
+#pin-pad-close-btn:not(.hidden) {
+  display: flex !important;
+}
+
 /* Audio Player in Header - Compact Design */
 #audio-player-bar {
-    background: rgba(26, 25, 20, 0.8) !important;
-    backdrop-filter: blur(25px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(25px) saturate(180%) !important;
-    border: 1px solid rgba(225, 193, 110, 0.2) !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 10px rgba(225, 193, 110, 0.05) !important;
-    transition: all 0.3s ease;
+  background: rgba(26, 25, 20, 0.8) !important;
+  backdrop-filter: blur(25px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(25px) saturate(180%) !important;
+  border: 1px solid rgba(225, 193, 110, 0.2) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 10px rgba(225, 193, 110, 0.05) !important;
+  transition: all 0.3s ease;
 }
 
 .dark #audio-player-bar {
-    background: rgba(26, 25, 20, 0.85) !important;
-    border: 1px solid rgba(225, 193, 110, 0.2) !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 10px rgba(225, 193, 110, 0.05) !important;
+  background: rgba(26, 25, 20, 0.85) !important;
+  border: 1px solid rgba(225, 193, 110, 0.2) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 10px rgba(225, 193, 110, 0.05) !important;
 }
 
 #audio-player-bar.hidden {
-    display: none !important;
+  display: none !important;
 }
 
 #audio-player-bar:not(.hidden) {
-    display: flex !important;
-    animation: fadeIn 0.3s ease;
+  display: flex !important;
+  animation: fadeIn 0.3s ease;
 }
 
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Church Font Text - для дней недели в стиле вязи */
 .church-font-text {
-    font-family: 'Ruslan Display', serif !important;
-    font-weight: 400;
-    letter-spacing: 0.02em;
+  font-family: 'Ruslan Display', serif !important;
+  font-weight: 400;
+  letter-spacing: 0.02em;
 }
 
 
-/* Текст навигации */
+/* Текст навигации (Stitch Design) */
 .nav-btn span:not(.material-symbols-outlined) {
-    color: var(--color-text-muted);
-    transition: all 0.3s ease;
+  color: var(--color-on-surface-variant);
+  transition: all 0.3s ease;
 }
 
 .nav-btn.active span:not(.material-symbols-outlined) {
-    color: var(--color-primary-gold);
-    text-shadow: 0 0 8px rgba(225, 193, 110, 0.5);
+  color: var(--color-primary);
 }
 
-/* Settings Headings - золотой вязью */
-#tab-settings h3 {
-    font-family: 'Ruslan Display', serif !important;
-    color: var(--color-primary-gold) !important;
-    font-size: 0.875rem;
-    font-weight: 700;
-    text-shadow: 0 0 12px rgba(225, 193, 110, 0.4);
-    margin-bottom: 0.75rem;
-}
-
-/* Settings Section Headers - золотой текст */
-#tab-settings .text-text-main,
-#tab-settings .font-bold.text-text-main {
-    color: #E1C16E !important;
-}
-
-/* Settings Icons - золотые */
+/* Settings Icons (Stitch Design) */
 #tab-settings .material-symbols-outlined {
-    color: var(--color-primary-gold) !important;
+  color: var(--color-primary) !important;
 }
 
-/* Active Navigation Icons */
+/* Active Navigation Icons (Stitch Design) */
 .nav-btn.active .material-symbols-outlined {
-    color: var(--color-primary-gold) !important;
+  color: var(--color-primary) !important;
 }
 
-/* Golden glow effect for active elements */
+/* Golden glow effect for active elements (Stitch Design) */
 .nav-btn.active,
 .prayer-menu-item.active {
-    text-shadow: 0 0 10px rgba(225, 193, 110, 0.5);
+  color: var(--color-primary);
 }
 
-/* Кнопки молитв - эффект свечи при наведении */
+/* Кнопки молитв - эффект свечи при наведении (Stitch Design) */
 .prayer-menu-item {
-    transition: all 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .prayer-menu-item:hover {
-    box-shadow: 0 0 20px rgba(225, 193, 110, 0.3);
-    border-color: rgba(225, 193, 110, 0.4);
+  box-shadow: 0 0 20px rgba(120, 86, 0, 0.15);
+  border-color: rgba(120, 86, 0, 0.2);
 }
 
 .prayer-menu-item:active {
-    filter: brightness(0.95);
-    transform: scale(0.98);
+  filter: brightness(0.95);
+  transform: scale(0.98);
 }
 
 /* Буквицы и запевы - красный (киноварь) */
 .canon-initial,
 .canon-red {
-    color: var(--color-accent-red) !important;
+  color: var(--color-accent-red) !important;
 }
