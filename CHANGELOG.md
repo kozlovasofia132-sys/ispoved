@@ -11,6 +11,18 @@
 ### Изменено
 - Версия приложения обновлена до 2.0.17
 
+### Сборка
+- **Vite**: v5.4.21
+- **PWA Plugin**: v0.19.8
+- **Capacitor**: v8.2.0
+- **Tailwind CSS**: v3.4.1
+
+### Android Studio
+- **Gradle Plugin**: обновлён
+- **versionCode**: 20017
+- **versionName**: 2.0.17
+- **Минимальная версия Android**: API 22+
+
 
 ## [2.0.16] - 27 марта 2026 г.
 
