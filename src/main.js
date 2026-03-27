@@ -1,6 +1,7 @@
 import './style.css';
 import { Capacitor } from '@capacitor/core';
 import { App } from '@capacitor/app';
+import { Browser } from '@capacitor/browser';
 import { TextToSpeech } from '@capacitor-community/text-to-speech';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -16,7 +17,7 @@ import { quotes } from './data/quotes.js';
 import { prayersData } from './data/prayers.js';
 
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
 
     // --- Global Error Interceptor ---
     window.addEventListener('error', (event) => {
@@ -41,10 +42,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const dateToUse = (typeof currentNavDate !== 'undefined' && currentNavDate) ? currentNavDate : new Date();
         const options = { day: 'numeric', month: 'long', year: 'numeric' };
-        const dateStr = dateToUse.toLocaleDateString('ru-RU', options);
+        let dateStr = dateToUse.toLocaleDateString('ru-RU', options);
+
+        // Убираем " г." в конце даты
+        dateStr = dateStr.replace(/\s*г\.$/, '');
 
         // Делаем первую букву заглавной
         dateEl.textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+    }
+
+    // --- Header Spacing ---
+    function updateHeaderSpacing() {
+        const header = document.querySelector('.main-header');
+        if (!header) return;
+
+        const headerHeight = header.offsetHeight;
+        console.log('[Header Spacing] Header height:', headerHeight, 'px');
+        document.documentElement.style.setProperty('--header-height', `${headerHeight}px`);
     }
 
     // --- Global Audio Utility ---
@@ -157,8 +171,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const donateModal = document.getElementById('donate-modal');
     const closeDonateBtn = document.getElementById('close-donate-btn');
     const donateAmountBtns = document.querySelectorAll('.donate-amount-btn');
-    const customAmountContainer = document.getElementById('custom-amount-container');
-    const customAmountInput = document.getElementById('custom-amount-input');
     const donateSubmitBtn = document.getElementById('donate-submit-btn');
 
     // Reading Mode Modal
@@ -283,6 +295,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function applyLanguageFont() {
         document.body.classList.toggle('font-cs', currentLanguage === 'cs');
+
+        // Обновляем отступ для шапки
+        updateHeaderSpacing();
     }
 
     function updateHeader() {
@@ -357,12 +372,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const headerDateContainer = document.getElementById('header-date-container');
         if (headerDateContainer) {
             if (tabId === 'church-empty') {
-                headerDateContainer.style.display = '';
-                headerDateContainer.classList.remove('hidden');
+                headerDateContainer.style.opacity = '1';
+                headerDateContainer.style.pointerEvents = 'auto';
                 updateHeaderDate();
             } else {
-                headerDateContainer.style.display = 'none';
-                headerDateContainer.classList.add('hidden');
+                headerDateContainer.style.opacity = '0';
+                headerDateContainer.style.pointerEvents = 'none';
             }
         }
 
@@ -374,6 +389,9 @@ document.addEventListener('DOMContentLoaded', () => {
             renderPreparation();
             renderCatalog();
         }
+
+        // Обновляем отступ для шапки
+        updateHeaderSpacing();
     }
 
 
@@ -1113,77 +1131,50 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Donation Modal Logic ---
-    let selectedAmount = null;
+    // --- Donation Logic ---
+    const DONATION_URL = 'https://www.tbank.ru/cf/93yFYu9QLm1';
 
-    // Open donate modal
+    async function handleDonation() {
+        showToast(t('donateRedirecting') || 'Переходим к странице пожертвования. Спаси Господи!');
+        if (donateModal) donateModal.classList.add('hidden');
+        try {
+            await Browser.open({ url: DONATION_URL });
+        } catch (e) {
+            window.open(DONATION_URL, '_blank');
+        }
+    }
+
+    // Открытие модального окна пожертвований
     if (donateBtn) {
         donateBtn.addEventListener('click', () => {
             if (donateModal) {
                 donateModal.classList.remove('hidden');
-                selectedAmount = null;
-                donateAmountBtns.forEach(btn => {
-                    btn.classList.remove('bg-[#7f19e6]', 'text-white');
-                    btn.classList.add('border-[#7f19e6]/50');
-                });
-                if (customAmountContainer) customAmountContainer.classList.add('hidden');
-                if (customAmountInput) customAmountInput.value = '';
+            } else {
+                handleDonation(); // Если окно по какой-то причине отсутствует
             }
         });
     }
 
-    // Close donate modal
+    // Закрытие модального окна пожертвований
     if (closeDonateBtn) {
         closeDonateBtn.addEventListener('click', () => {
             if (donateModal) donateModal.classList.add('hidden');
         });
     }
 
-    // Amount selection
-    donateAmountBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const amount = btn.dataset.amount;
-            selectedAmount = amount;
-
-            donateAmountBtns.forEach(b => {
-                b.classList.remove('bg-[#7f19e6]', 'text-white');
-                b.classList.add('border-[#7f19e6]/50');
-            });
-
-            btn.classList.remove('border-[#7f19e6]/50');
-            btn.classList.add('bg-[#7f19e6]', 'text-white');
-
-            if (amount === 'custom' && customAmountContainer) {
-                customAmountContainer.classList.remove('hidden');
-            } else if (customAmountContainer) {
-                customAmountContainer.classList.add('hidden');
-            }
-        });
-    });
-
-    // Submit donation
-    if (donateSubmitBtn) {
-        donateSubmitBtn.addEventListener('click', () => {
-            let finalAmount = selectedAmount;
-
-            if (selectedAmount === 'custom' && customAmountInput) {
-                finalAmount = customAmountInput.value;
-            }
-
-            if (!finalAmount || finalAmount === 'custom') {
-                alert(t('donationSuccess') || 'Функция оплаты временно недоступна. Спасибо за вашу поддержку!');
-                return;
-            }
-
-            // Show success message (temporary stub)
-            alert(t('donationSuccess') || 'Функция оплаты временно недоступна. Спасибо за вашу поддержку!');
-
-            // Close modal after action
-            if (donateModal) donateModal.classList.add('hidden');
+    // Все суммы и кнопка «Другая сумма» теперь тоже открывают Т-Банк
+    if (donateAmountBtns) {
+        donateAmountBtns.forEach(btn => {
+            btn.addEventListener('click', handleDonation);
         });
     }
 
-    // Close on backdrop click
+    // Большая кнопка «Пожертвовать»
+    if (donateSubmitBtn) {
+        donateSubmitBtn.addEventListener('click', handleDonation);
+    }
+
+    // Закрытие по клику вне модального окна
     if (donateModal) {
         donateModal.addEventListener('click', (e) => {
             if (e.target === donateModal) {
@@ -1212,6 +1203,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 btn.classList.add('bg-white/5', 'text-slate-300');
             }
         });
+
+        // Обновляем отступ для шапки
+        updateHeaderSpacing();
     }
 
     // --- Appearance Settings ---
@@ -1232,21 +1226,29 @@ document.addEventListener('DOMContentLoaded', () => {
             if (Capacitor.isNativePlatform()) {
                 // Status Bar (Top)
                 await StatusBar.setStyle({ style: isDark ? Style.Dark : Style.Light });
-                if (!isDark) {
-                    await StatusBar.setBackgroundColor({ color: '#fbf9f4' });
-                } else {
-                    await StatusBar.setBackgroundColor({ color: '#120F16' });
-                }
+                
+                // Настраиваем цвет фона и overlay
+                const statusBarColor = isDark ? '#110d18' : '#fbf9f4';
+                await StatusBar.setBackgroundColor({ color: statusBarColor });
+                
+                // Фиксируем, чтобы контент не залезал под статус-бар
+                await StatusBar.setOverlaysWebView({ overlay: false });
 
                 // Navigation Bar (Bottom) - Android
                 if (Capacitor.getPlatform() === 'android') {
-                    await NavigationBar.setColor({ color: isDark ? '#120F16' : '#fbf9f4' });
-                    await NavigationBar.setDarkIcons({ darkIcons: !isDark });
+                    // Используем NavigationBar если плагин доступен
+                    if (typeof NavigationBar !== 'undefined' && NavigationBar) {
+                        await NavigationBar.setColor({ color: statusBarColor });
+                        await NavigationBar.setDarkIcons({ darkIcons: !isDark });
+                    }
                 }
             }
         } catch (err) {
             console.warn('[Native Theme] Failed to update system bars:', err);
         }
+
+        // Обновляем отступ для шапки
+        updateHeaderSpacing();
     }
     if (themeToggle) {
         themeToggle.addEventListener('change', (e) => {
@@ -2520,19 +2522,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function drag(e) {
             if (!isDragging) return;
-            e.preventDefault();
 
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
             const deltaX = dragStartX - clientX;
-            const deltaY = dragStartY - clientY;
+            const deltaY = clientY - dragStartY; // Инвертировано для естественного движения
 
             const newRight = panelStartX + deltaX;
             const newTop = panelStartY + deltaY;
 
-            teleControls.style.right = newRight + 'px';
-            teleControls.style.top = newTop + 'px';
+            // Ограничиваем перемещение пределами экрана
+            const controlsWidth = teleControls.offsetWidth; // 96px
+            const panelRect = teleControls.getBoundingClientRect();
+            const maxWidth = window.innerWidth - controlsWidth; // Чтобы левый край контейнера не уходил за экран
+
+            // Ограничения по горизонтали (0 = правый край контейнера у правого края экрана)
+            const clampedRight = Math.max(0, Math.min(newRight, maxWidth));
+            
+            // Ограничения по вертикали
+            const minTop = 80; // Минимальный отступ сверху (чтобы не заходила на камеру)
+            const maxHeight = window.innerHeight - panelRect.height;
+            const clampedTop = Math.max(minTop, Math.min(newTop, maxHeight));
+
+            teleControls.style.right = clampedRight + 'px';
+            teleControls.style.top = clampedTop + 'px';
             teleControls.style.transform = 'none';
         }
 
@@ -2571,10 +2585,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // События для сброса таймера при явном взаимодействии
+        // Не используем click, чтобы не дублировать с кнопками (у них свой resetAutohideTimer)
         teleControls.addEventListener('touchstart', resetAutohideTimer, { passive: true });
-        teleControls.addEventListener('click', (e) => {
-            resetAutohideTimer();
-        });
 
         if (autoscrollSpeedInput) {
             autoscrollSpeedInput.addEventListener('input', resetAutohideTimer);
@@ -2619,7 +2631,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!container) return;
 
         isAutoscrolling = true;
-        lastAutoscrollTimestamp = 0;
+        // НЕ сбрасываем timestamp, чтобы не было скачка при первом кадре
+        // lastAutoscrollTimestamp остаётся 0, и в smoothAutoscroll он установится в текущий timestamp
         // Сбрасываем аккумулятор в 0 при запуске
         preciseScrollTop = 0;
         if (autoscrollIcon) autoscrollIcon.textContent = 'pause';
@@ -2630,6 +2643,8 @@ document.addEventListener('DOMContentLoaded', () => {
         isAutoscrolling = false;
         if (autoscrollRequestId) cancelAnimationFrame(autoscrollRequestId);
         autoscrollRequestId = null;
+        // Сбрасываем timestamp, чтобы при следующем запуске не было скачка
+        lastAutoscrollTimestamp = 0;
         if (autoscrollIcon) autoscrollIcon.textContent = 'play_arrow';
     }
 
@@ -2662,47 +2677,63 @@ document.addEventListener('DOMContentLoaded', () => {
     if (toggleAutoscrollBtn) {
         toggleAutoscrollBtn.addEventListener('click', (e) => {
             e.stopPropagation();
+            e.preventDefault();
             if (isAutoscrolling) stopAutoscroll();
             else startAutoscroll();
         });
+        toggleAutoscrollBtn.addEventListener('touchstart', (e) => {
+            e.stopPropagation();
+        }, { passive: true });
     }
 
-    function updateSpeed() {
-        const val = parseInt(autoscrollSpeedInput.value);
-        // Map 0-100 to 0-50 speed (медленная прокрутка для чтения молитв)
-        const newSpeed = (val / 100) * 50;
-
-        // Просто обновляем скорость, без перезапуска
-        autoscrollSpeed = newSpeed;
+    let autoscrollSpeedValue = 25; // Speed in pixels per second
+    
+    function updateSpeedDisplay() {
+        autoscrollSpeed = autoscrollSpeedValue;
+        console.log('[Autoscroll] Speed updated to:', autoscrollSpeed);
     }
 
     if (autoscrollSpeedInput) {
-        autoscrollSpeedInput.addEventListener('input', updateSpeed);
-        // Устанавливаем начальное значение 30% (15 px/sec)
-        autoscrollSpeedInput.value = 30;
-        updateSpeed();
+        // Slider controls speed again (0-100 px/sec)
+        autoscrollSpeedInput.addEventListener('input', (e) => {
+            autoscrollSpeedValue = parseInt(autoscrollSpeedInput.value);
+            updateSpeedDisplay();
+            resetAutohideTimer();
+        });
+        
+        autoscrollSpeedValue = 25;
+        autoscrollSpeedInput.value = autoscrollSpeedValue;
+        updateSpeedDisplay();
     }
 
     if (speedUpBtn) {
         speedUpBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            const currentValue = parseInt(autoscrollSpeedInput.value) || 30;
-            const newValue = Math.min(100, currentValue + 10);
-            autoscrollSpeedInput.value = newValue;
-            updateSpeed();
+            e.preventDefault();
+            autoscrollSpeedValue = Math.min(100, autoscrollSpeedValue + 5);
+            if (autoscrollSpeedInput) autoscrollSpeedInput.value = autoscrollSpeedValue;
+            updateSpeedDisplay();
+            showToast(`Скорость: ${Math.round(autoscrollSpeedValue)}`);
             resetAutohideTimer();
         });
+        speedUpBtn.addEventListener('touchstart', (e) => {
+            e.stopPropagation();
+        }, { passive: true });
     }
 
     if (speedDownBtn) {
         speedDownBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            const currentValue = parseInt(autoscrollSpeedInput.value) || 30;
-            const newValue = Math.max(0, currentValue - 10);
-            autoscrollSpeedInput.value = newValue;
-            updateSpeed();
+            e.preventDefault();
+            autoscrollSpeedValue = Math.max(0, autoscrollSpeedValue - 5);
+            if (autoscrollSpeedInput) autoscrollSpeedInput.value = autoscrollSpeedValue;
+            updateSpeedDisplay();
+            showToast(`Скорость: ${Math.round(autoscrollSpeedValue)}`);
             resetAutohideTimer();
         });
+        speedDownBtn.addEventListener('touchstart', (e) => {
+            e.stopPropagation();
+        }, { passive: true });
     }
 
     // Auto-pause only for the active scrollable elements
@@ -2781,14 +2812,14 @@ document.addEventListener('DOMContentLoaded', () => {
         return formatDateMonth(oldStyleDate);
     }
 
-    // Format full date (e.g., "Среда, 14 августа 2024 г.")
+    // Format full date (e.g., "Среда, 14 августа 2024")
     function formatDateFull(date) {
         const weekday = date.toLocaleDateString('ru-RU', { weekday: 'long' });
         const day = date.getDate();
         const month = date.toLocaleDateString('ru-RU', { month: 'long' });
         const year = date.getFullYear();
         // Capitalize first letter
-        return `${weekday.charAt(0).toUpperCase() + weekday.slice(1)}, ${day} ${month} ${year} г.`;
+        return `${weekday.charAt(0).toUpperCase() + weekday.slice(1)}, ${day} ${month} ${year}`;
     }
 
     // Get date string in YYYY-MM-DD format
@@ -2804,7 +2835,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = document.getElementById('icon-of-day-container');
         const iconBlock = document.getElementById('icon-of-day-block');
 
-        // Скрываем блок с иконами святых
+        // Скрываем бло�� с иконами святых
         if (iconBlock) iconBlock.style.display = 'none';
         if (container) container.innerHTML = '';
     }
@@ -3947,7 +3978,27 @@ document.addEventListener('DOMContentLoaded', () => {
     updateAppLanguage();
     applyLanguageFont();
     updateLanguageUI();
+    updateHeaderSpacing(); // Вычисляем высоту шапки
     loadChurchToday(); // Load calendar data
     renderRandomQuote(); // Load random quote on startup
     switchTab('church-empty'); // Start on Church Today tab
+
+    // Обновляем отступ после загрузки шрифтов и при изменении размера шапки
+    if (document.fonts) {
+        document.fonts.ready.then(() => {
+            updateHeaderSpacing();
+        });
+    }
+
+    // Добавляем ResizeObserver для автоматического обновления при изменении контента шапки
+    if (window.ResizeObserver) {
+        const header = document.querySelector('.main-header');
+        if (header) {
+            const ro = new ResizeObserver(() => {
+                updateHeaderSpacing();
+            });
+            ro.observe(header);
+            console.log('[Header Spacing] ResizeObserver attached to header.');
+        }
+    }
 });

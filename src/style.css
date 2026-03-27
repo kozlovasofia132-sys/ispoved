@@ -74,6 +74,7 @@
   /* On Error */
   --color-accent-red: #ba1a1a;
   /* Error для киновари */
+  --header-height: 60px; /* Значение устанавливается через JS */
 }
 
 .dark {
@@ -197,6 +198,8 @@
   --surface-container-low: #f5f3ee;
   --surface-container-highest: #e4e2dd;
   --secondary: #934b19;
+  /* Header height for dynamic spacing (set by JS) */
+  --header-height: 60px;
 }
 
 /* Ghost Border utility */
@@ -243,15 +246,32 @@
   -webkit-backdrop-filter: blur(24px);
   background: rgba(255, 255, 255, 0.8);
   border-bottom: 1px solid rgba(211, 196, 175, 0.2);
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: 4px;
-  text-align: center;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: 8px;
   transition: all 0.3s ease;
   box-shadow: 0 1px 3px 0 rgba(120, 86, 0, 0.05);
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
+  min-height: calc(56px + env(safe-area-inset-top, 0px));
+}
+
+.header-left, .header-right {
+  display: flex !important;
   justify-content: center;
-  gap: 16px;
+  align-items: center;
+  height: 100%;
+  min-width: 80px;
+  text-align: center;
+  transition: opacity 0.3s ease;
+}
+
+.header-left {
+  padding-left: 8px;
+}
+
+.header-right {
+  padding-right: 8px;
 }
 
 .main-header h1 {
@@ -266,6 +286,7 @@
   /* без курсива как в шаблоне */
   margin: 0;
   padding: 0 16px;
+  text-align: center;
 }
 
 .dark .main-header {
@@ -579,6 +600,42 @@
   z-index: 210;
   position: sticky;
   top: 0;
+}
+
+#prayer-scroll-area::-webkit-scrollbar {
+  width: 12px;
+  display: block !important;
+}
+
+#prayer-scroll-area::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  margin: 10px 0;
+}
+
+#prayer-scroll-area::-webkit-scrollbar-thumb {
+  background: rgba(225, 193, 110, 0.4);
+  border: 3px solid rgba(18, 15, 22, 1);
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+#prayer-scroll-area::-webkit-scrollbar-thumb:hover {
+  background: rgba(225, 193, 110, 0.7);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 12px;
+  display: block;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(225, 193, 110, 0.3);
+  border-radius: 10px;
 }
 
 .dark .reading-mode-header {
@@ -1389,4 +1446,27 @@ summary::-webkit-details-marker {
 .canon-initial,
 .canon-red {
   color: var(--color-accent-red) !important;
+}
+
+/* Autoscroll Speed Slider Thumb */
+#autoscroll-speed::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #E1C16E;
+  border: 2px solid white;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(225, 193, 110, 0.5);
+}
+
+#autoscroll-speed::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: #E1C16E;
+  border: 2px solid white;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(225, 193, 110, 0.5);
 }

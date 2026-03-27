@@ -242,3 +242,6 @@ GITHUB_REPO_NAME=ispoved
 
 ## Статус: Ожидает подтверждения / В работе / Завершён
 ```
+
+## Qwen Added Memories
+- Ссылка для поддержки проекта (донаты): https://pay.cloudtips.ru/p/07c2c144

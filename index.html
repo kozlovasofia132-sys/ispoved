@@ -31,14 +31,13 @@
     <div class="w-full h-full flex flex-col relative app-wrapper">
         <!-- Unified Main Header (Stitch Design) -->
         <header class="main-header">
-            <div id="header-date-container" class="header-left flex items-center gap-2">
-                <span class="material-symbols-outlined text-amber-800 dark:text-amber-400"
-                    style="font-size: 20px;">calendar_today</span>
+            <div id="header-date-container" class="header-left">
                 <span id="header-date"
                     class="font-newsreader italic tracking-tight text-base text-amber-800 dark:text-amber-400"
                     style="font-family: 'Newsreader', serif;"></span>
             </div>
             <h1 id="main-header-title" data-t="churchTitle" class="font-serif header-title"></h1>
+            <div class="header-right"></div>
         </header>
 
         <!-- MAIN CONTENT AREA -->
@@ -46,7 +45,7 @@
             <!-- CHURCH (LITURGICAL INFO) TAB -->
             <main id="tab-church-empty" class="absolute inset-0 overflow-y-auto pb-20 no-scrollbar bg-bg">
                 <!-- Spacer for fixed header -->
-                <div class="h-[40px]"></div>
+                <div class="w-full" style="height: var(--header-height);"></div>
 
                 <!-- Main Day Card (Premium Redesign) -->
                 <div class="px-4 animate-fade-in-up">
@@ -210,10 +209,11 @@
 
             <!-- CONFESSION TAB (Stitch Design) -->
             <main id="tab-church-today" class="absolute inset-0 overflow-y-auto pb-20 no-scrollbar hidden bg-bg">
-
+                <!-- Spacer for fixed header -->
+                <div class="w-full" style="height: var(--header-height);"></div>
 
                 <!-- Saint Quote Card (Wisdom - Stitch Design) -->
-                <div class="px-4 mb-8 mt-6 animate-fade-in-up" style="animation-delay: 0.1s">
+                <div class="px-4 pt-6 mb-8 animate-fade-in-up" style="animation-delay: 0.1s">
                     <div class="bg-surface-container-low p-6 rounded-lg relative">
                         <div class="absolute -top-2 -right-2 p-2 opacity-5 pointer-events-none">
                             <span class="material-symbols-outlined text-[60px]"
@@ -249,7 +249,7 @@
                 <div class="px-4 mb-12 animate-fade-in-up" style="animation-delay: 0.2s">
                     <div class="flex items-center justify-center gap-3 mb-4">
                         <p data-t="psalm50Recommendation"
-                            class="text-[11px] font-bold text-text-muted text-center uppercase tracking-[0.1em] opacity-60 m-0">
+                            class="text-[11px] font-bold text-on-surface text-center uppercase tracking-[0.1em] m-0">
                             Рекомендуется прочитать Псалом 50</p>
                         <button id="psalm-50-play-btn"
                             class="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary transition-all active:scale-95">
@@ -268,7 +268,7 @@
                         <summary class="list-none outline-none">
                             <div class="relative">
                                 <p id="psalm-50-text" data-t="psalm50Full"
-                                    class="text-[15px] italic text-text-muted font-serif leading-loose text-justify line-clamp-3 group-open:line-clamp-none transition-all duration-500">
+                                    class="text-[15px] italic text-on-surface font-serif leading-loose text-justify line-clamp-3 group-open:line-clamp-none transition-all duration-500">
                                     Помилуй мя, Боже, по велицей милости Твоей, и по множеству щедрот Твоих очисти
                                     беззаконие мое...
                                 </p>
@@ -282,16 +282,14 @@
 
                 <!-- Preparation Section (Stitch Design) -->
                 <div class="px-4 mb-8 animate-fade-in-up">
-                    <div class="flex items-baseline justify-between pb-4 mb-6">
-                        <h2 class="font-headline text-3xl text-on-surface italic" data-t="prepSectionTitle">Подготовка
-                        </h2>
-                        <span
-                            class="font-label text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/50">К
-                            таинству покаяния</span>
+                    <div class="flex items-center justify-center gap-3 mb-4">
+                        <span class="material-symbols-outlined text-3xl text-primary">candle</span>
+                        <p class="text-[11px] font-bold text-on-surface text-center uppercase tracking-[0.1em] m-0">
+                            О таинстве исповеди</p>
                     </div>
 
-                    <div class="text-center mb-8">
-                        <p class="text-base font-body italic text-on-surface-variant leading-relaxed max-w-3xl mx-auto">
+                    <div class="relative">
+                        <p class="text-[15px] italic text-on-surface font-serif leading-loose text-justify">
                             Исповедь — это не экзамен и не отчет, а искренняя встреча с Отцом, Который ждет нас с
                             распростертыми объятиями. Пусть этот путь поможет вам оставить тяжесть прошлого и с легким
                             сердцем шагнуть навстречу новой жизни.
@@ -316,8 +314,7 @@
                     </div>
 
                     <!-- Starting Formula -->
-                    <div id="formula-container"
-                        class="mb-8 p-6 bg-surface-container-low rounded-lg">
+                    <div id="formula-container" class="mb-8 p-6 bg-surface-container-low rounded-lg">
                         <p class="text-base font-body italic text-on-surface-variant leading-relaxed text-center"
                             data-t="formulaText">
                             Господи, помоги мне исповедать грехи мои искренне и без утайки. Батюшка, я каюсь в том,
@@ -442,25 +439,25 @@
 
             <!-- SETTINGS TAB (Stitch Design) -->
             <main id="tab-settings" class="absolute inset-0 overflow-y-auto pb-20 no-scrollbar hidden bg-bg">
-                <div class="px-4 mt-12 space-y-10 animate-fade-in-up">
+                <!-- Spacer for fixed header -->
+                <div class="w-full" style="height: var(--header-height);"></div>
+                <div class="px-4 space-y-10 animate-fade-in-up">
                     <!-- Appearance Section -->
                     <section>
-                        <div class="flex items-baseline justify-between pb-4">
-                            <h3 class="font-headline text-3xl italic" data-t="sectionAppearance"
+                        <div class="flex items-baseline justify-between pb-2">
+                            <h3 class="font-headline text-xl italic" data-t="sectionAppearance"
                                 style="color: var(--color-on-surface);">
                                 Настройки вида</h3>
                             <span class="font-label text-[10px] font-bold uppercase tracking-widest"
                                 style="color: var(--color-on-surface-variant); opacity: 0.5;">Внешний вид</span>
                         </div>
-                        <div
-                            class="bg-surface-container-low rounded-lg overflow-hidden">
+                        <div class="bg-surface-container-low rounded-lg overflow-hidden">
                             <!-- Theme Toggle -->
-                            <div class="flex items-center justify-between p-4">
-                                <div class="flex items-center gap-4">
+                            <div class="flex items-center justify-between p-6">
+                                <div class="flex items-center gap-5">
                                     <div
-                                        class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20 shrink-0 transition-transform active:scale-90">
-                                        <span class="material-symbols-outlined"
-                                            style="color: #92400e; font-size: 22px;">dark_mode</span>
+                                        class="w-11 h-11 rounded-2xl bg-primary-gold/10 flex items-center justify-center text-primary-gold shrink-0 transition-transform active:scale-90 shadow-sm shadow-primary-gold/20 border border-primary-gold/20">
+                                        <span class="material-symbols-outlined text-2xl">dark_mode</span>
                                     </div>
                                     <span class="text-base font-bold text-on-surface" data-t="templeModeTitle">Режим для
                                         храма</span>
@@ -474,10 +471,10 @@
                             </div>
                             <!-- Font Size -->
                             <div class="flex items-center justify-between p-6">
-                                <div class="flex items-center gap-4">
+                                <div class="flex items-center gap-5">
                                     <div
-                                        class="w-11 h-11 rounded-2xl bg-primary-gold/10 flex items-center justify-center text-primary-gold shrink-0 transition-transform active:scale-90 shadow-sm shadow-primary-gold/20">
-                                        <span class="material-symbols-outlined">text_fields</span>
+                                        class="w-11 h-11 rounded-2xl bg-primary-gold/10 flex items-center justify-center text-primary-gold shrink-0 transition-transform active:scale-90 shadow-sm shadow-primary-gold/20 border border-primary-gold/20">
+                                        <span class="material-symbols-outlined text-2xl">text_fields</span>
                                     </div>
                                     <span class="font-bold text-text-main" data-t="fontSizeLabel">Размер шрифта</span>
                                 </div>
@@ -492,8 +489,8 @@
                             <div class="p-6">
                                 <div class="flex items-center gap-5 mb-5">
                                     <div
-                                        class="w-11 h-11 rounded-2xl bg-primary-gold/10 flex items-center justify-center text-primary-gold shrink-0 transition-transform active:scale-90 shadow-sm shadow-primary-gold/20">
-                                        <span class="material-symbols-outlined">receipt_long</span>
+                                        class="w-11 h-11 rounded-2xl bg-primary-gold/10 flex items-center justify-center text-primary-gold shrink-0 transition-transform active:scale-90 shadow-sm shadow-primary-gold/20 border border-primary-gold/20">
+                                        <span class="material-symbols-outlined text-2xl">receipt_long</span>
                                     </div>
                                     <div class="flex flex-col gap-0.5">
                                         <span class="text-lg font-bold text-text-main" data-t="viewModeLabel">Вид списка
@@ -515,8 +512,8 @@
 
                     <!-- Age Profile Section -->
                     <section>
-                        <div class="flex items-baseline justify-between pb-4">
-                            <h3 class="font-headline text-3xl italic" data-t="sectionProfile"
+                        <div class="flex items-baseline justify-between pb-2">
+                            <h3 class="font-headline text-xl italic" data-t="sectionProfile"
                                 style="color: var(--color-on-surface);">Профиль
                                 верующего</h3>
                             <span class="font-label text-[10px] font-bold uppercase tracking-widest"
@@ -537,8 +534,8 @@
 
                     <!-- Language Section -->
                     <section>
-                        <div class="flex items-baseline justify-between pb-4">
-                            <h3 class="font-headline text-3xl italic" data-t="sectionLanguage"
+                        <div class="flex items-baseline justify-between pb-2">
+                            <h3 class="font-headline text-xl italic" data-t="sectionLanguage"
                                 style="color: var(--color-on-surface);">Язык
                                 богослужения</h3>
                             <span class="font-label text-[10px] font-bold uppercase tracking-widest"
@@ -555,8 +552,8 @@
 
                     <!-- Privacy Section -->
                     <section>
-                        <div class="flex items-baseline justify-between pb-4">
-                            <h3 class="font-headline text-3xl italic" data-t="sectionPrivacy"
+                        <div class="flex items-baseline justify-between pb-2">
+                            <h3 class="font-headline text-xl italic" data-t="sectionPrivacy"
                                 style="color: var(--color-on-surface);">Хранение
                                 данных</h3>
                             <span class="font-label text-[10px] font-bold uppercase tracking-widest"
@@ -567,8 +564,8 @@
                             <div class="flex items-center justify-between p-6">
                                 <div class="flex items-center gap-5">
                                     <div
-                                        class="w-11 h-11 rounded-2xl bg-primary-gold/10 flex items-center justify-center text-primary-gold border border-primary-gold/20">
-                                        <span class="material-symbols-outlined">lock</span>
+                                        class="w-11 h-11 rounded-2xl bg-primary-gold/10 flex items-center justify-center text-primary-gold shrink-0 transition-transform active:scale-90 shadow-sm shadow-primary-gold/20 border border-primary-gold/20">
+                                        <span class="material-symbols-outlined text-2xl">lock</span>
                                     </div>
                                     <span class="text-lg font-bold text-text-main" data-t="pinEntryTitle">Вход по
                                         ПИН-коду</span>
@@ -585,8 +582,8 @@
 
                     <!-- App Section -->
                     <section>
-                        <div class="flex items-baseline justify-between pb-4">
-                            <h3 class="font-headline text-3xl italic" data-t="sectionApp"
+                        <div class="flex items-baseline justify-between pb-2">
+                            <h3 class="font-headline text-xl italic" data-t="sectionApp"
                                 style="color: var(--color-on-surface);">Об
                                 приложении</h3>
                             <span class="font-label text-[10px] font-bold uppercase tracking-widest"
@@ -597,7 +594,7 @@
                             <button id="about-app-btn"
                                 class="w-full flex items-center gap-5 p-6 hover:bg-white/5 transition-all text-left group">
                                 <div
-                                    class="w-11 h-11 rounded-2xl bg-primary-gold/10 flex items-center justify-center text-primary-gold group-hover:scale-105 transition-transform border border-primary-gold/20">
+                                    class="w-11 h-11 rounded-2xl bg-primary-gold/10 flex items-center justify-center text-primary-gold shrink-0 transition-transform active:scale-90 shadow-sm shadow-primary-gold/20 border border-primary-gold/20">
                                     <span class="material-symbols-outlined text-2xl">info</span>
                                 </div>
                                 <span class="text-lg font-bold text-text-main flex-1" data-t="aboutApp">О
@@ -609,7 +606,7 @@
                             <button id="donate-btn"
                                 class="w-full flex items-center gap-5 p-6 hover:bg-white/5 transition-all text-left group">
                                 <div
-                                    class="w-11 h-11 rounded-2xl bg-primary-gold/10 flex items-center justify-center text-primary-gold group-hover:scale-105 transition-transform border border-primary-gold/20">
+                                    class="w-11 h-11 rounded-2xl bg-primary-gold/10 flex items-center justify-center text-primary-gold shrink-0 transition-transform active:scale-90 shadow-sm shadow-primary-gold/20 border border-primary-gold/20">
                                     <span class="material-symbols-outlined text-2xl">favorite</span>
                                 </div>
                                 <div class="flex-1">
@@ -623,8 +620,8 @@
                             <button id="contact-dev-btn"
                                 class="w-full flex items-center gap-5 p-6 hover:bg-white/5 transition-all text-left group">
                                 <div
-                                    class="w-11 h-11 rounded-2xl bg-primary-gold/10 flex items-center justify-center text-primary-gold group-hover:scale-105 transition-transform border border-primary-gold/20">
-                                    <span class="material-symbols-outlined">mail</span>
+                                    class="w-11 h-11 rounded-2xl bg-primary-gold/10 flex items-center justify-center text-primary-gold shrink-0 transition-transform active:scale-90 shadow-sm shadow-primary-gold/20 border border-primary-gold/20">
+                                    <span class="material-symbols-outlined text-2xl">mail</span>
                                 </div>
                                 <span class="text-lg font-bold text-text-main flex-1" data-t="contactDev">Написать
                                     разработчикам</span>
@@ -635,8 +632,8 @@
 
                     <!-- Experimental Features -->
                     <section class="opacity-80">
-                        <div class="flex items-baseline justify-between border-b border-white/10 pb-4 mb-6">
-                            <h3 class="font-headline text-3xl text-text-main italic" data-t="experimentalFeaturesTitle">
+                        <div class="flex items-baseline justify-between border-b border-white/10 pb-2 mb-6">
+                            <h3 class="font-headline text-xl text-text-main italic" data-t="experimentalFeaturesTitle">
                                 Новые возможности</h3>
                         </div>
                         <div class="glass-card border-primary-gold/20 rounded-[32px] overflow-hidden">
@@ -849,7 +846,7 @@
         class="fixed inset-0 z-[300] flex items-center justify-center p-6 bg-black/70 backdrop-blur-sm hidden">
         <div
             class="bg-surface w-full max-w-md rounded-[40px] overflow-hidden shadow-2xl border border-border animate-fade-in-up relative">
-            <!-- Close Button (fixed position to avoid overlap) -->
+            <!-- Close Button -->
             <button id="close-donate-btn"
                 class="absolute top-4 right-4 w-10 h-10 rounded-full bg-surface-alt flex items-center justify-center text-text-muted hover:text-text-main transition-all active:scale-90 z-50">
                 <span class="material-symbols-outlined text-xl">close</span>
@@ -885,12 +882,14 @@
                             class="donate-amount-btn py-4 rounded-2xl border-2 border-border font-bold text-text-main hover:bg-surface-alt transition-all focus:border-primary active:scale-95"
                             data-amount="500">500 ₽</button>
                     </div>
+                    <!-- Теперь эта кнопка тоже просто открывает Т-Банк, поэтому её можно оставить без изменений -->
                     <button
                         class="donate-amount-btn w-full py-4 rounded-2xl border-2 border-border font-bold text-text-main hover:bg-surface-alt transition-all focus:border-primary active:scale-95"
                         data-amount="custom" data-t="donateOtherAmount">Другая сумма</button>
                 </div>
 
                 <div id="custom-amount-container" class="mb-6 hidden animate-fade-in">
+                    <!-- Скрытое поле ввода: оставим для обратной совместимости логики (если вдруг) -->
                     <input type="number" id="custom-amount-input"
                         class="w-full bg-surface-alt border-border rounded-2xl px-5 py-4 text-text-main font-bold focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                         placeholder="Сумма (₽)" min="10" />
@@ -1027,8 +1026,8 @@
                     <div class="flex-1 flex flex-col gap-0.5 min-w-0">
                         <div class="flex justify-between items-center">
                             <span
-                                class="text-[7px] font-bold text-primary-gold uppercase tracking-[0.15em]">Аудио</span>
-                            <span id="audio-time" class="text-[7px] font-bold text-[#E1C16E] tabular-nums">00:00</span>
+                                class="text-[10px] font-bold text-primary-gold uppercase tracking-[0.15em]">Аудио</span>
+                            <span id="audio-time" class="text-[12px] font-bold text-[#E1C16E] tabular-nums">00:00</span>
                         </div>
                         <div id="audio-progress-container"
                             class="h-1.5 w-full bg-[#333]/50 rounded-full overflow-hidden border border-white/5 cursor-pointer">
@@ -1047,7 +1046,7 @@
         </header>
 
         <!-- Scrollable Content -->
-        <div id="prayer-scroll-area" class="flex-1 overflow-y-auto px-6 py-10 no-scrollbar">
+        <div id="prayer-scroll-area" class="flex-1 overflow-y-auto px-6 py-10">
             <div class="max-w-2xl mx-auto">
                 <!-- Hero Image -->
                 <div
@@ -1081,29 +1080,29 @@
         <!-- Основная панель (скрывается) -->
         <div id="teleprompter-controls"
             class="fixed right-0 top-[60%] -translate-y-1/2 z-[620] flex transition-all duration-300 hidden"
-            style="width: 280px; touch-action: none;">
-            <div class="teleprompter-panel ml-4 bg-surface/90 backdrop-blur-3xl border border-primary-gold/20 rounded-[3rem] py-8 px-4 flex flex-col items-center gap-6 shadow-3xl transition-all duration-300 transform translate-x-full opacity-0"
+            style="width: 96px; touch-action: none;">
+            <div class="teleprompter-panel ml-2 bg-surface/90 backdrop-blur-3xl border border-primary-gold/20 rounded-[3rem] py-8 px-4 flex flex-col items-center gap-6 shadow-3xl transition-all duration-300 transform translate-x-full opacity-0"
                 id="teleprompter-panel" style="touch-action: none;">
                 <!-- Speed Control Vertical -->
                 <div class="flex flex-col items-center gap-6">
                     <div class="flex flex-col items-center gap-3">
                         <button id="toggle-autoscroll-btn"
-                            class="w-10 h-10 rounded-xl bg-primary-gold text-white flex items-center justify-center shadow-lg shadow-primary-gold/20 active:scale-90 transition-all">
+                            class="relative z-10 w-10 h-10 rounded-xl bg-primary-gold text-white flex items-center justify-center shadow-lg shadow-primary-gold/20 active:scale-90 transition-all">
                             <span id="autoscroll-icon" class="material-symbols-outlined text-2xl">play_arrow</span>
                         </button>
                     </div>
                     <div class="flex flex-col items-center gap-3">
                         <button id="speed-up-btn"
-                            class="w-10 h-10 rounded-xl bg-white/5 border border-primary-gold/20 flex items-center justify-center text-primary-gold active:scale-90 transition-all">
+                            class="relative z-10 w-10 h-10 rounded-xl bg-white/5 border border-primary-gold/20 flex items-center justify-center text-primary-gold active:scale-90 transition-all">
                             <span class="material-symbols-outlined text-2xl">add</span>
                         </button>
                         <div class="relative h-44 w-8 flex items-center justify-center">
                             <input type="range" id="autoscroll-speed" min="0" max="100" value="30"
                                 class="absolute w-44 h-1.5 accent-primary-gold cursor-pointer bg-white/5 rounded-full"
-                                style="transform: rotate(-90deg); -webkit-appearance: none;">
+                                style="transform: rotate(-90deg); -webkit-appearance: none; appearance: none;">
                         </div>
                         <button id="speed-down-btn"
-                            class="w-10 h-10 rounded-xl bg-white/5 border border-primary-gold/20 flex items-center justify-center text-primary-gold active:scale-90 transition-all">
+                            class="relative z-10 w-10 h-10 rounded-xl bg-white/5 border border-primary-gold/20 flex items-center justify-center text-primary-gold active:scale-90 transition-all">
                             <span class="material-symbols-outlined text-2xl">remove</span>
                         </button>
                     </div>

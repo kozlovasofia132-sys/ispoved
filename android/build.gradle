@@ -7,7 +7,7 @@ buildscript {
         mavenLocal()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.7.3'
+        classpath 'com.android.tools.build:gradle:8.13.2'
     }
 }
 
@@ -38,36 +38,25 @@ allprojects {
 }
 
 subprojects {
-    afterEvaluate { project ->
-        if (project.hasProperty('android')) {
-            // Java Toolchain configuration
-            project.android {
-                compileOptions {
-                    sourceCompatibility JavaVersion.VERSION_17
-                    targetCompatibility JavaVersion.VERSION_17
-                }
-                compileSdk 35
-            }
-
-            // Ensure Java Toolchain is set if java plugin is present
-            if (project.plugins.hasPlugin('java')) {
-                java {
-                    toolchain {
-                        languageVersion = JavaLanguageVersion.of(17)
-                    }
-                }
-            }
-
-            // Kotlin Toolchain configuration
-            if (project.plugins.hasPlugin('kotlin-android')) {
-                kotlin {
-                    jvmToolchain(17)
-                }
-            }
+    configurations.all {
+        resolutionStrategy {
+            force 'com.google.android.gms:play-services-location:21.0.1'
+            force 'com.google.android.gms:play-services-base:18.2.0'
+            force 'androidx.browser:browser:1.8.0'
         }
     }
 }
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
+subprojects {
+    // Этот блок отключает Toolchain для всех задач компиляции
+    tasks.withType(JavaCompile).configureEach {
+        javaCompiler = null // Это отменяет привязку к Toolchain
+    }
+
+    // То же самое для Kotlin
+    tasks.matching { it.name.contains("KotlinCompile") }.configureEach {
+        kotlinOptions {
+            jvmTarget = "17"
+        }
+    }
 }
