@@ -2066,10 +2066,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 // Применяем сохранённую позицию
                 applyPanelPosition();
-            }
 
-            // Сбрасываем таймер авто-скрытия при открытии
-            if (typeof resetAutohideTimer === 'function') {
+                // Разворачиваем панель явно при открытии молитвы
                 resetAutohideTimer();
             }
 
@@ -2444,13 +2442,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Сбрасываем старый таймер
         clearTimeout(autohideTimer);
 
-        // Запускаем новый таймер на 4 секунды бездействия
+        // Запускаем новый таймер на 10 секунд бездействия (увеличено для мобильных)
         autohideTimer = setTimeout(() => {
             // Если панель открыта и пользователь её не трогает - прячем
             if (isPanelExpanded && !teleControls.classList.contains('hidden')) {
                 collapseTeleprompterPanel();
             }
-        }, 4000);
+        }, 10000);
     }
 
     function collapseTeleprompterPanel() {
