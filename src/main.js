@@ -230,11 +230,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     let wakeLock = null;
     let isAllExpanded = false;
 
-    // --- New Features State ---
-
-    let isDigitalMentorEnabled = localStorage.getItem('digitalMentor') === 'true';
-
-
     // --- Teleprompter State ---
     let isAutoscrolling = false;
     let autoscrollSpeed = 25; // pixels per second (базовая скорость - 25 px/sec при 50%)
@@ -1761,19 +1756,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     console.log('[PIN] PIN changed successfully');
                 });
             });
-        });
-    }
-
-    // --- Experimental / Digital Mentor Logic ---
-    const toggleDigitalMentor = document.getElementById('toggle-digital-mentor');
-    if (toggleDigitalMentor) {
-        toggleDigitalMentor.checked = isDigitalMentorEnabled;
-        toggleDigitalMentor.addEventListener('change', (e) => {
-            isDigitalMentorEnabled = e.target.checked;
-            localStorage.setItem('digitalMentor', isDigitalMentorEnabled);
-            if (isDigitalMentorEnabled) {
-                alert('Эта функция находится в разработке. Скоро ИИ сможет анализировать ваши записи и давать советы святых отцов по вашей ситуации.');
-            }
         });
     }
 
