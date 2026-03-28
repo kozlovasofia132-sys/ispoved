@@ -31,13 +31,14 @@
     <div class="w-full h-full flex flex-col relative app-wrapper">
         <!-- Unified Main Header (Stitch Design) -->
         <header class="main-header">
-            <div id="header-date-container" class="header-left">
+            <div class="header-left flex flex-col items-center justify-center">
                 <span id="header-date"
                     class="font-newsreader italic tracking-tight text-base text-amber-800 dark:text-amber-400"
-                    style="font-family: 'Newsreader', serif;"></span>
+                    style="font-family: 'Newsreader', serif;">13 апреля 2026</span>
             </div>
-            <h1 id="main-header-title" data-t="churchTitle" class="font-serif header-title"></h1>
-            <div class="header-right"></div>
+            <div class="header-right flex flex-col items-center justify-center">
+                <h1 id="main-header-title" data-t="churchTitle" class="font-serif header-title">Церковный календарь</h1>
+            </div>
         </header>
 
         <!-- MAIN CONTENT AREA -->
@@ -190,20 +191,12 @@
                     </section>
                 </div>
 
-                <!-- Saints Memory Section (Stitch_1 Style) -->
-                <div class="px-4 mt-12 mb-8 animate-fade-in-up" style="animation-delay: 0.2s">
-                    <section class="space-y-6">
-                        <div class="flex items-baseline justify-between pb-4">
-                            <h3 class="font-headline text-3xl italic" data-t="saintsMemory"
-                                style="color: var(--color-on-surface);">Память
-                                святых</h3>
-                            <span class="font-label text-[10px] font-bold uppercase tracking-widest" id="saints-count"
-                                style="color: var(--color-on-surface-variant); opacity: 0.5;">0 святых</span>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="saints-container">
-                            <!-- Saints will be injected here -->
-                        </div>
-                    </section>
+                <!-- Read Mode Button (Copy) -->
+                <div class="px-4 mt-8 animate-fade-in-up" style="animation-delay: 0.15s">
+                    <button id="open-read-mode-btn-church" class="btn-primary w-full text-lg py-5 shadow-primary/20">
+                        <span class="material-symbols-outlined text-2xl">visibility</span>
+                        <span data-t="readModeBtn">Читать на исповеди</span>
+                    </button>
                 </div>
             </main>
 
@@ -719,7 +712,7 @@
                         data-t="aboutImportant"></div>
                     <div class="pt-6 border-t border-border space-y-2 opacity-60 text-center">
                         <p class="text-[11px] font-bold text-text-main uppercase tracking-widest"
-                            data-t="appHelperVersion">Версия 2.0.12</p>
+                            data-t="appHelperVersion">Версия 2.0.19</p>
                         <p class="text-[10px] italic text-text-muted">2026 г. Тюмень</p>
                         <p class="text-[10px] italic text-text-muted" data-t="madeWithPrayer">Создано с молитвой и
                             любовью</p>
@@ -875,11 +868,11 @@
 
     <!-- Reading Mode Modal -->
     <div id="reading-mode-modal"
-        class="fixed inset-0 z-[400] bg-[#120F16] flex flex-col hidden overflow-hidden transition-colors duration-500">
+        class="fixed inset-0 z-[400] flex flex-col hidden overflow-hidden transition-colors duration-500">
         <!-- Header -->
-        <header class="shrink-0 z-[410] bg-[#120F16]/90 backdrop-blur-2xl border-b border-border px-6 pt-16 pb-8">
+        <header class="shrink-0 z-[410] backdrop-blur-2xl border-b border-border px-6 pt-20 pb-8">
             <div class="max-w-2xl mx-auto relative">
-                <p class="text-[18px] sm:text-[22px] text-primary-gold italic text-center leading-relaxed font-serif px-10"
+                <p class="text-[18px] sm:text-[22px] text-primary italic text-center leading-relaxed font-serif px-10"
                     data-t="formulaText">
                     Господи, помоги мне исповедать грехи мои искренне и без утайки...
                 </p>
@@ -904,9 +897,9 @@
                 </div>
 
                 <button id="finish-confession-btn"
-                    class="w-full py-6 rounded-3xl bg-danger/10 border border-danger/30 text-danger font-bold text-xl flex items-center justify-center gap-4 active:scale-[0.98] transition-all shadow-lg active:bg-danger/15">
+                    class="w-full py-6 rounded-3xl bg-gradient-to-r from-orange-600 to-red-600 text-white font-bold text-xl flex items-center justify-center gap-4 active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(234,88,12,0.4)] hover:shadow-[0_0_30px_rgba(234,88,12,0.6)] border-none">
                     <span id="finish-fire-icon" class="text-3xl transition-all duration-700">🔥</span>
-                    <span data-t="finishConfessionBtn" class="uppercase tracking-widest">Завершить</span>
+                    <span data-t="finishConfessionBtn" class="uppercase tracking-widest">Сжечь грехи</span>
                 </button>
             </div>
         </div>
@@ -977,42 +970,40 @@
     <div id="prayers-reading-modal"
         class="fixed inset-0 z-[600] bg-[#120F16] flex flex-col hidden overflow-hidden transition-all duration-500">
         <!-- Close Button (Fixed Top Right) -->
-        <button id="close-prayers-modal-btn"
-            class="fixed top-4 right-4 z-[610] w-12 h-12 rounded-full bg-[#E1C16E]/10 backdrop-blur-md flex items-center justify-center text-[#E1C16E] active:scale-90 transition-all shadow-lg border border-[#E1C16E]/30">
-            <span class="material-symbols-outlined text-2xl">close</span>
-        </button>
+        <!-- Close button moved inside header -->
 
         <!-- Header with Progress Bar -->
-        <header class="shrink-0 z-[605] bg-[#120F16]/90 backdrop-blur-2xl border-b border-border px-5 py-2 overflow-hidden">
-            <div class="w-full flex flex-col items-center gap-1.5">
-                <h3 id="prayers-modal-header-text" class="text-lg font-serif font-bold text-primary-gold text-center">
-                </h3>
-
-                <!-- Audio Player in Header -->
-                <div id="audio-player-bar"
-                    class="self-stretch mr-16 sm:mr-20 bg-[#1a1914]/80 backdrop-blur-xl border border-[#E1C16E]/20 rounded-xl p-2 pr-4 flex items-center gap-2 shadow-lg hidden animate-fade-in">
-                    <button id="audio-play-pause-btn"
-                        class="w-8 h-8 rounded-full bg-[#E1C16E]/10 border-2 border-[#E1C16E]/30 flex items-center justify-center text-[#E1C16E] hover:bg-[#E1C16E]/20 active:scale-95 transition-all shrink-0">
-                        <span id="audio-play-icon" class="material-symbols-outlined text-base">play_arrow</span>
-                    </button>
-                    <div class="flex-1 flex flex-col gap-0.5 min-w-0">
-                        <div class="flex justify-between items-center">
-                            <span
-                                class="text-[10px] font-bold text-primary-gold uppercase tracking-[0.15em]">Аудио</span>
-                            <span id="audio-time" class="text-[12px] font-bold text-[#E1C16E] tabular-nums">00:00</span>
-                        </div>
-                        <div id="audio-progress-container"
-                            class="h-1.5 w-full bg-[#333]/50 rounded-full overflow-hidden border border-white/5 cursor-pointer">
-                            <div id="audio-progress"
-                                class="h-full bg-[#E1C16E] w-0 transition-all duration-300 shadow-[0_0_10px_rgba(225,193,110,0.6)] pointer-events-none">
+        <header
+            class="shrink-0 z-[605] bg-[#120F16]/90 backdrop-blur-2xl border-b border-[#E1C16E]/10 px-4 pt-6 pb-2 overflow-hidden">
+            <div class="w-full flex flex-col gap-2 max-w-2xl mx-auto">
+                <!-- Top Row: Audio Player & Close Button -->
+                <div class="flex items-center justify-between gap-3">
+                    <div id="audio-player-bar"
+                        class="flex-1 bg-[#1a1914]/80 backdrop-blur-xl border border-[#E1C16E]/20 rounded-2xl p-1.5 pr-3 flex items-center gap-2 shadow-lg hidden animate-fade-in">
+                        <button id="audio-play-pause-btn"
+                            class="w-9 h-9 rounded-full bg-[#E1C16E]/10 border-2 border-[#E1C16E]/30 flex items-center justify-center text-[#E1C16E] hover:bg-[#E1C16E]/20 active:scale-95 transition-all shrink-0">
+                            <span id="audio-play-icon" class="material-symbols-outlined text-lg">play_arrow</span>
+                        </button>
+                        <div class="flex-1 flex flex-col gap-0.5 min-w-0">
+                            <div class="flex justify-between items-center px-0.5">
+                                <span
+                                    class="text-[9px] font-bold text-primary-gold uppercase tracking-[0.2em] opacity-80">Аудио</span>
+                                <span id="audio-time"
+                                    class="text-[10px] font-bold text-[#E1C16E] tabular-nums tracking-wider">00:00</span>
+                            </div>
+                            <div id="audio-progress-container"
+                                class="h-1 w-full bg-white/5 rounded-full overflow-hidden border border-white/5 cursor-pointer relative">
+                                <div id="audio-progress"
+                                    class="h-full bg-[#E1C16E] w-0 transition-all duration-300 shadow-[0_0_12px_rgba(225,193,110,0.5)] pointer-events-none">
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Progress Bar -->
-                <div class="w-full bg-white/5 h-0.5 rounded-full overflow-hidden">
-                    <div id="prayer-progress-bar" class="h-full bg-primary-gold w-0 transition-all duration-300"></div>
+                    <button id="close-prayers-modal-btn"
+                        class="shrink-0 w-10 h-10 rounded-full bg-[#E1C16E]/10 backdrop-blur-md flex items-center justify-center text-[#E1C16E] active:scale-90 transition-all border border-[#E1C16E]/30 shadow-lg">
+                        <span class="material-symbols-outlined text-xl">close</span>
+                    </button>
                 </div>
             </div>
         </header>
@@ -1041,46 +1032,6 @@
         </div>
 
         <audio id="global-audio-element" preload="auto"></audio>
-
-        <!-- Золотистый ярлычок (всегда виден когда открыта молитва) -->
-        <button id="teleprompter-handle"
-            class="fixed -right-8 top-[60%] -translate-y-1/2 z-[630] w-16 h-16 bg-primary-gold/30 backdrop-blur-md border-l-2 border-t-2 border-b-2 border-primary-gold/50 rounded-l-2xl flex items-center justify-start shadow-lg active:scale-95 transition-all pl-1">
-            <span id="handle-icon"
-                class="material-symbols-outlined text-primary-gold text-3xl font-bold">chevron_left</span>
-        </button>
-
-        <!-- Основная панель (скрывается) -->
-        <div id="teleprompter-controls"
-            class="fixed right-0 top-[60%] -translate-y-1/2 z-[620] flex transition-all duration-300 hidden"
-            style="width: 96px; touch-action: none;">
-            <div class="teleprompter-panel ml-2 bg-surface/90 backdrop-blur-3xl border border-primary-gold/20 rounded-[3rem] py-8 px-4 flex flex-col items-center gap-6 shadow-3xl transition-all duration-300 transform translate-x-full opacity-0"
-                id="teleprompter-panel" style="touch-action: none;">
-                <!-- Speed Control Vertical -->
-                <div class="flex flex-col items-center gap-6">
-                    <div class="flex flex-col items-center gap-3">
-                        <button id="toggle-autoscroll-btn"
-                            class="relative z-10 w-10 h-10 rounded-xl bg-primary-gold text-white flex items-center justify-center shadow-lg shadow-primary-gold/20 active:scale-90 transition-all">
-                            <span id="autoscroll-icon" class="material-symbols-outlined text-2xl">play_arrow</span>
-                        </button>
-                    </div>
-                    <div class="flex flex-col items-center gap-3">
-                        <button id="speed-up-btn"
-                            class="relative z-10 w-10 h-10 rounded-xl bg-white/5 border border-primary-gold/20 flex items-center justify-center text-primary-gold active:scale-90 transition-all">
-                            <span class="material-symbols-outlined text-2xl">add</span>
-                        </button>
-                        <div class="relative h-44 w-8 flex items-center justify-center">
-                            <input type="range" id="autoscroll-speed" min="0" max="100" value="30"
-                                class="absolute w-44 h-1.5 accent-primary-gold cursor-pointer bg-white/5 rounded-full"
-                                style="transform: rotate(-90deg); -webkit-appearance: none; appearance: none;">
-                        </div>
-                        <button id="speed-down-btn"
-                            class="relative z-10 w-10 h-10 rounded-xl bg-white/5 border border-primary-gold/20 flex items-center justify-center text-primary-gold active:scale-90 transition-all">
-                            <span class="material-symbols-outlined text-2xl">remove</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Custom Confirm Modal -->
@@ -1214,6 +1165,15 @@
             <!-- Separator -->
             <div class="h-px bg-border w-full opacity-50"></div>
 
+            <!-- Style Toggle -->
+            <div class="flex items-center justify-center gap-2 px-2">
+                <button id="date-picker-style-toggle"
+                    class="flex items-center gap-2 py-2 px-4 rounded-full bg-surface-alt border border-border hover:bg-surface-container-low transition-all">
+                    <span class="text-[10px] font-bold text-text-muted uppercase tracking-[0.15em]">Новый стиль</span>
+                    <span class="material-symbols-outlined text-sm text-primary-gold">calendar_month</span>
+                </button>
+            </div>
+
             <!-- Legend -->
             <div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 px-2">
                 <div class="flex items-center gap-2.5">
@@ -1241,6 +1201,26 @@
         </div>
     </div>
 
+
+    <!-- Teleprompter Controls (Floating Panel) -->
+    <div id="teleprompter-controls"
+        class="fixed bottom-32 right-4 z-[99999] flex flex-col items-center gap-2 p-2 rounded-2xl bg-[#120F16]/80 backdrop-blur-md border border-[#E1C16E]/30 shadow-lg hidden transition-opacity duration-300">
+        <!-- Play/Pause -->
+        <button id="toggle-autoscroll-btn"
+            class="w-12 h-12 rounded-full bg-primary-gold text-white flex items-center justify-center shadow-lg shadow-primary-gold/30 active:scale-90 transition-all mb-1">
+            <span id="autoscroll-icon" class="material-symbols-outlined text-3xl">play_arrow</span>
+        </button>
+        <!-- Speed Up -->
+        <button id="speed-up-btn"
+            class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-primary-gold active:scale-90 transition-all">
+            <span class="material-symbols-outlined text-xl">add</span>
+        </button>
+        <!-- Speed Down -->
+        <button id="speed-down-btn"
+            class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-primary-gold active:scale-90 transition-all">
+            <span class="material-symbols-outlined text-xl">remove</span>
+        </button>
+    </div>
 
     <script type="module" src="/src/main.js"></script>
 </body>

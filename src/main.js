@@ -92,6 +92,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             i.textContent = 'volume_up';
         });
 
+        // Скрываем время у всех чтений
+        document.querySelectorAll('.reading-time').forEach(el => {
+            el.style.opacity = '0';
+        });
+
         isAudioPlaying = false;
         console.log('[Audio] All media stopped.');
     }
@@ -176,6 +181,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Reading Mode Modal
     const readingModeModal = document.getElementById('reading-mode-modal');
     const openReadModeBtn = document.getElementById('open-read-mode-btn');
+    const openReadModeBtnChurch = document.getElementById('open-read-mode-btn-church');
     const closeReadModeBtn = document.getElementById('close-read-mode-btn');
     const readModeContainer = document.getElementById('read-mode-container');
     const readingModeContent = document.getElementById('reading-mode-content');
@@ -749,6 +755,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             myListContainer.innerHTML = '';
             if (emptyState) emptyState.classList.replace('hidden', 'flex');
             if (readModeContainer) readModeContainer.classList.add('hidden');
+            if (openReadModeBtnChurch) openReadModeBtnChurch.parentElement.classList.add('hidden');
             if (toggleAllBtn) toggleAllBtn.classList.add('hidden');
             if (formulaContainer) formulaContainer.classList.add('hidden');
             return;
@@ -756,6 +763,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (emptyState) emptyState.classList.replace('flex', 'hidden');
         if (readModeContainer) readModeContainer.classList.remove('hidden');
+        if (openReadModeBtnChurch) openReadModeBtnChurch.parentElement.classList.remove('hidden');
         if (toggleAllBtn) toggleAllBtn.classList.remove('hidden');
         if (formulaContainer) formulaContainer.classList.remove('hidden');
 
@@ -921,17 +929,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             contentHtml += `
                 <div class="reading-sin-item">
-                    <p class="reading-sin-text text-white font-bold">${sinText}</p>
-                    ${item.note ? `<p class="reading-sin-note italic text-slate-400 mt-2">${item.note}</p>` : ''}
+                    <p class="reading-sin-text">${sinText}</p>
+                    ${item.note ? `<p class="reading-sin-note italic mt-2">${item.note}</p>` : ''}
                 </div>
             `;
         });
 
         if (personalNotes.trim()) {
             contentHtml += `
-                <div class="pt-8 border-t border-white/10">
+                <div class="pt-8 border-t border-border">
                     <p class="text-[11px] font-bold tracking-[0.2em] text-primary uppercase mb-4">${t('personalReflections')}</p>
-                    <p class="text-xl text-slate-300 leading-relaxed italic">${personalNotes}</p>
+                    <p class="text-xl text-text-muted leading-relaxed italic">${personalNotes}</p>
                 </div>
             `;
         }
@@ -947,31 +955,91 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (openReadModeBtn && readingModeModal) {
         openReadModeBtn.addEventListener('click', () => {
-            populateReadingMode();
+            const startReadingFlow = () => {
+                populateReadingMode();
 
-            // Force show modal with !important styles
-            readingModeModal.classList.remove('hidden');
-            readingModeModal.classList.add('flex');
-            readingModeModal.style.display = 'flex';
-            readingModeModal.style.visibility = 'visible';
-            readingModeModal.style.opacity = '1';
-            readingModeModal.style.zIndex = '99999';
+                // Принудительно применяем тему к модальному окну
+                const isDark = document.documentElement.classList.contains('dark');
+                readingModeModal.style.setProperty('--color-bg', isDark ? '#120F16' : '#fbf9f4');
+                readingModeModal.style.setProperty('--color-surface', isDark ? '#2a1f33' : '#ffffff');
+                readingModeModal.style.setProperty('--color-text-main', isDark ? '#ffffff' : '#1b1c19');
+                readingModeModal.style.setProperty('--color-text-muted', isDark ? '#ab9db8' : '#4f4535');
+                readingModeModal.style.setProperty('--color-border', isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(211, 196, 175, 0.2)');
+                readingModeModal.style.setProperty('--color-danger', isDark ? '#ffb4ab' : '#ba1a1a');
+                readingModeModal.style.setProperty('--color-secondary', isDark ? '#ffb68c' : '#934b19');
 
-            // === TELEPROMPTER - ОТКЛЮЧЕН для режима чтения ===
-            const teleControls = document.getElementById('teleprompter-controls');
-            if (teleControls) {
-                teleControls.classList.add('hidden');
-                teleControls.style.display = 'none';
+                // Force show modal with !important styles
+                readingModeModal.classList.remove('hidden');
+                readingModeModal.classList.add('flex');
+                readingModeModal.style.display = 'flex';
+                readingModeModal.style.visibility = 'visible';
+                readingModeModal.style.opacity = '1';
+                readingModeModal.style.zIndex = '99999';
+
+                // === TELEPROMPTER - ОТКЛЮЧЕН для режима чтения ===
+                const teleControls = document.getElementById('teleprompter-controls');
+                if (teleControls) {
+                    teleControls.classList.add('hidden');
+                    teleControls.style.display = 'none';
+                }
+
+                const modalScrollArea = readingModeModal.querySelector('.overflow-y-auto');
+                if (modalScrollArea) modalScrollArea.scrollTop = 0;
+                requestWakeLock();
+            };
+
+            if (isPinEnabled && !isUnlocked) {
+                openPinPad(false, startReadingFlow);
+            } else {
+                startReadingFlow();
             }
-
-            const modalScrollArea = readingModeModal.querySelector('.overflow-y-auto');
-            if (modalScrollArea) modalScrollArea.scrollTop = 0;
-            requestWakeLock();
         });
     } else {
         console.error('[Reading Mode] Missing elements:', {
             openReadModeBtn: !!openReadModeBtn,
             readingModeModal: !!readingModeModal
+        });
+    }
+
+    // Кнопка "Читать на исповеди" в церковной вкладке
+    if (openReadModeBtnChurch && readingModeModal) {
+        openReadModeBtnChurch.addEventListener('click', () => {
+            const startReadingFlow = () => {
+                populateReadingMode();
+
+                // Принудительно применяем тему к модальному окну
+                const isDark = document.documentElement.classList.contains('dark');
+                readingModeModal.style.setProperty('--color-bg', isDark ? '#120F16' : '#fbf9f4');
+                readingModeModal.style.setProperty('--color-surface', isDark ? '#2a1f33' : '#ffffff');
+                readingModeModal.style.setProperty('--color-text-main', isDark ? '#ffffff' : '#1b1c19');
+                readingModeModal.style.setProperty('--color-text-muted', isDark ? '#ab9db8' : '#4f4535');
+                readingModeModal.style.setProperty('--color-border', isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(211, 196, 175, 0.2)');
+                readingModeModal.style.setProperty('--color-danger', isDark ? '#ffb4ab' : '#ba1a1a');
+                readingModeModal.style.setProperty('--color-secondary', isDark ? '#ffb68c' : '#934b19');
+
+                readingModeModal.classList.remove('hidden');
+                readingModeModal.classList.add('flex');
+                readingModeModal.style.display = 'flex';
+                readingModeModal.style.visibility = 'visible';
+                readingModeModal.style.opacity = '1';
+                readingModeModal.style.zIndex = '99999';
+
+                const teleControls = document.getElementById('teleprompter-controls');
+                if (teleControls) {
+                    teleControls.classList.add('hidden');
+                    teleControls.style.display = 'none';
+                }
+
+                const modalScrollArea = readingModeModal.querySelector('.overflow-y-auto');
+                if (modalScrollArea) modalScrollArea.scrollTop = 0;
+                requestWakeLock();
+            };
+
+            if (isPinEnabled && !isUnlocked) {
+                openPinPad(false, startReadingFlow);
+            } else {
+                startReadingFlow();
+            }
         });
     }
 
@@ -1010,7 +1078,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             switchTab('church-today');
 
             // Показываем уведомление
-            showToast(t('confessionCompleted'));
+            showToast(t('sinsBurnedToast'));
 
             console.log('[Confession] Confession completed');
         });
@@ -1221,11 +1289,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (Capacitor.isNativePlatform()) {
                 // Status Bar (Top)
                 await StatusBar.setStyle({ style: isDark ? Style.Dark : Style.Light });
-                
+
                 // Настраиваем цвет фона и overlay
                 const statusBarColor = isDark ? '#110d18' : '#fbf9f4';
                 await StatusBar.setBackgroundColor({ color: statusBarColor });
-                
+
                 // Фиксируем, чтобы контент не залезал под статус-бар
                 await StatusBar.setOverlaysWebView({ overlay: false });
 
@@ -1317,11 +1385,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!pinCells || pinCells.length === 0) return;
         pinCells.forEach((cell, i) => {
             if (i < currentInputPin.length) {
-                cell.classList.add('bg-white', 'border-white');
-                cell.classList.remove('border-white/30');
+                cell.classList.add('bg-primary', 'border-primary');
+                cell.classList.remove('border-border');
             } else {
-                cell.classList.remove('bg-white', 'border-white');
-                cell.classList.add('border-white/30');
+                cell.classList.remove('bg-primary', 'border-primary');
+                cell.classList.add('border-border');
             }
             // Remove error state
             cell.classList.remove('border-red-500');
@@ -1445,6 +1513,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         // === ПРИНУДИТЕЛЬНОЕ ОТОБРАЖЕНИЕ МОДАЛЬНОГО ОКНА ===
         pinPadModal.classList.remove('hidden');
         pinPadModal.classList.add('flex');
+
+        // Принудительно применяем тему к модальному окну ПИН
+        const isDark = document.documentElement.classList.contains('dark');
+        pinPadModal.style.setProperty('--color-bg', isDark ? '#120F16' : '#fbf9f4');
+        pinPadModal.style.setProperty('--color-surface', isDark ? '#2a1f33' : '#ffffff');
+        pinPadModal.style.setProperty('--color-text-main', isDark ? '#ffffff' : '#1b1c19');
+        pinPadModal.style.setProperty('--color-text-muted', isDark ? '#ab9db8' : '#4f4535');
+        pinPadModal.style.setProperty('--color-border', isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(211, 196, 175, 0.2)');
+        pinPadModal.style.setProperty('--color-primary', isDark ? '#E1C16E' : '#934b19');
 
         // Показываем кнопку закрытия
         if (pinPadCloseBtn) {
@@ -1713,12 +1790,28 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             } else {
                 // Пользователь хочет ВЫКЛЮЧИТЬ функцию ПИН-кода
+                
+                // Если есть грехи и сессия не разблокирована — требуем ПИН для выключения
+                if (existingPin && selectedSins.length > 0 && !isUnlocked) {
+                    e.target.checked = true; // Возвращаем тумблер обратно пока не проверим
+                    console.log('[PIN] PIN disable blocked - authentication required');
+                    
+                    openPinPad(false, () => {
+                        // Успешная авторизация — теперь выключаем
+                        console.log('[PIN] Disabling PIN function after auth');
+                        isPinEnabled = false;
+                        localStorage.setItem('pinEnabled', 'false');
+                        pinToggle.checked = false;
+                        updatePrivacyUI();
+                        showToast(t('pinDisabled'));
+                    });
+                    return;
+                }
+
                 console.log('[PIN] Disabling PIN function');
                 isPinEnabled = false;
                 localStorage.setItem('pinEnabled', 'false');
-
                 updatePrivacyUI();
-
                 showToast(t('pinDisabled'));
             }
         });
@@ -1981,6 +2074,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             pinPadCloseBtn.style.display = 'none';
         }
 
+        // === TELEPROMPTER - ВКЛЮЧЕН ===
+        const teleControls = document.getElementById('teleprompter-controls');
+
+        if (teleControls) {
+            teleControls.classList.remove('hidden');
+            teleControls.classList.add('flex', 'opacity-100');
+            teleControls.style.opacity = '1';
+        }
+
         // Reset audio player state when opening new prayer
         if (currentGlobalAudio) {
             currentGlobalAudio.pause();
@@ -2057,18 +2159,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             console.log('[Prayer Modal] Modal opened, classes:', prayersReadingModal.classList.toString());
 
-            // === TELEPROMPTER - ВКЛЮЧЕН С АВТО-СКРЫТИЕМ ===
+            // === TELEPROMPTER - ВКЛЮЧЕН ===
             const teleControls = document.getElementById('teleprompter-controls');
 
             if (teleControls) {
                 teleControls.classList.remove('hidden');
-                teleControls.style.display = 'flex';
-
-                // Применяем сохранённую позицию
-                applyPanelPosition();
-
-                // Разворачиваем панель явно при открытии молитвы
-                resetAutohideTimer();
+                teleControls.classList.add('flex', 'opacity-100');
+                teleControls.style.opacity = '1';
             }
 
             // Ждем следующего кадра для правильного рендеринга
@@ -2108,7 +2205,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             prayersReadingModal.style.removeProperty('z-index');
 
             const teleControls = document.getElementById('teleprompter-controls');
-            if (teleControls) teleControls.classList.add('hidden');
+            if (teleControls) {
+                teleControls.classList.add('hidden');
+                teleControls.classList.remove('flex', 'opacity-100');
+            }
 
             releaseWakeLock();
             hideAudioPlayerBar();
@@ -2378,200 +2478,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const speedUpBtn = document.getElementById('speed-up-btn');
     const speedDownBtn = document.getElementById('speed-down-btn');
 
-    let autohideTimer = null;
-    let isPanelExpanded = false; // Состояние панели (развёрнута/свёрнута)
 
-    // === Переменные для перетаскивания панели ===
-    let isDragging = false;
-    let dragStartX = 0;
-    let dragStartY = 0;
-    let panelStartX = 0;
-    let panelStartY = 0;
-    let savedPanelPosition = null; // {right: number, top: number}
-
-    // === Функции для сохранения/загрузки позиции ===
-    function loadPanelPosition() {
-        const saved = localStorage.getItem('teleprompterPosition');
-        if (saved) {
-            try {
-                savedPanelPosition = JSON.parse(saved);
-                return savedPanelPosition;
-            } catch (e) {
-                return null;
-            }
-        }
-        return null;
-    }
-
-    function savePanelPosition() {
-        if (teleControls) {
-            const rect = teleControls.getBoundingClientRect();
-            const right = window.innerWidth - rect.right;
-            const top = rect.top;
-            const position = { right, top };
-            savedPanelPosition = position;
-            localStorage.setItem('teleprompterPosition', JSON.stringify(position));
-        }
-    }
-
-    function applyPanelPosition() {
-        const position = loadPanelPosition();
-        if (position && teleControls) {
-            teleControls.style.right = position.right + 'px';
-            teleControls.style.top = position.top + 'px';
-            teleControls.style.transform = 'none';
-        }
-    }
-
-    function resetAutohideTimer() {
-        if (!teleControls) return;
-
-        // Показываем панель
-        const panel = teleControls.querySelector('.teleprompter-panel');
-        const handleIcon = document.getElementById('handle-icon');
-
-        if (panel) {
-            panel.classList.remove('translate-x-full', 'opacity-0');
-            panel.classList.add('translate-x-0', 'opacity-100');
-        }
-
-        // Меняем иконку на стрелку вправо
-        if (handleIcon) handleIcon.textContent = 'chevron_right';
-        isPanelExpanded = true;
-
-        // Сбрасываем старый таймер
-        clearTimeout(autohideTimer);
-
-        // Запускаем новый таймер на 10 секунд бездействия (увеличено для мобильных)
-        autohideTimer = setTimeout(() => {
-            // Если панель открыта и пользователь её не трогает - прячем
-            if (isPanelExpanded && !teleControls.classList.contains('hidden')) {
-                collapseTeleprompterPanel();
-            }
-        }, 10000);
-    }
-
-    function collapseTeleprompterPanel() {
-        const panel = teleControls.querySelector('.teleprompter-panel');
-        const handleIcon = document.getElementById('handle-icon');
-
-        if (panel) {
-            panel.classList.add('translate-x-full', 'opacity-0');
-            panel.classList.remove('translate-x-0', 'opacity-100');
-        }
-
-        // Меняем иконку на стрелку влево
-        if (handleIcon) handleIcon.textContent = 'chevron_left';
-        isPanelExpanded = false;
-    }
-
-    function toggleTeleprompterPanel() {
-        if (isPanelExpanded) {
-            collapseTeleprompterPanel();
-        } else {
-            resetAutohideTimer();
-        }
-    }
-
-    if (teleControls) {
-        // === Обработчики для перетаскивания панели ===
-        const teleprompterPanel = document.getElementById('teleprompter-panel');
-
-        function startDrag(e) {
-            isDragging = true;
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            dragStartX = clientX;
-            dragStartY = clientY;
-
-            const rect = teleControls.getBoundingClientRect();
-            panelStartX = window.innerWidth - rect.right;
-            panelStartY = rect.top;
-
-            // Останавливаем таймер авто-скрытия на время перетаскивания
-            clearTimeout(autohideTimer);
-
-            // Предотвращаем всплытие события, чтобы не срабатывали другие обработчики
-            if (e.touches) {
-                e.stopPropagation();
-            }
-
-            teleControls.style.transition = 'none';
-            if (teleprompterPanel) teleprompterPanel.style.transition = 'none';
-        }
-
-        function drag(e) {
-            if (!isDragging) return;
-
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-            const deltaX = dragStartX - clientX;
-            const deltaY = clientY - dragStartY; // Инвертировано для естественного движения
-
-            const newRight = panelStartX + deltaX;
-            const newTop = panelStartY + deltaY;
-
-            // Ограничиваем перемещение пределами экрана
-            const controlsWidth = teleControls.offsetWidth; // 96px
-            const panelRect = teleControls.getBoundingClientRect();
-            const maxWidth = window.innerWidth - controlsWidth; // Чтобы левый край контейнера не уходил за экран
-
-            // Ограничения по горизонтали (0 = правый край контейнера у правого края экрана)
-            const clampedRight = Math.max(0, Math.min(newRight, maxWidth));
-            
-            // Ограничения по вертикали
-            const minTop = 80; // Минимальный отступ сверху (чтобы не заходила на камеру)
-            const maxHeight = window.innerHeight - panelRect.height;
-            const clampedTop = Math.max(minTop, Math.min(newTop, maxHeight));
-
-            teleControls.style.right = clampedRight + 'px';
-            teleControls.style.top = clampedTop + 'px';
-            teleControls.style.transform = 'none';
-        }
-
-        function endDrag() {
-            if (isDragging) {
-                isDragging = false;
-                teleControls.style.transition = 'all duration-300';
-                if (teleprompterPanel) teleprompterPanel.style.transition = 'all duration-300';
-                savePanelPosition(); // Сохраняем позицию
-
-                // Запускаем таймер авто-скрытия после того, как отпустили панель
-                resetAutohideTimer();
-            }
-        }
-
-        // Мышь
-        teleControls.addEventListener('mousedown', startDrag);
-        document.addEventListener('mousemove', drag);
-        document.addEventListener('mouseup', endDrag);
-
-        // Тач
-        teleControls.addEventListener('touchstart', (e) => {
-            startDrag(e);
-            resetAutohideTimer(); // Сбрасываем таймер при начале касания
-        }, { passive: true });
-        teleControls.addEventListener('touchmove', drag, { passive: false });
-        teleControls.addEventListener('touchend', endDrag);
-
-        // Обработчик для ярлычка
-        const teleprompterHandle = document.getElementById('teleprompter-handle');
-        if (teleprompterHandle) {
-            teleprompterHandle.addEventListener('click', (e) => {
-                e.stopPropagation();
-                toggleTeleprompterPanel();
-            });
-        }
-
-        // События для сброса таймера при явном взаимодействии
-        // Не используем click, чтобы не дублировать с кнопками (у них свой resetAutohideTimer)
-        teleControls.addEventListener('touchstart', resetAutohideTimer, { passive: true });
-
-        if (autoscrollSpeedInput) {
-            autoscrollSpeedInput.addEventListener('input', resetAutohideTimer);
-        }
-    }
 
     function getActiveScrollContainer() {
         if (!prayersReadingModal.classList.contains('hidden')) return prayerScrollArea;
@@ -2667,34 +2574,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     let autoscrollSpeedValue = 25; // Speed in pixels per second
-    
+
     function updateSpeedDisplay() {
         autoscrollSpeed = autoscrollSpeedValue;
         console.log('[Autoscroll] Speed updated to:', autoscrollSpeed);
     }
 
-    if (autoscrollSpeedInput) {
-        // Slider controls speed again (0-100 px/sec)
-        autoscrollSpeedInput.addEventListener('input', (e) => {
-            autoscrollSpeedValue = parseInt(autoscrollSpeedInput.value);
-            updateSpeedDisplay();
-            resetAutohideTimer();
-        });
-        
-        autoscrollSpeedValue = 25;
-        autoscrollSpeedInput.value = autoscrollSpeedValue;
-        updateSpeedDisplay();
-    }
+    updateSpeedDisplay();
 
     if (speedUpBtn) {
         speedUpBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             e.preventDefault();
             autoscrollSpeedValue = Math.min(100, autoscrollSpeedValue + 5);
-            if (autoscrollSpeedInput) autoscrollSpeedInput.value = autoscrollSpeedValue;
             updateSpeedDisplay();
             showToast(`Скорость: ${Math.round(autoscrollSpeedValue)}`);
-            resetAutohideTimer();
         });
         speedUpBtn.addEventListener('touchstart', (e) => {
             e.stopPropagation();
@@ -2706,10 +2600,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             e.stopPropagation();
             e.preventDefault();
             autoscrollSpeedValue = Math.max(0, autoscrollSpeedValue - 5);
-            if (autoscrollSpeedInput) autoscrollSpeedInput.value = autoscrollSpeedValue;
             updateSpeedDisplay();
             showToast(`Скорость: ${Math.round(autoscrollSpeedValue)}`);
-            resetAutohideTimer();
         });
         speedDownBtn.addEventListener('touchstart', (e) => {
             e.stopPropagation();
@@ -3258,9 +3150,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <span class="font-label text-[10px] font-bold uppercase tracking-widest transition-colors duration-300 group-hover:text-primary" style="color: var(--color-secondary);">${typeLabel}</span>
                     <h5 class="font-headline text-2xl transition-colors duration-300 group-hover:text-primary" style="color: var(--color-on-surface);">${formattedText}</h5>
                 </div>
-                ${audioUrl ? `<button class="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary transition-all duration-300 active:scale-95 hover:bg-primary/20 hover:scale-110 reading-audio-btn" data-audio-url="${audioUrl}">
-                    <span class="material-symbols-outlined text-xl">volume_up</span>
-                </button>` : ''}
+                ${audioUrl ? `<div class="flex-shrink-0 flex flex-col items-center gap-1">
+                    <button class="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary transition-all duration-300 active:scale-95 hover:bg-primary/20 hover:scale-110 reading-audio-btn" data-audio-url="${audioUrl}">
+                        <span class="material-symbols-outlined text-xl">volume_up</span>
+                    </button>
+                    <span class="reading-time text-[9px] font-bold text-primary font-label opacity-0 transition-opacity duration-300">0:00</span>
+                </div>` : ''}
             </div>
             `;
         });
@@ -3282,19 +3177,33 @@ document.addEventListener('DOMContentLoaded', async () => {
                     e.preventDefault();
                     const audioUrl = this.getAttribute('data-audio-url');
                     const icon = this.querySelector('.material-symbols-outlined');
+                    const timeDisplay = this.parentElement.querySelector('.reading-time');
 
                     if (!audioUrl) return;
 
-                    // Если аудио уже играет — останавливаем
+                    // Если это же аудио уже играет — ставим паузу
                     if (window.currentAudio && window.currentAudio._readingUrl === audioUrl && !window.currentAudio.paused) {
                         window.currentAudio.pause();
-                        window.currentAudio = null;
                         icon.textContent = 'volume_up';
+                        if (timeDisplay) timeDisplay.style.opacity = '0';
+                        return;
+                    }
+
+                    // Если это же аудио на паузе — продолжаем
+                    if (window.currentAudio && window.currentAudio._readingUrl === audioUrl && window.currentAudio.paused) {
+                        window.currentAudio.play();
+                        icon.textContent = 'pause';
+                        if (timeDisplay) timeDisplay.style.opacity = '1';
                         return;
                     }
 
                     // Останавливаем всё остальное аудио
                     stopAllAudio();
+
+                    // Скрываем время у всех кнопок
+                    document.querySelectorAll('.reading-time').forEach(el => {
+                        el.style.opacity = '0';
+                    });
 
                     // Запускаем новое аудио
                     const audio = new Audio(audioUrl);
@@ -3302,21 +3211,43 @@ document.addEventListener('DOMContentLoaded', async () => {
                     window.currentAudio = audio;
 
                     icon.textContent = 'pause';
+                    if (timeDisplay) {
+                        timeDisplay.style.opacity = '1';
+                        timeDisplay.textContent = '0:00';
+                    }
+
+                    // Обновляем время воспроизведения (оставшееся время)
+                    const updateTimeDisplay = () => {
+                        if (!timeDisplay) return;
+                        const currentTime = audio.currentTime || 0;
+                        const duration = audio.duration || 0;
+                        const remaining = Math.max(0, duration - currentTime);
+                        const minutes = Math.floor(remaining / 60);
+                        const seconds = Math.floor(remaining % 60);
+                        timeDisplay.textContent = `-${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    };
+
+                    audio.addEventListener('timeupdate', updateTimeDisplay);
 
                     audio.play().catch(err => {
                         console.error('[Reading Audio] Play error:', err);
                         icon.textContent = 'volume_up';
+                        if (timeDisplay) timeDisplay.style.opacity = '0';
                     });
 
                     audio.addEventListener('ended', () => {
                         icon.textContent = 'volume_up';
+                        if (timeDisplay) timeDisplay.style.opacity = '0';
                         window.currentAudio = null;
+                        audio.removeEventListener('timeupdate', updateTimeDisplay);
                     });
 
                     audio.addEventListener('error', () => {
                         console.error('[Reading Audio] Error loading:', audioUrl);
                         icon.textContent = 'volume_off';
+                        if (timeDisplay) timeDisplay.style.opacity = '0';
                         window.currentAudio = null;
+                        audio.removeEventListener('timeupdate', updateTimeDisplay);
                     });
                 });
             });
@@ -3698,8 +3629,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const calNextMonthBtn = document.getElementById('date-picker-next-month');
     const calTodayBtn = document.getElementById('date-picker-today-btn');
     const calCloseBtn = document.getElementById('date-picker-close-btn');
+    const calStyleToggle = document.getElementById('date-picker-style-toggle');
 
     let currentCalendarDate = new Date();
+    let useOldStyleInCalendar = false; // Переключатель старый/новый стиль в календаре
     const liturgicalCache = {};
 
     function fetchMonthData(year, month) {
@@ -3785,6 +3718,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const today = new Date();
+        // Для старого стиля "сегодня" - это 13 дней назад
+        const todayForCompare = useOldStyleInCalendar ? new Date(today.getFullYear(), today.getMonth(), today.getDate() - 13) : today;
         const cacheKey = `${year}-${month}`;
 
         // Trigger background fetch for this month
@@ -3792,7 +3727,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         for (let day = 1; day <= daysInMonth; day++) {
             const date = new Date(year, month, day);
-            const isToday = date.toDateString() === today.toDateString();
+            const isToday = date.toDateString() === todayForCompare.toDateString();
             const isSelected = date.toDateString() === currentNavDate.toDateString();
 
             const cell = document.createElement('div');
@@ -3855,11 +3790,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (calTodayBtn) {
         calTodayBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            currentNavDate = new Date();
-            currentCalendarDate = new Date();
+            const today = new Date();
+            currentNavDate = today;
+            // Если включен старый стиль, отнимаем 13 дней
+            currentCalendarDate = useOldStyleInCalendar ? new Date(today.getFullYear(), today.getMonth(), today.getDate() - 13) : today;
             localStorage.setItem('selectedDate', currentNavDate.toISOString());
             loadCalendarDate(currentNavDate);
+            renderCalendar(currentCalendarDate);
             closeCalendarModal();
+        });
+    }
+
+    if (calStyleToggle) {
+        calStyleToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            useOldStyleInCalendar = !useOldStyleInCalendar;
+            const styleText = calStyleToggle.querySelector('span');
+            if (styleText) {
+                styleText.textContent = useOldStyleInCalendar ? 'Старый стиль' : 'Новый стиль';
+            }
+            // Перерисовать календарь с учётом стиля
+            const today = new Date();
+            currentCalendarDate = useOldStyleInCalendar ? new Date(today.getFullYear(), today.getMonth(), today.getDate() - 13) : today;
+            renderCalendar(currentCalendarDate);
         });
     }
 

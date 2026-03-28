@@ -44,6 +44,8 @@
   /* Primary Fixed */
   --color-primary-fixed-dim: #f7bd48;
   /* Primary Fixed Dim */
+  --color-primary-gold: #E1C16E;
+  /* Для совместимости */
   --color-on-primary: #3D2B1F;
   /* On Primary */
   --color-on-primary-container: #fffbff;
@@ -74,7 +76,10 @@
   /* On Error */
   --color-accent-red: #ba1a1a;
   /* Error для киновари */
-  --header-height: 60px; /* Значение устанавливается через JS */
+  --color-danger: #ba1a1a;
+  /* Danger для кнопки */
+  --header-height: 60px;
+  /* Значение устанавливается через JS */
 }
 
 .dark {
@@ -112,10 +117,10 @@
   --color-error: #ffb4ab;
   --color-error-container: #93000a;
   --color-accent-red: #F87171;
+  --color-danger: #ffb4ab;
 }
 
 /* Принудительный темный режим для окон чтения молитв */
-#reading-mode-modal,
 #prayers-reading-modal {
   --color-bg: #120F16;
   --color-surface: #1a1914;
@@ -127,9 +132,73 @@
   color: var(--color-text-main) !important;
 }
 
-#reading-mode-modal *,
 #prayers-reading-modal * {
   border-color: var(--color-border) !important;
+}
+
+/* Окно исповеди использует текущую тему приложения */
+#reading-mode-modal {
+  background-color: var(--color-bg) !important;
+  color: var(--color-text-main) !important;
+}
+
+#reading-mode-modal header {
+  background-color: var(--color-bg) !important;
+}
+
+#reading-mode-modal .reading-sin-item {
+  background-color: var(--color-surface) !important;
+  color: var(--color-text-main) !important;
+}
+
+#reading-mode-modal .reading-sin-text {
+  color: var(--color-text-main) !important;
+  font-weight: 700 !important;
+}
+
+#reading-mode-modal .reading-sin-note {
+  color: var(--color-text-muted) !important;
+}
+
+#reading-mode-modal .glass-card {
+  background-color: var(--color-surface) !important;
+  color: var(--color-text-main) !important;
+}
+
+#reading-mode-modal .text-primary {
+  color: var(--color-primary) !important;
+}
+
+#reading-mode-modal .text-text-muted {
+  color: var(--color-text-muted) !important;
+}
+
+#reading-mode-modal .border-border {
+  border-color: var(--color-border) !important;
+}
+
+#reading-mode-modal .bg-gradient-to-t {
+  background-image: linear-gradient(to top, var(--color-bg), transparent) !important;
+}
+
+#reading-mode-modal .bg-danger\/10 {
+  background-color: color-mix(in srgb, var(--color-danger) 10%, transparent) !important;
+}
+
+#reading-mode-modal .border-danger\/30 {
+  border-color: color-mix(in srgb, var(--color-danger) 30%, transparent) !important;
+}
+
+#reading-mode-modal .text-danger {
+  color: var(--color-danger) !important;
+}
+
+#reading-mode-modal .text-secondary {
+  color: var(--color-secondary) !important;
+}
+
+#reading-mode-modal .bg-surface-alt {
+  background-color: var(--color-surface-alt) !important;
 }
 
 @layer base {
@@ -251,12 +320,13 @@
   transition: all 0.3s ease;
   box-shadow: 0 1px 3px 0 rgba(120, 86, 0, 0.05);
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: 1fr 1fr;
   align-items: center;
   min-height: calc(56px + env(safe-area-inset-top, 0px));
 }
 
-.header-left, .header-right {
+.header-left,
+.header-right {
   display: flex !important;
   justify-content: center;
   align-items: center;
@@ -272,6 +342,16 @@
 
 .header-right {
   padding-right: 8px;
+}
+
+.header-center-container {
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  text-align: center;
+  transition: opacity 0.3s ease;
 }
 
 .main-header h1 {
@@ -374,38 +454,8 @@
     color: var(--color-primary-gold);
   }
 
-  /* Стили для выезжающей панели телесуфлера */
-  @keyframes fadeInRight {
-    from {
-      opacity: 0;
-      transform: translateY(-50%) translateX(50px);
-    }
 
-    to {
-      opacity: 1;
-      transform: translateY(-50%) translateX(0);
-    }
-  }
 
-  .animate-fade-in-right {
-    animation: fadeInRight 0.5s ease-out forwards;
-  }
-
-  #teleprompter-controls {
-    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
-    will-change: transform, opacity;
-  }
-
-  #teleprompter-controls.collapsed {
-    transform: translateY(-50%) translateX(calc(100% - 12px)) !important;
-    opacity: 0.4;
-  }
-
-  #teleprompter-controls.collapsed:hover,
-  #teleprompter-controls.collapsed:active {
-    transform: translateY(-50%) translateX(calc(100% - 32px)) !important;
-    opacity: 0.8;
-  }
 
   /* Текст навигации - светлая тема (Stitch Design) */
   .nav-btn span:not(.material-symbols-outlined) {
@@ -1249,7 +1299,8 @@ summary::-webkit-details-marker {
   position: fixed !important;
   inset: 0 !important;
   z-index: 99999 !important;
-  background-color: #120F16 !important;
+  background-color: var(--color-bg) !important;
+  color: var(--color-text-main) !important;
   opacity: 1 !important;
   visibility: visible !important;
   transition: none !important;
@@ -1266,7 +1317,7 @@ summary::-webkit-details-marker {
   position: fixed !important;
   inset: 0 !important;
   z-index: 99999 !important;
-  background-color: #120F16 !important;
+  background-color: var(--color-bg) !important;
   opacity: 1 !important;
   visibility: visible !important;
   transition: none !important;
@@ -1279,6 +1330,9 @@ summary::-webkit-details-marker {
 
 #confirm-modal:not(.hidden) {
   display: flex !important;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 100000 !important;
   align-items: center;
   justify-content: center;
 }
