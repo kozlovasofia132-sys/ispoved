@@ -1,7 +1,7 @@
 {
   "name": "ispoved",
   "private": true,
-  "version": "2.0.20",
+  "version": "2.0.21",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -23,6 +23,7 @@
     "vite-plugin-pwa": "^0.19.0"
   },
   "dependencies": {
+    "@a2seven/yoo-checkout": "^1.1.4",
     "@aparajita/capacitor-biometric-auth": "^10.0.0",
     "@capacitor-community/keep-awake": "^8.0.0",
     "@capacitor-community/text-to-speech": "^8.0.0",

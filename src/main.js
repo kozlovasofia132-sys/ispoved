@@ -15,9 +15,10 @@ let currentNavDate;
 import { preparationData, communionPrep } from './data/preparation.js';
 import { quotes } from './data/quotes.js';
 import { prayersData } from './data/prayers.js';
+import { createDonationScreen, initDonationScreen, openDonationScreen, closeDonationScreen } from './components/DonationScreen.js';
 
 
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
 
     // --- Global Error Interceptor ---
     window.addEventListener('error', (event) => {
@@ -90,11 +91,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Сброс всех динамиков в "Подготовке"
         document.querySelectorAll('#preparation-intro-container button .material-symbols-outlined, #communion-prep-container button .material-symbols-outlined').forEach(i => {
             i.textContent = 'volume_up';
-        });
-
-        // Скрываем время у всех чтений
-        document.querySelectorAll('.reading-time').forEach(el => {
-            el.style.opacity = '0';
         });
 
         isAudioPlaying = false;
@@ -184,6 +180,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const openReadModeBtnChurch = document.getElementById('open-read-mode-btn-church');
     const closeReadModeBtn = document.getElementById('close-read-mode-btn');
     const readModeContainer = document.getElementById('read-mode-container');
+    const readModeContainerChurch = document.getElementById('read-mode-container-church');
     const readingModeContent = document.getElementById('reading-mode-content');
     const printPdfBtn = document.getElementById('print-pdf-btn');
     const previewModal = document.getElementById('preview-modal');
@@ -235,6 +232,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     let isDetailedView = localStorage.getItem('viewMode') !== 'simple';
     let wakeLock = null;
     let isAllExpanded = false;
+
+    // --- Синхронизация между вкладками ---
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'selectedSins') {
+            console.log('[Storage Event] selectedSins changed in another tab');
+            selectedSins = JSON.parse(e.newValue) || [];
+            updateMyList();
+            renderCatalog();
+        }
+        if (e.key === 'personalReflections') {
+            console.log('[Storage Event] personalReflections changed in another tab');
+            personalNotes = e.newValue || '';
+            if (personalNotesArea) personalNotesArea.value = personalNotes;
+        }
+    });
+
+    // --- New Features State ---
+
+    let isDigitalMentorEnabled = localStorage.getItem('digitalMentor') === 'true';
+
 
     // --- Teleprompter State ---
     let isAutoscrolling = false;
@@ -373,12 +390,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const headerDateContainer = document.getElementById('header-date-container');
         if (headerDateContainer) {
             if (tabId === 'church-empty') {
-                headerDateContainer.style.opacity = '1';
-                headerDateContainer.style.pointerEvents = 'auto';
+                headerDateContainer.style.display = '';
+                headerDateContainer.classList.remove('hidden');
                 updateHeaderDate();
             } else {
-                headerDateContainer.style.opacity = '0';
-                headerDateContainer.style.pointerEvents = 'none';
+                headerDateContainer.style.display = 'none';
+                headerDateContainer.classList.add('hidden');
             }
         }
 
@@ -521,6 +538,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         catalogContainer.querySelectorAll('.sin-checkbox').forEach(cb => {
             cb.addEventListener('change', (e) => {
                 const id = e.target.value;
+                console.log('[Checkbox Change] id:', id, 'checked:', e.target.checked);
+                console.log('[Checkbox Change] selectedSins before:', selectedSins.length);
+                
                 if (e.target.checked) {
                     if (!selectedSins.some(s => s.id === id)) {
                         selectedSins.push({ id: id, type: 'predefined', note: '' });
@@ -528,7 +548,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 } else {
                     selectedSins = selectedSins.filter(s => s.id !== id);
                 }
-                localStorage.setItem('selectedSins', JSON.stringify(selectedSins));
+                
+                console.log('[Checkbox Change] selectedSins after:', selectedSins.length);
+                const saved = JSON.stringify(selectedSins);
+                localStorage.setItem('selectedSins', saved);
+                console.log('[Checkbox Change] Saved to localStorage:', saved.substring(0, 100) + '...');
+                
                 updateMyList();
             });
         });
@@ -755,17 +780,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             myListContainer.innerHTML = '';
             if (emptyState) emptyState.classList.replace('hidden', 'flex');
             if (readModeContainer) readModeContainer.classList.add('hidden');
-            if (openReadModeBtnChurch) openReadModeBtnChurch.parentElement.classList.add('hidden');
             if (toggleAllBtn) toggleAllBtn.classList.add('hidden');
             if (formulaContainer) formulaContainer.classList.add('hidden');
+            updateChurchReadButtonVisibility();
             return;
         }
 
         if (emptyState) emptyState.classList.replace('flex', 'hidden');
         if (readModeContainer) readModeContainer.classList.remove('hidden');
-        if (openReadModeBtnChurch) openReadModeBtnChurch.parentElement.classList.remove('hidden');
         if (toggleAllBtn) toggleAllBtn.classList.remove('hidden');
         if (formulaContainer) formulaContainer.classList.remove('hidden');
+        updateChurchReadButtonVisibility();
 
         let listHtml = '';
         const data = getSinsData();
@@ -929,17 +954,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             contentHtml += `
                 <div class="reading-sin-item">
-                    <p class="reading-sin-text">${sinText}</p>
-                    ${item.note ? `<p class="reading-sin-note italic mt-2">${item.note}</p>` : ''}
+                    <p class="reading-sin-text text-white font-bold">${sinText}</p>
+                    ${item.note ? `<p class="reading-sin-note italic text-slate-400 mt-2">${item.note}</p>` : ''}
                 </div>
             `;
         });
 
         if (personalNotes.trim()) {
             contentHtml += `
-                <div class="pt-8 border-t border-border">
+                <div class="pt-8 border-t border-white/10">
                     <p class="text-[11px] font-bold tracking-[0.2em] text-primary uppercase mb-4">${t('personalReflections')}</p>
-                    <p class="text-xl text-text-muted leading-relaxed italic">${personalNotes}</p>
+                    <p class="text-xl text-slate-300 leading-relaxed italic">${personalNotes}</p>
                 </div>
             `;
         }
@@ -955,44 +980,26 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (openReadModeBtn && readingModeModal) {
         openReadModeBtn.addEventListener('click', () => {
-            const startReadingFlow = () => {
-                populateReadingMode();
+            populateReadingMode();
 
-                // Принудительно применяем тему к модальному окну
-                const isDark = document.documentElement.classList.contains('dark');
-                readingModeModal.style.setProperty('--color-bg', isDark ? '#120F16' : '#fbf9f4');
-                readingModeModal.style.setProperty('--color-surface', isDark ? '#2a1f33' : '#ffffff');
-                readingModeModal.style.setProperty('--color-text-main', isDark ? '#ffffff' : '#1b1c19');
-                readingModeModal.style.setProperty('--color-text-muted', isDark ? '#ab9db8' : '#4f4535');
-                readingModeModal.style.setProperty('--color-border', isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(211, 196, 175, 0.2)');
-                readingModeModal.style.setProperty('--color-danger', isDark ? '#ffb4ab' : '#ba1a1a');
-                readingModeModal.style.setProperty('--color-secondary', isDark ? '#ffb68c' : '#934b19');
+            // Force show modal with !important styles
+            readingModeModal.classList.remove('hidden');
+            readingModeModal.classList.add('flex');
+            readingModeModal.style.display = 'flex';
+            readingModeModal.style.visibility = 'visible';
+            readingModeModal.style.opacity = '1';
+            readingModeModal.style.zIndex = '99999';
 
-                // Force show modal with !important styles
-                readingModeModal.classList.remove('hidden');
-                readingModeModal.classList.add('flex');
-                readingModeModal.style.display = 'flex';
-                readingModeModal.style.visibility = 'visible';
-                readingModeModal.style.opacity = '1';
-                readingModeModal.style.zIndex = '99999';
-
-                // === TELEPROMPTER - ОТКЛЮЧЕН для режима чтения ===
-                const teleControls = document.getElementById('teleprompter-controls');
-                if (teleControls) {
-                    teleControls.classList.add('hidden');
-                    teleControls.style.display = 'none';
-                }
-
-                const modalScrollArea = readingModeModal.querySelector('.overflow-y-auto');
-                if (modalScrollArea) modalScrollArea.scrollTop = 0;
-                requestWakeLock();
-            };
-
-            if (isPinEnabled && !isUnlocked) {
-                openPinPad(false, startReadingFlow);
-            } else {
-                startReadingFlow();
+            // === TELEPROMPTER - ОТКЛЮЧЕН для режима чтения ===
+            const teleControls = document.getElementById('teleprompter-controls');
+            if (teleControls) {
+                teleControls.classList.add('hidden');
+                teleControls.style.display = 'none';
             }
+
+            const modalScrollArea = readingModeModal.querySelector('.overflow-y-auto');
+            if (modalScrollArea) modalScrollArea.scrollTop = 0;
+            requestWakeLock();
         });
     } else {
         console.error('[Reading Mode] Missing elements:', {
@@ -1004,43 +1011,58 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Кнопка "Читать на исповеди" в церковной вкладке
     if (openReadModeBtnChurch && readingModeModal) {
         openReadModeBtnChurch.addEventListener('click', () => {
-            const startReadingFlow = () => {
-                populateReadingMode();
-
-                // Принудительно применяем тему к модальному окну
-                const isDark = document.documentElement.classList.contains('dark');
-                readingModeModal.style.setProperty('--color-bg', isDark ? '#120F16' : '#fbf9f4');
-                readingModeModal.style.setProperty('--color-surface', isDark ? '#2a1f33' : '#ffffff');
-                readingModeModal.style.setProperty('--color-text-main', isDark ? '#ffffff' : '#1b1c19');
-                readingModeModal.style.setProperty('--color-text-muted', isDark ? '#ab9db8' : '#4f4535');
-                readingModeModal.style.setProperty('--color-border', isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(211, 196, 175, 0.2)');
-                readingModeModal.style.setProperty('--color-danger', isDark ? '#ffb4ab' : '#ba1a1a');
-                readingModeModal.style.setProperty('--color-secondary', isDark ? '#ffb68c' : '#934b19');
-
-                readingModeModal.classList.remove('hidden');
-                readingModeModal.classList.add('flex');
-                readingModeModal.style.display = 'flex';
-                readingModeModal.style.visibility = 'visible';
-                readingModeModal.style.opacity = '1';
-                readingModeModal.style.zIndex = '99999';
-
-                const teleControls = document.getElementById('teleprompter-controls');
-                if (teleControls) {
-                    teleControls.classList.add('hidden');
-                    teleControls.style.display = 'none';
+            // Проверяем ПИН если включено и есть грехи
+            if (isPinEnabled && selectedSins.length > 0 && !isUnlocked) {
+                if (hashedPin) {
+                    pendingTabAfterAuth = 'church-read-mode';
+                    console.log('[Church Read Button] Opening PIN pad');
+                    openPinPad(false);
+                    return;
                 }
-
-                const modalScrollArea = readingModeModal.querySelector('.overflow-y-auto');
-                if (modalScrollArea) modalScrollArea.scrollTop = 0;
-                requestWakeLock();
-            };
-
-            if (isPinEnabled && !isUnlocked) {
-                openPinPad(false, startReadingFlow);
-            } else {
-                startReadingFlow();
             }
+            
+            // Открываем режим чтения
+            openReadModeBtnChurchClickHandler();
         });
+    }
+    
+    // Обработчик клика кнопки "Читать на исповеди" (после успешной PIN-проверки)
+    function openReadModeBtnChurchClickHandler() {
+        populateReadingMode();
+
+        // Force show modal with !important styles
+        readingModeModal.classList.remove('hidden');
+        readingModeModal.classList.add('flex');
+        readingModeModal.style.display = 'flex';
+        readingModeModal.style.visibility = 'visible';
+        readingModeModal.style.opacity = '1';
+        readingModeModal.style.zIndex = '99999';
+
+        // === TELEPROMPTER - ОТКЛЮЧЕН для режима чтения ===
+        const teleControls = document.getElementById('teleprompter-controls');
+        if (teleControls) {
+            teleControls.classList.add('hidden');
+            teleControls.style.display = 'none';
+        }
+
+        const modalScrollArea = readingModeModal.querySelector('.overflow-y-auto');
+        if (modalScrollArea) modalScrollArea.scrollTop = 0;
+        requestWakeLock();
+    }
+
+    // Функция обновления видимости кнопки в церковной вкладке
+    function updateChurchReadButtonVisibility() {
+        const readModeContainerChurch = document.getElementById('read-mode-container-church');
+        if (readModeContainerChurch) {
+            // Показываем кнопку только если есть грехи
+            const hasSins = selectedSins && selectedSins.length > 0;
+            
+            if (hasSins) {
+                readModeContainerChurch.classList.remove('hidden');
+            } else {
+                readModeContainerChurch.classList.add('hidden');
+            }
+        }
     }
 
     if (closeReadModeBtn && readingModeModal) {
@@ -1078,7 +1100,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             switchTab('church-today');
 
             // Показываем уведомление
-            showToast(t('sinsBurnedToast'));
+            showToast(t('confessionCompleted'));
 
             console.log('[Confession] Confession completed');
         });
@@ -1195,54 +1217,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // --- Donation Logic ---
-    const DONATION_URL = 'https://www.tbank.ru/cf/93yFYu9QLm1';
+    const DONATION_URL = 'https://pay.cloudtips.ru/p/07c2c144';
 
-    async function handleDonation() {
-        showToast(t('donateRedirecting') || 'Переходим к странице пожертвования. Спаси Господи!');
-        if (donateModal) donateModal.classList.add('hidden');
-        try {
-            await Browser.open({ url: DONATION_URL });
-        } catch (e) {
-            window.open(DONATION_URL, '_blank');
-        }
-    }
+    // Создаем и добавляем экран пожертвований
+    const donationScreen = createDonationScreen();
+    document.body.appendChild(donationScreen);
+    
+    // Инициализируем обработчики экрана пожертвований
+    initDonationScreen();
 
-    // Открытие модального окна пожертвований
+    // Открытие экрана пожертвований
     if (donateBtn) {
         donateBtn.addEventListener('click', () => {
-            if (donateModal) {
-                donateModal.classList.remove('hidden');
-            } else {
-                handleDonation(); // Если окно по какой-то причине отсутствует
-            }
+            openDonationScreen();
         });
     }
 
-    // Закрытие модального окна пожертвований
+    // Обработка старой кнопки закрытия модального окна (для совместимости)
     if (closeDonateBtn) {
         closeDonateBtn.addEventListener('click', () => {
             if (donateModal) donateModal.classList.add('hidden');
-        });
-    }
-
-    // Все суммы и кнопка «Другая сумма» теперь тоже открывают Т-Банк
-    if (donateAmountBtns) {
-        donateAmountBtns.forEach(btn => {
-            btn.addEventListener('click', handleDonation);
-        });
-    }
-
-    // Большая кнопка «Пожертвовать»
-    if (donateSubmitBtn) {
-        donateSubmitBtn.addEventListener('click', handleDonation);
-    }
-
-    // Закрытие по клику вне модального окна
-    if (donateModal) {
-        donateModal.addEventListener('click', (e) => {
-            if (e.target === donateModal) {
-                donateModal.classList.add('hidden');
-            }
+            closeDonationScreen();
         });
     }
 
@@ -1289,21 +1284,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (Capacitor.isNativePlatform()) {
                 // Status Bar (Top)
                 await StatusBar.setStyle({ style: isDark ? Style.Dark : Style.Light });
-
-                // Настраиваем цвет фона и overlay
-                const statusBarColor = isDark ? '#110d18' : '#fbf9f4';
-                await StatusBar.setBackgroundColor({ color: statusBarColor });
-
-                // Фиксируем, чтобы контент не залезал под статус-бар
-                await StatusBar.setOverlaysWebView({ overlay: false });
+                if (!isDark) {
+                    await StatusBar.setBackgroundColor({ color: '#fbf9f4' });
+                } else {
+                    await StatusBar.setBackgroundColor({ color: '#120F16' });
+                }
 
                 // Navigation Bar (Bottom) - Android
                 if (Capacitor.getPlatform() === 'android') {
-                    // Используем NavigationBar если плагин доступен
-                    if (typeof NavigationBar !== 'undefined' && NavigationBar) {
-                        await NavigationBar.setColor({ color: statusBarColor });
-                        await NavigationBar.setDarkIcons({ darkIcons: !isDark });
-                    }
+                    await NavigationBar.setColor({ color: isDark ? '#120F16' : '#fbf9f4' });
+                    await NavigationBar.setDarkIcons({ darkIcons: !isDark });
                 }
             }
         } catch (err) {
@@ -1385,11 +1375,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!pinCells || pinCells.length === 0) return;
         pinCells.forEach((cell, i) => {
             if (i < currentInputPin.length) {
-                cell.classList.add('bg-primary', 'border-primary');
-                cell.classList.remove('border-border');
+                cell.classList.add('bg-white', 'border-white');
+                cell.classList.remove('border-white/30');
             } else {
-                cell.classList.remove('bg-primary', 'border-primary');
-                cell.classList.add('border-border');
+                cell.classList.remove('bg-white', 'border-white');
+                cell.classList.add('border-white/30');
             }
             // Remove error state
             cell.classList.remove('border-red-500');
@@ -1514,15 +1504,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         pinPadModal.classList.remove('hidden');
         pinPadModal.classList.add('flex');
 
-        // Принудительно применяем тему к модальному окну ПИН
-        const isDark = document.documentElement.classList.contains('dark');
-        pinPadModal.style.setProperty('--color-bg', isDark ? '#120F16' : '#fbf9f4');
-        pinPadModal.style.setProperty('--color-surface', isDark ? '#2a1f33' : '#ffffff');
-        pinPadModal.style.setProperty('--color-text-main', isDark ? '#ffffff' : '#1b1c19');
-        pinPadModal.style.setProperty('--color-text-muted', isDark ? '#ab9db8' : '#4f4535');
-        pinPadModal.style.setProperty('--color-border', isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(211, 196, 175, 0.2)');
-        pinPadModal.style.setProperty('--color-primary', isDark ? '#E1C16E' : '#934b19');
-
         // Показываем кнопку закрытия
         if (pinPadCloseBtn) {
             pinPadCloseBtn.classList.remove('hidden');
@@ -1583,7 +1564,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Переключаем вкладку только если это не процесс изменения ПИН
         if (!wasSetup && pendingTabAfterAuth && !isChangingPin) {
-            switchTab(pendingTabAfterAuth);
+            if (pendingTabAfterAuth === 'church-read-mode') {
+                // Открываем режим чтения из церковной вкладки
+                openReadModeBtnChurchClickHandler();
+            } else {
+                switchTab(pendingTabAfterAuth);
+            }
             pendingTabAfterAuth = null;
         }
     }
@@ -1790,28 +1776,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             } else {
                 // Пользователь хочет ВЫКЛЮЧИТЬ функцию ПИН-кода
-                
-                // Если есть грехи и сессия не разблокирована — требуем ПИН для выключения
-                if (existingPin && selectedSins.length > 0 && !isUnlocked) {
-                    e.target.checked = true; // Возвращаем тумблер обратно пока не проверим
-                    console.log('[PIN] PIN disable blocked - authentication required');
-                    
-                    openPinPad(false, () => {
-                        // Успешная авторизация — теперь выключаем
-                        console.log('[PIN] Disabling PIN function after auth');
-                        isPinEnabled = false;
-                        localStorage.setItem('pinEnabled', 'false');
-                        pinToggle.checked = false;
-                        updatePrivacyUI();
-                        showToast(t('pinDisabled'));
-                    });
-                    return;
-                }
-
                 console.log('[PIN] Disabling PIN function');
                 isPinEnabled = false;
                 localStorage.setItem('pinEnabled', 'false');
+                // Сбрасываем hashedPin при выключении функции
+                hashedPin = '';
+                localStorage.removeItem('hashedPin');
+
                 updatePrivacyUI();
+
                 showToast(t('pinDisabled'));
             }
         });
@@ -1849,6 +1822,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                     console.log('[PIN] PIN changed successfully');
                 });
             });
+        });
+    }
+
+    // --- Experimental / Digital Mentor Logic ---
+    const toggleDigitalMentor = document.getElementById('toggle-digital-mentor');
+    if (toggleDigitalMentor) {
+        toggleDigitalMentor.checked = isDigitalMentorEnabled;
+        toggleDigitalMentor.addEventListener('change', (e) => {
+            isDigitalMentorEnabled = e.target.checked;
+            localStorage.setItem('digitalMentor', isDigitalMentorEnabled);
+            if (isDigitalMentorEnabled) {
+                alert('Эта функция находится в разработке. Скоро ИИ сможет анализировать ваши записи и давать советы святых отцов по вашей ситуации.');
+            }
         });
     }
 
@@ -2074,15 +2060,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             pinPadCloseBtn.style.display = 'none';
         }
 
-        // === TELEPROMPTER - ВКЛЮЧЕН ===
-        const teleControls = document.getElementById('teleprompter-controls');
-
-        if (teleControls) {
-            teleControls.classList.remove('hidden');
-            teleControls.classList.add('flex', 'opacity-100');
-            teleControls.style.opacity = '1';
-        }
-
         // Reset audio player state when opening new prayer
         if (currentGlobalAudio) {
             currentGlobalAudio.pause();
@@ -2159,13 +2136,35 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             console.log('[Prayer Modal] Modal opened, classes:', prayersReadingModal.classList.toString());
 
-            // === TELEPROMPTER - ВКЛЮЧЕН ===
+            // === TELEPROMPTER - ВКЛЮЧЕН С АВТО-СКРЫТИЕМ ===
             const teleControls = document.getElementById('teleprompter-controls');
+            const teleprompterContent = document.getElementById('teleprompter-content');
 
             if (teleControls) {
+                // Сначала убеждаемся, что панель не скрыта через .hidden
                 teleControls.classList.remove('hidden');
-                teleControls.classList.add('flex', 'opacity-100');
-                teleControls.style.opacity = '1';
+                
+                // Сбрасываем возможные классы смещения
+                teleControls.classList.remove('translate-x-[80%]', 'opacity-0');
+                
+                // Force reflow
+                void teleControls.offsetWidth;
+                
+                // 1. Сначала ПЛАВНО ВЫПЛЫВАЕТ КРУГ (translateX(150%) -> 0)
+                teleControls.classList.add('visible');
+                
+                // 2. ПОСЛЕ ВЫПЛЫВАНИЯ (800мс) - РАСКРЫВАЕТСЯ
+                setTimeout(() => {
+                    if (teleprompterContent) {
+                        teleprompterContent.classList.remove('opacity-0', 'max-h-0');
+                        teleprompterContent.classList.add('opacity-100', 'max-h-96');
+                    }
+                    
+                    // 3. После раскрытия ждем 4 секунды и уходим
+                    if (typeof resetAutohideTimer === 'function') {
+                        resetAutohideTimer();
+                    }
+                }, 800); 
             }
 
             // Ждем следующего кадра для правильного рендеринга
@@ -2200,18 +2199,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     function closePrayersModal() {
         if (prayersReadingModal) {
             stopAutoscroll();
-            prayersReadingModal.classList.add('hidden');
-            prayersReadingModal.classList.remove('flex', 'modal-active');
-            prayersReadingModal.style.removeProperty('z-index');
-
+            
+            // Очищаем таймер авто-скрытия
+            if (typeof autohideTimer !== 'undefined' && autohideTimer) {
+                clearTimeout(autohideTimer);
+            }
+            
             const teleControls = document.getElementById('teleprompter-controls');
+            const teleprompterContent = document.getElementById('teleprompter-content');
+            
             if (teleControls) {
-                teleControls.classList.add('hidden');
-                teleControls.classList.remove('flex', 'opacity-100');
+                // Запускаем анимацию скрытия (300мс)
+                teleControls.classList.remove('visible');
+                
+                // Если контент был развернут, сворачиваем его
+                if (teleprompterContent) {
+                    teleprompterContent.classList.remove('opacity-100', 'max-h-96');
+                    teleprompterContent.classList.add('opacity-0', 'max-h-0');
+                }
             }
 
-            releaseWakeLock();
-            hideAudioPlayerBar();
+            // Ждем завершения анимации (300мс) перед закрытием всего модального окна
+            setTimeout(() => {
+                prayersReadingModal.classList.add('hidden');
+                prayersReadingModal.classList.remove('flex', 'modal-active');
+                prayersReadingModal.style.removeProperty('z-index');
+                releaseWakeLock();
+                hideAudioPlayerBar();
+            }, 300);
         }
     }
 
@@ -2403,16 +2418,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    function startAudioProgress() {
-        // Now handled by timeupdate event for more accuracy
-    }
-
-    function stopAudioProgress() {
-        if (audioIntervalId) {
-            clearInterval(audioIntervalId);
-            audioIntervalId = null;
-        }
-    }
+    function startAudioProgress() { }
+    function stopAudioProgress() { }
 
     function resetAudioPlayer() {
         if (currentGlobalAudio) {
@@ -2425,35 +2432,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (audioPlayIcon) audioPlayIcon.textContent = 'play_arrow';
         if (audioProgress) audioProgress.style.width = '0%';
         const timeEl = document.getElementById('audio-time');
-        if (timeEl) timeEl.textContent = '00:00';
+        if (timeEl) timeEl.textContent = '00:00 / 00:00';
     }
 
-    // Show audio player bar when prayers modal is opened
     function showAudioPlayerBar(prayerId) {
-        console.log('[Audio Debug] showAudioPlayerBar called for:', prayerId);
         currentPrayerIdInPlayer = prayerId;
         if (audioPlayerBar) {
             audioPlayerBar.classList.remove('hidden');
             audioPlayerBar.classList.add('flex');
             audioPlayerBar.style.setProperty('display', 'flex', 'important');
-            audioPlayerBar.style.opacity = '1';
-        } else {
-            console.warn('[Audio Debug] Cannot show player bar - element missing');
         }
     }
 
-    // Hide audio player bar when prayers modal is closed
     function hideAudioPlayerBar() {
         if (audioPlayerBar) {
             audioPlayerBar.classList.add('hidden');
             audioPlayerBar.classList.remove('flex');
-            audioPlayerBar.style.removeProperty('display');
-            audioPlayerBar.style.removeProperty('opacity');
         }
         resetAudioPlayer();
     }
 
-    // Add click listener to play/pause button
     if (audioPlayPauseBtn) {
         audioPlayPauseBtn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -2461,16 +2459,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Add click listener to speaker icon button
-    const audioSpeakerBtn = document.getElementById('audio-speaker-btn');
-    if (audioSpeakerBtn) {
-        audioSpeakerBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            showToast(t('audioPlaybackNotAvailable'));
-        });
-    }
-
-    // --- Teleprompter / Auto-scroll Logic (Auto-hide Panel) ---
+    // --- Teleprompter / Auto-scroll Logic ---
     const teleControls = document.getElementById('teleprompter-controls');
     const toggleAutoscrollBtn = document.getElementById('toggle-autoscroll-btn');
     const autoscrollSpeedInput = document.getElementById('autoscroll-speed');
@@ -2478,11 +2467,121 @@ document.addEventListener('DOMContentLoaded', async () => {
     const speedUpBtn = document.getElementById('speed-up-btn');
     const speedDownBtn = document.getElementById('speed-down-btn');
 
+    let autohideTimer = null;
+    const AUTOHIDE_DELAY = 4000;
 
+    function resetAutohideTimer() {
+        if (!teleControls) return;
+        const teleprompterContent = document.getElementById('teleprompter-content');
+        
+        if (!teleControls.classList.contains('visible')) {
+            teleControls.classList.remove('translate-x-[80%]', 'opacity-0');
+            teleControls.classList.add('visible');
+            setTimeout(() => {
+                if (teleprompterContent) {
+                    teleprompterContent.classList.remove('opacity-0', 'max-h-0');
+                    teleprompterContent.classList.add('opacity-100', 'max-h-96');
+                }
+                startAutoHideTimer();
+            }, 800);
+        } else {
+            if (teleprompterContent) {
+                teleprompterContent.classList.remove('opacity-0', 'max-h-0');
+                teleprompterContent.classList.add('opacity-100', 'max-h-96');
+            }
+            startAutoHideTimer();
+        }
+
+        function startAutoHideTimer() {
+            if (autohideTimer) clearTimeout(autohideTimer);
+            autohideTimer = setTimeout(() => {
+                if (teleprompterContent) {
+                    teleprompterContent.classList.remove('opacity-100', 'max-h-96');
+                    teleprompterContent.classList.add('opacity-0', 'max-h-0');
+                }
+                setTimeout(() => {
+                    if (teleControls) {
+                        teleControls.classList.remove('visible');
+                        teleControls.classList.add('translate-x-[80%]', 'opacity-0');
+                    }
+                }, 800);
+            }, AUTOHIDE_DELAY);
+        }
+    }
+
+    if (teleControls) {
+        const teleprompterContent = document.getElementById('teleprompter-content');
+        toggleAutoscrollBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (isAutoscrolling) {
+                stopAutoscroll();
+                teleControls.classList.remove('translate-x-[80%]', 'opacity-0');
+            } else {
+                startAutoscroll();
+                // При запуске скрываем панель для удобства чтения
+                teleControls.classList.add('translate-x-[80%]', 'opacity-0');
+            }
+        });
+        
+        const handleSpeedChange = () => {
+            teleControls.classList.remove('translate-x-[80%]', 'opacity-0');
+            if (autoscrollSpeedInput) {
+                const val = parseInt(autoscrollSpeedInput.value);
+                // Unified: Map 0-100 to 0-50 pixels per second
+                autoscrollSpeed = (val / 100) * 50; 
+            }
+            resetAutohideTimer();
+        };
+
+        speedUpBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (autoscrollSpeedInput) {
+                autoscrollSpeedInput.value = Math.min(100, parseInt(autoscrollSpeedInput.value) + 10);
+                handleSpeedChange();
+            }
+        });
+        speedDownBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (autoscrollSpeedInput) {
+                autoscrollSpeedInput.value = Math.max(0, parseInt(autoscrollSpeedInput.value) - 10);
+                handleSpeedChange();
+            }
+        });
+        if (autoscrollSpeedInput) {
+            autoscrollSpeedInput.addEventListener('input', handleSpeedChange);
+        }
+        teleControls.addEventListener('mouseenter', () => {
+            teleControls.classList.remove('translate-x-[80%]', 'opacity-0');
+            if (teleprompterContent) {
+                teleprompterContent.classList.remove('opacity-0', 'max-h-0');
+                teleprompterContent.classList.add('opacity-100', 'max-h-96');
+            }
+            resetAutohideTimer();
+        });
+        teleControls.addEventListener('touchstart', () => {
+            teleControls.classList.remove('translate-x-[80%]', 'opacity-0');
+            if (teleprompterContent) {
+                teleprompterContent.classList.remove('opacity-0', 'max-h-0');
+                teleprompterContent.classList.add('opacity-100', 'max-h-96');
+            }
+            resetAutohideTimer();
+        }, { passive: true });
+    }
+    // --- Teleprompter Scrolling Logic ---
 
     function getActiveScrollContainer() {
-        if (!prayersReadingModal.classList.contains('hidden')) return prayerScrollArea;
-        if (!readingModeModal.classList.contains('hidden')) return readingModeModal.querySelector('.overflow-y-auto');
+        console.log('[Teleprompter] getActiveScrollContainer called');
+        console.log('[Teleprompter] prayersReadingModal hidden:', prayersReadingModal.classList.contains('hidden'));
+        console.log('[Teleprompter] prayerScrollArea:', prayerScrollArea);
+        if (!prayersReadingModal.classList.contains('hidden')) {
+            console.log('[Teleprompter] Returning prayerScrollArea');
+            return prayerScrollArea;
+        }
+        if (!readingModeModal.classList.contains('hidden')) {
+            console.log('[Teleprompter] Returning readingModeModal scroll area');
+            return readingModeModal.querySelector('.overflow-y-auto');
+        }
+        console.log('[Teleprompter] No active container found');
         return null;
     }
 
@@ -2513,16 +2612,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function startAutoscroll() {
-        if (isAutoscrolling) return;
+        console.log('[Teleprompter] startAutoscroll called');
+        if (isAutoscrolling) {
+            console.log('[Teleprompter] Already scrolling');
+            return;
+        }
         const container = getActiveScrollContainer();
-        if (!container) return;
+        console.log('[Teleprompter] Active container:', container);
+        if (!container) {
+            console.log('[Teleprompter] No container found');
+            return;
+        }
 
         isAutoscrolling = true;
-        // НЕ сбрасываем timestamp, чтобы не было скачка при первом кадре
-        // lastAutoscrollTimestamp остаётся 0, и в smoothAutoscroll он установится в текущий timestamp
+        lastAutoscrollTimestamp = 0;
         // Сбрасываем аккумулятор в 0 при запуске
         preciseScrollTop = 0;
         if (autoscrollIcon) autoscrollIcon.textContent = 'pause';
+        console.log('[Teleprompter] Starting scroll with speed:', autoscrollSpeed);
         autoscrollRequestId = requestAnimationFrame(smoothAutoscroll);
     }
 
@@ -2530,8 +2637,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         isAutoscrolling = false;
         if (autoscrollRequestId) cancelAnimationFrame(autoscrollRequestId);
         autoscrollRequestId = null;
-        // Сбрасываем timestamp, чтобы при следующем запуске не было скачка
-        lastAutoscrollTimestamp = 0;
         if (autoscrollIcon) autoscrollIcon.textContent = 'play_arrow';
     }
 
@@ -2561,59 +2666,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, { passive: true });
     }
 
-    if (toggleAutoscrollBtn) {
-        toggleAutoscrollBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            if (isAutoscrolling) stopAutoscroll();
-            else startAutoscroll();
-        });
-        toggleAutoscrollBtn.addEventListener('touchstart', (e) => {
-            e.stopPropagation();
-        }, { passive: true });
+    // Initialization: set initial speed based on HTML input value
+    if (autoscrollSpeedInput) {
+        const initialValue = parseInt(autoscrollSpeedInput.value) || 30;
+        autoscrollSpeed = (initialValue / 100) * 50;
     }
 
-    let autoscrollSpeedValue = 25; // Speed in pixels per second
-
-    function updateSpeedDisplay() {
-        autoscrollSpeed = autoscrollSpeedValue;
-        console.log('[Autoscroll] Speed updated to:', autoscrollSpeed);
-    }
-
-    updateSpeedDisplay();
-
-    if (speedUpBtn) {
-        speedUpBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            autoscrollSpeedValue = Math.min(100, autoscrollSpeedValue + 5);
-            updateSpeedDisplay();
-            showToast(`Скорость: ${Math.round(autoscrollSpeedValue)}`);
-        });
-        speedUpBtn.addEventListener('touchstart', (e) => {
-            e.stopPropagation();
-        }, { passive: true });
-    }
-
-    if (speedDownBtn) {
-        speedDownBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            autoscrollSpeedValue = Math.max(0, autoscrollSpeedValue - 5);
-            updateSpeedDisplay();
-            showToast(`Скорость: ${Math.round(autoscrollSpeedValue)}`);
-        });
-        speedDownBtn.addEventListener('touchstart', (e) => {
-            e.stopPropagation();
-        }, { passive: true });
-    }
-
-    // Auto-pause only for the active scrollable elements
+    // Auto-pause was disabled at user request: the text will now keep moving during manual scroll.
     const setupAutoPause = (container) => {
         if (!container) return;
         ['mousedown', 'touchstart', 'wheel'].forEach(evt => {
-            container.addEventListener(evt, () => {
-                if (isAutoscrolling) stopAutoscroll();
+            container.addEventListener(evt, (e) => {
+                // We no longer call stopAutoscroll() here to allow continuous movement
             }, { passive: true });
         });
     };
@@ -2707,7 +2771,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const container = document.getElementById('icon-of-day-container');
         const iconBlock = document.getElementById('icon-of-day-block');
 
-        // Скрываем бло�� с иконами святых
+        // Скрываем блок с иконами святых
         if (iconBlock) iconBlock.style.display = 'none';
         if (container) container.innerHTML = '';
     }
@@ -2784,8 +2848,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             'веч': 'На вечерне'
         };
 
-        // Разбиваем текст на части по точкам с пробелами
-        const parts = cleanText.split('. ');
+        // Разбиваем текст на части по точкам, но не после сокращений служб
+        // Используем более умное разбиение: точка + пробел + заглавная буква (не после утр/лит/мчч и т.д.)
+        const parts = cleanText.split(/(?<!\bутр|лит|мчч|мч|веч)\.\s+/i);
 
         console.log('[parseReadingsText] Parts:', parts);
 
@@ -2795,18 +2860,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             part = part.trim();
             if (!part) continue;
 
-            // Дополнительно разбиваем часть по ". " если есть несколько чтений
+            // Разбиваем часть на подчасти по ". " где следующая буква заглавная
             const subParts = part.split(/\.\s+(?=[А-Я])/);
 
             for (let subPart of subParts) {
                 subPart = subPart.trim();
                 if (!subPart) continue;
 
+                // Для каждой подчасти заново определяем тип службы
+                let partServiceType = currentServiceType;
+                
                 // Проверяем, есть ли тип службы в начале части
                 for (const [abbrev, fullName] of Object.entries(serviceTypes)) {
                     const regex = new RegExp(`^${abbrev.replace('.', '\\.')}\\s*[:–-]\\s*`, 'i');
                     if (regex.test(subPart)) {
-                        currentServiceType = fullName;
+                        partServiceType = fullName;
+                        currentServiceType = fullName; // Сохраняем для следующих чтений
                         subPart = subPart.replace(regex, '');
                         break;
                     }
@@ -2830,11 +2899,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const chapter = chapter1;
 
                     // Определяем тип чтения и полное название книги
-                    let type = currentServiceType || 'Апостол';
+                    let type = partServiceType || 'Апостол';
                     const bookLower = book.toLowerCase();
 
                     // Если тип службы не установлен, определяем по книге
-                    if (!currentServiceType) {
+                    if (!partServiceType) {
                         if (['мк', 'мф', 'лк', 'ин'].some(b => bookLower.includes(b))) {
                             type = 'Евангелие';
                         } else {
@@ -2910,9 +2979,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     // Получаем полное название книги
                     let fullBookName = book;
+                    let bookAbbrev = book;
                     for (const [abbrev, fullName] of Object.entries(bookNames)) {
                         if (book === abbrev || book === abbrev.replace('.', '')) {
                             fullBookName = fullName;
+                            bookAbbrev = abbrev.replace('.', '');
                             break;
                         }
                     }
@@ -2922,12 +2993,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                         ? `${fullBookName}, ${zachalo} зач., глава ${parseInt(chapter)}, стихи ${startVerse}–${endVerseFinal}`
                         : `${fullBookName}, глава ${parseInt(chapter)}, стихи ${startVerse}–${endVerseFinal}`;
 
+                    // Генерируем MP3 ссылку для Азбуки.ru
+                    // Формат: https://azbyka.ru/audio/audio1/zachala/In/In.20.19.mp3
+                    let mp3Url = null;
+                    if (zachalo) {
+                        // Для зачал используем формат с номером зачала
+                        mp3Url = `https://azbyka.ru/audio/audio1/zachala/${bookAbbrev}/${bookAbbrev}.${zachalo}.mp3`;
+                    }
+
                     readings.push({
                         type: type,
                         text: formattedText,
-                        link_mp3: null,
-                        audio: null,
-                        mp3_remote: null
+                        link_mp3: mp3Url,
+                        audio: mp3Url,
+                        mp3_remote: mp3Url
                     });
                 }
             }
@@ -3150,11 +3229,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <span class="font-label text-[10px] font-bold uppercase tracking-widest transition-colors duration-300 group-hover:text-primary" style="color: var(--color-secondary);">${typeLabel}</span>
                     <h5 class="font-headline text-2xl transition-colors duration-300 group-hover:text-primary" style="color: var(--color-on-surface);">${formattedText}</h5>
                 </div>
-                ${audioUrl ? `<div class="flex-shrink-0 flex flex-col items-center gap-1">
-                    <button class="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary transition-all duration-300 active:scale-95 hover:bg-primary/20 hover:scale-110 reading-audio-btn" data-audio-url="${audioUrl}">
+                ${audioUrl ? `<div class="flex flex-col items-center gap-1">
+                    <button class="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary transition-all duration-300 active:scale-95 hover:bg-primary/20 hover:scale-110 reading-audio-btn" data-audio-url="${audioUrl}" data-reading-index="${index}">
                         <span class="material-symbols-outlined text-xl">volume_up</span>
                     </button>
-                    <span class="reading-time text-[9px] font-bold text-primary font-label opacity-0 transition-opacity duration-300">0:00</span>
+                    <span class="reading-audio-time text-[9px] font-bold text-primary font-label" data-reading-index="${index}"></span>
                 </div>` : ''}
             </div>
             `;
@@ -3170,6 +3249,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             readingsCount.textContent = countText;
         }
 
+        // Показываем/скрываем кнопку "Читать на исповеди" в церковной вкладке
+        updateChurchReadButtonVisibility();
+
         // Добавляем обработчики для кнопок воспроизведения
         setTimeout(() => {
             document.querySelectorAll('.reading-audio-btn').forEach(btn => {
@@ -3177,32 +3259,33 @@ document.addEventListener('DOMContentLoaded', async () => {
                     e.preventDefault();
                     const audioUrl = this.getAttribute('data-audio-url');
                     const icon = this.querySelector('.material-symbols-outlined');
-                    const timeDisplay = this.parentElement.querySelector('.reading-time');
+                    const readingIndex = this.getAttribute('data-reading-index');
 
                     if (!audioUrl) return;
 
-                    // Если это же аудио уже играет — ставим паузу
+                    // Если это же аудио уже играет — ставим на паузу
                     if (window.currentAudio && window.currentAudio._readingUrl === audioUrl && !window.currentAudio.paused) {
                         window.currentAudio.pause();
                         icon.textContent = 'volume_up';
-                        if (timeDisplay) timeDisplay.style.opacity = '0';
                         return;
                     }
 
-                    // Если это же аудио на паузе — продолжаем
+                    // Если это же аудио на паузе — продолжаем воспроизведение
                     if (window.currentAudio && window.currentAudio._readingUrl === audioUrl && window.currentAudio.paused) {
-                        window.currentAudio.play();
+                        window.currentAudio.play().catch(err => {
+                            console.error('[Reading Audio] Play error:', err);
+                            icon.textContent = 'volume_up';
+                        });
                         icon.textContent = 'pause';
-                        if (timeDisplay) timeDisplay.style.opacity = '1';
                         return;
                     }
 
                     // Останавливаем всё остальное аудио
                     stopAllAudio();
-
-                    // Скрываем время у всех кнопок
-                    document.querySelectorAll('.reading-time').forEach(el => {
-                        el.style.opacity = '0';
+                    
+                    // Скрываем время на всех кнопках
+                    document.querySelectorAll('.reading-audio-time').forEach(el => {
+                        el.textContent = '';
                     });
 
                     // Запускаем новое аудио
@@ -3211,43 +3294,47 @@ document.addEventListener('DOMContentLoaded', async () => {
                     window.currentAudio = audio;
 
                     icon.textContent = 'pause';
-                    if (timeDisplay) {
-                        timeDisplay.style.opacity = '1';
-                        timeDisplay.textContent = '0:00';
+
+                    // Функция форматирования времени
+                    function formatTime(seconds) {
+                        const mins = Math.floor(seconds / 60);
+                        const secs = Math.floor(seconds % 60);
+                        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
                     }
 
-                    // Обновляем время воспроизведения (оставшееся время)
-                    const updateTimeDisplay = () => {
-                        if (!timeDisplay) return;
-                        const currentTime = audio.currentTime || 0;
-                        const duration = audio.duration || 0;
-                        const remaining = Math.max(0, duration - currentTime);
-                        const minutes = Math.floor(remaining / 60);
-                        const seconds = Math.floor(remaining % 60);
-                        timeDisplay.textContent = `-${minutes}:${seconds.toString().padStart(2, '0')}`;
-                    };
+                    // Обновляем время при загрузке метаданных
+                    audio.addEventListener('loadedmetadata', () => {
+                        // Не показываем время пока не началось воспроизведение
+                    });
 
-                    audio.addEventListener('timeupdate', updateTimeDisplay);
+                    // Обновляем время воспроизведения (показываем сколько осталось)
+                    audio.addEventListener('timeupdate', () => {
+                        const totalTime = audio.duration || 0;
+                        const currentTime = audio.currentTime;
+                        const remainingTime = totalTime - currentTime;
+                        const timeEl = document.querySelector(`.reading-audio-time[data-reading-index="${readingIndex}"]`);
+                        if (timeEl && totalTime > 0 && currentTime > 0) {
+                            timeEl.textContent = `- ${formatTime(remainingTime)}`;
+                        }
+                    });
 
                     audio.play().catch(err => {
                         console.error('[Reading Audio] Play error:', err);
                         icon.textContent = 'volume_up';
-                        if (timeDisplay) timeDisplay.style.opacity = '0';
                     });
 
                     audio.addEventListener('ended', () => {
                         icon.textContent = 'volume_up';
-                        if (timeDisplay) timeDisplay.style.opacity = '0';
                         window.currentAudio = null;
-                        audio.removeEventListener('timeupdate', updateTimeDisplay);
+                        // Скрываем время
+                        const timeEl = document.querySelector(`.reading-audio-time[data-reading-index="${readingIndex}"]`);
+                        if (timeEl) timeEl.textContent = '';
                     });
 
                     audio.addEventListener('error', () => {
                         console.error('[Reading Audio] Error loading:', audioUrl);
                         icon.textContent = 'volume_off';
-                        if (timeDisplay) timeDisplay.style.opacity = '0';
                         window.currentAudio = null;
-                        audio.removeEventListener('timeupdate', updateTimeDisplay);
                     });
                 });
             });
@@ -3629,10 +3716,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const calNextMonthBtn = document.getElementById('date-picker-next-month');
     const calTodayBtn = document.getElementById('date-picker-today-btn');
     const calCloseBtn = document.getElementById('date-picker-close-btn');
-    const calStyleToggle = document.getElementById('date-picker-style-toggle');
 
     let currentCalendarDate = new Date();
-    let useOldStyleInCalendar = false; // Переключатель старый/новый стиль в календаре
     const liturgicalCache = {};
 
     function fetchMonthData(year, month) {
@@ -3718,8 +3803,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const today = new Date();
-        // Для старого стиля "сегодня" - это 13 дней назад
-        const todayForCompare = useOldStyleInCalendar ? new Date(today.getFullYear(), today.getMonth(), today.getDate() - 13) : today;
         const cacheKey = `${year}-${month}`;
 
         // Trigger background fetch for this month
@@ -3727,7 +3810,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         for (let day = 1; day <= daysInMonth; day++) {
             const date = new Date(year, month, day);
-            const isToday = date.toDateString() === todayForCompare.toDateString();
+            const isToday = date.toDateString() === today.toDateString();
             const isSelected = date.toDateString() === currentNavDate.toDateString();
 
             const cell = document.createElement('div');
@@ -3790,29 +3873,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (calTodayBtn) {
         calTodayBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            const today = new Date();
-            currentNavDate = today;
-            // Если включен старый стиль, отнимаем 13 дней
-            currentCalendarDate = useOldStyleInCalendar ? new Date(today.getFullYear(), today.getMonth(), today.getDate() - 13) : today;
+            currentNavDate = new Date();
+            currentCalendarDate = new Date();
             localStorage.setItem('selectedDate', currentNavDate.toISOString());
             loadCalendarDate(currentNavDate);
-            renderCalendar(currentCalendarDate);
             closeCalendarModal();
-        });
-    }
-
-    if (calStyleToggle) {
-        calStyleToggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            useOldStyleInCalendar = !useOldStyleInCalendar;
-            const styleText = calStyleToggle.querySelector('span');
-            if (styleText) {
-                styleText.textContent = useOldStyleInCalendar ? 'Старый стиль' : 'Новый стиль';
-            }
-            // Перерисовать календарь с учётом стиля
-            const today = new Date();
-            currentCalendarDate = useOldStyleInCalendar ? new Date(today.getFullYear(), today.getMonth(), today.getDate() - 13) : today;
-            renderCalendar(currentCalendarDate);
         });
     }
 
