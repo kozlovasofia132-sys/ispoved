@@ -596,18 +596,16 @@
                             </button>
 
                             <!-- Donation Item -->
-                            <button id="donate-btn"
-                                class="w-full flex items-center gap-5 p-6 hover:bg-white/5 transition-all text-left group">
-                                <div
-                                    class="w-11 h-11 rounded-2xl bg-primary-gold/10 flex items-center justify-center text-primary-gold shrink-0 transition-transform active:scale-90 shadow-sm shadow-primary-gold/20 border border-primary-gold/20">
-                                    <span class="material-symbols-outlined text-2xl">favorite</span>
-                                </div>
-                                <div class="flex-1">
-                                    <span class="text-lg font-bold text-text-main block" data-t="donateTitle">Поддержать
-                                        проект</span>
-                                </div>
-                                <span class="material-symbols-outlined text-text-muted opacity-40">chevron_right</span>
-                            </button>
+                            <div class="px-4 pb-2">
+                                <button id="donate-btn"
+                                    class="w-full flex items-center gap-4 px-5 py-4 rounded-2xl
+                                           bg-primary-gold hover:bg-amber-500 active:scale-[0.98]
+                                           transition-all duration-200 shadow-lg shadow-primary-gold/30 text-left">
+                                    <span class="material-symbols-outlined text-bg text-2xl">favorite</span>
+                                    <span class="text-lg font-bold text-bg flex-1" data-t="donateTitle">Поддержать проект</span>
+                                    <span class="material-symbols-outlined text-bg/70">chevron_right</span>
+                                </button>
+                            </div>
 
                             <!-- Contact Dev Item -->
                             <button id="contact-dev-btn"
@@ -712,6 +710,17 @@
                     <p class="whitespace-pre-line no-scrollbar" data-t="aboutDescription"></p>
                     <div class="p-5 rounded-2xl bg-primary-gold/10 border border-primary-gold/20 text-primary-gold italic font-medium"
                         data-t="aboutImportant"></div>
+                    
+                    <!-- Кнопка пожертвования -->
+                    <button id="donate-from-about-btn"
+                        class="w-full py-4 rounded-2xl bg-primary-gold hover:bg-amber-500 
+                               text-bg font-bold text-lg transition-all duration-200 shadow-lg
+                               hover:shadow-xl active:scale-[0.98]
+                               flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-xl">favorite</span>
+                        Внести пожертвование
+                    </button>
+                    
                     <div class="pt-6 border-t border-border space-y-2 opacity-60 text-center">
                         <p class="text-[11px] font-bold text-text-main uppercase tracking-widest"
                             data-t="appHelperVersion">Версия 2.0.12</p>
@@ -721,7 +730,7 @@
                     </div>
                 </div>
                 <button id="close-about-btn"
-                    class="mt-8 w-full py-4 rounded-2xl bg-text-main text-bg font-bold active:scale-95 transition-all"
+                    class="w-full py-4 rounded-2xl bg-text-main text-bg font-bold active:scale-95 transition-all"
                     data-t="close">Закрыть</button>
             </div>
         </div>
@@ -808,7 +817,7 @@
         </div>
     </div>
 
-    <!-- Donation Modal -->
+    <!-- Donation Modal (YooKassa SBP) -->
     <div id="donate-modal"
         class="fixed inset-0 z-[300] flex items-center justify-center p-6 bg-black/70 backdrop-blur-sm hidden">
         <div
@@ -830,40 +839,82 @@
 
                 <!-- Title -->
                 <div class="text-center mb-8">
-                    <h3 class="text-2xl font-serif font-bold text-text-main mb-2" data-t="donateModalTitle">Помощь
-                        проекту</h3>
-                    <p class="text-sm text-text-muted leading-relaxed" data-t="donateModalText">Ваша поддержка помогает
-                        нам развивать приложение</p>
+                    <h3 class="text-2xl font-serif font-bold text-text-main mb-2">Принести лепту</h3>
+                    <p class="text-sm text-text-muted leading-relaxed">
+                        Ваше пожертвование помогает развитию приложения «Исповедь»
+                    </p>
                 </div>
 
                 <!-- Amount Buttons -->
-                <div class="space-y-3 mb-6">
-                    <div class="grid grid-cols-3 gap-3">
-                        <button
-                            class="donate-amount-btn py-4 rounded-2xl border-2 border-border font-bold text-text-main hover:bg-surface-alt transition-all focus:border-primary active:scale-95"
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <button class="donate-amount-btn px-4 py-4 rounded-2xl border-2 border-border/50 
+                                   hover:border-primary-gold hover:bg-primary-gold/10 
+                                   transition-all duration-200 font-bold text-text-main
+                                   active:scale-95"
                             data-amount="100">100 ₽</button>
-                        <button
-                            class="donate-amount-btn py-4 rounded-2xl border-2 border-border font-bold text-text-main hover:bg-surface-alt transition-all focus:border-primary active:scale-95"
+                    <button class="donate-amount-btn px-4 py-4 rounded-2xl border-2 border-border/50 
+                                   hover:border-primary-gold hover:bg-primary-gold/10 
+                                   transition-all duration-200 font-bold text-text-main
+                                   active:scale-95"
                             data-amount="300">300 ₽</button>
-                        <button
-                            class="donate-amount-btn py-4 rounded-2xl border-2 border-border font-bold text-text-main hover:bg-surface-alt transition-all focus:border-primary active:scale-95"
+                    <button class="donate-amount-btn px-4 py-4 rounded-2xl border-2 border-border/50 
+                                   hover:border-primary-gold hover:bg-primary-gold/10 
+                                   transition-all duration-200 font-bold text-text-main
+                                   active:scale-95"
                             data-amount="500">500 ₽</button>
-                    </div>
-                    <!-- Теперь эта кнопка тоже просто открывает Т-Банк, поэтому её можно оставить без изменений -->
-                    <button
-                        class="donate-amount-btn w-full py-4 rounded-2xl border-2 border-border font-bold text-text-main hover:bg-surface-alt transition-all focus:border-primary active:scale-95"
-                        data-amount="custom" data-t="donateOtherAmount">Другая сумма</button>
+                    <button class="donate-amount-btn px-4 py-4 rounded-2xl border-2 border-border/50 
+                                   hover:border-primary-gold hover:bg-primary-gold/10 
+                                   transition-all duration-200 font-bold text-text-main
+                                   active:scale-95"
+                            data-amount="1000">1000 ₽</button>
                 </div>
 
-                <div id="custom-amount-container" class="mb-6 hidden animate-fade-in">
-                    <!-- Скрытое поле ввода: оставим для обратной совместимости логики (если вдруг) -->
+                <!-- Custom Amount -->
+                <div class="mb-6">
+                    <label class="block text-sm text-text-muted mb-2" for="custom-amount-input">
+                        Или укажите свою сумму (₽)
+                    </label>
                     <input type="number" id="custom-amount-input"
-                        class="w-full bg-surface-alt border-border rounded-2xl px-5 py-4 text-text-main font-bold focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
-                        placeholder="Сумма (₽)" min="10" />
+                        class="w-full px-4 py-4 rounded-2xl border border-border/50 
+                               bg-surface text-text-main font-bold
+                               focus:outline-none focus:ring-2 focus:ring-primary-gold/50
+                               [&::-webkit-inner-spin-button]:appearance-none
+                               [&::-webkit-outer-spin-button]:appearance-none"
+                        placeholder="Например, 700" min="100" max="1000000" step="50" />
                 </div>
 
-                <button id="donate-submit-btn" class="btn-primary w-full py-5 text-lg"
-                    data-t="donateSubmitBtn">Пожертвовать</button>
+                <!-- Submit Button -->
+                <button id="donate-submit-btn" 
+                    class="w-full py-5 rounded-2xl bg-primary-gold hover:bg-amber-500 
+                           text-bg font-bold text-lg transition-all duration-200 shadow-lg
+                           hover:shadow-xl active:scale-[0.98]
+                           disabled:opacity-50 disabled:cursor-not-allowed
+                           flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-xl">qr_code</span>
+                    Внести через СБП
+                </button>
+
+                <!-- Loading Indicator -->
+                <div id="donate-loading" class="hidden mt-4 text-center">
+                    <span class="material-symbols-outlined animate-spin text-primary-gold text-3xl">
+                        progress_activity
+                    </span>
+                    <p class="text-sm text-text-muted mt-2">Создаём платёж...</p>
+                </div>
+
+                <!-- Message -->
+                <div id="donate-message" class="mt-4 text-center text-sm hidden"></div>
+
+                <!-- Info -->
+                <div class="mt-6 p-4 rounded-2xl bg-surface-alt/50 border border-border/30">
+                    <p class="text-xs text-text-muted leading-relaxed">
+                        <span class="material-symbols-outlined inline-block align-text-bottom text-sm mr-1">
+                            info
+                        </span>
+                        Безопасный платёж через <strong>Систему Быстрых Платежей (СБП)</strong>. 
+                        Минимальная сумма — <strong>100 ₽</strong>.
+                    </p>
+                </div>
             </div>
         </div>
     </div>
@@ -1001,7 +1052,7 @@
                     <span class="material-symbols-outlined text-xl">close</span>
                 </button>
             </div>
-            
+
             <!-- Title row -->
             <div class="w-full flex items-center justify-center mt-3">
                 <h3 id="prayers-modal-header-text" class="text-lg font-serif font-bold text-primary-gold text-center truncate px-2">
