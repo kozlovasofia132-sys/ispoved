@@ -16,6 +16,7 @@ import { preparationData, communionPrep } from './data/preparation.js';
 import { quotes } from './data/quotes.js';
 import { prayersData } from './data/prayers.js';
 import { createDonationScreen, initDonationScreen, openDonationScreen, closeDonationScreen } from './components/DonationScreen.js';
+import { readingSummaries } from './data/readingSummaries.js';
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -3341,13 +3342,56 @@ document.addEventListener('DOMContentLoaded', () => {
             'На вечерне': 'Н'
         };
 
-        let html = '<div class="space-y-12">';
+        // Получение записи дня из readingSummaries
+        function getDayEntry() {
+            const dateToUse = (typeof currentNavDate !== 'undefined' && currentNavDate) ? currentNavDate : new Date();
+            const pad = n => String(n).padStart(2, '0');
+            const dateKey = `${dateToUse.getFullYear()}-${pad(dateToUse.getMonth() + 1)}-${pad(dateToUse.getDate())}`;
+            return readingSummaries[dateKey] || null;
+        }
+
+        // Поиск краткого содержания по тексту чтения
+        function findSummary(readingText, dayEntry) {
+            if (!dayEntry || !dayEntry.readings || !readingText) return null;
+            const chapterMatch = readingText.match(/глава\s+(\d+)/i);
+            const verseMatch = readingText.match(/стихи?\s+(\d+)/i);
+            if (!chapterMatch || !verseMatch) return null;
+            const ch = chapterMatch[1];
+            const vs = verseMatch[1];
+            return dayEntry.readings.find(s => {
+                const m = s.ref.match(/(\d+):(\d+)/);
+                return m && m[1] === ch && m[2] === vs;
+            }) || null;
+        }
+
+        // Баннер праздника
+        function getFeastBannerHtml(feast) {
+            if (!feast) return '';
+            const isPascha = !feast.dvunadesyaty && feast.name.includes('Пасха');
+            const iconColor = isPascha ? '#f59e0b' : feast.dvunadesyaty ? '#a78bfa' : '#60a5fa';
+            const icon = isPascha ? '✝' : feast.dvunadesyaty ? '☩' : '✦';
+            return `
+            <div class="mb-8 p-4 rounded-2xl border flex gap-3 items-start" style="background: ${iconColor}14; border-color: ${iconColor}40;">
+                <span class="text-xl mt-0.5 flex-shrink-0" style="color: ${iconColor};">${icon}</span>
+                <div>
+                    <p class="font-bold text-sm leading-tight" style="color: ${iconColor};">${feast.name}</p>
+                    ${feast.note ? `<p class="text-xs mt-1 leading-relaxed opacity-80" style="color: ${iconColor};">${feast.note}</p>` : ''}
+                </div>
+            </div>`;
+        }
+
+        const dayEntry = getDayEntry();
+        let html = getFeastBannerHtml(dayEntry && dayEntry.feast) + '<div class="space-y-12">';
 
         readings.forEach((reading, index) => {
             const audioUrl = reading.link_mp3 || reading.audio || reading.mp3_remote;
             const formattedText = formatReadingText(reading.text || reading);
             const dropCapLetter = dropCapLetters[reading.type] || (reading.type ? reading.type[0].toUpperCase() : '');
             const typeLabel = reading.type.charAt(0).toUpperCase() + reading.type.slice(1);
+            const summaryEntry = findSummary(reading.text || '', dayEntry);
+            const summaryHtml = summaryEntry
+                ? `<p class="text-sm leading-relaxed mt-2 italic" style="color: var(--color-on-surface-variant);">${summaryEntry.summary}</p>`
+                : '';
 
             html += `
             <div class="group relative transition-all duration-300 hover:translate-x-2 flex items-start justify-between gap-4">
@@ -3355,6 +3399,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="space-y-2 flex-1">
                     <span class="font-label text-[10px] font-bold uppercase tracking-widest transition-colors duration-300 group-hover:text-primary" style="color: var(--color-secondary);">${typeLabel}</span>
                     <h5 class="font-headline text-2xl transition-colors duration-300 group-hover:text-primary" style="color: var(--color-on-surface);">${formattedText}</h5>
+                    ${summaryHtml}
                 </div>
                 ${audioUrl ? `<div class="flex flex-col items-center gap-1">
                     <button class="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary transition-all duration-300 active:scale-95 hover:bg-primary/20 hover:scale-110 reading-audio-btn" data-audio-url="${audioUrl}" data-reading-index="${index}">
