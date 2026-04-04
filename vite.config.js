@@ -59,6 +59,49 @@ export default defineConfig({
             workbox: {
                 runtimeCaching: [
                     {
+                        urlPattern: /^https:\/\/azbyka\.ru\/audio\/.*/i,
+                        handler: 'CacheFirst',
+                        options: {
+                            cacheName: 'azbyka-audio-cache',
+                            expiration: {
+                                maxEntries: 200,
+                                maxAgeSeconds: 60 * 60 * 24 * 60
+                            },
+                            cacheableResponse: {
+                                statuses: [0, 200]
+                            }
+                        }
+                    },
+                    {
+                        urlPattern: /^https:\/\/pravoslavie-audio\.com\/.*/i,
+                        handler: 'CacheFirst',
+                        options: {
+                            cacheName: 'pravoslavie-audio-cache',
+                            expiration: {
+                                maxEntries: 20,
+                                maxAgeSeconds: 60 * 60 * 24 * 60
+                            },
+                            cacheableResponse: {
+                                statuses: [0, 200]
+                            }
+                        }
+                    },
+                    {
+                        urlPattern: /^https:\/\/azbyka\.ru\/days\/api\/.*/i,
+                        handler: 'NetworkFirst',
+                        options: {
+                            cacheName: 'azbyka-api-cache',
+                            networkTimeoutSeconds: 5,
+                            expiration: {
+                                maxEntries: 60,
+                                maxAgeSeconds: 60 * 60 * 24 * 30
+                            },
+                            cacheableResponse: {
+                                statuses: [0, 200]
+                            }
+                        }
+                    },
+                    {
                         urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
                         handler: 'CacheFirst',
                         options: {

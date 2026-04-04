@@ -38,9 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Header Date ---
     function updateHeaderDate() {
-        const dateEl = document.getElementById('header-date');
-        if (!dateEl) return;
-
         const dateToUse = (typeof currentNavDate !== 'undefined' && currentNavDate) ? currentNavDate : new Date();
         const options = { day: 'numeric', month: 'long', year: 'numeric' };
         let dateStr = dateToUse.toLocaleDateString('ru-RU', options);
@@ -49,7 +46,13 @@ document.addEventListener('DOMContentLoaded', () => {
         dateStr = dateStr.replace(/\s*г\.$/, '');
 
         // Делаем первую букву заглавной
-        dateEl.textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+        const formatted = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+
+        const headerDateEl = document.getElementById('header-date');
+        if (headerDateEl) headerDateEl.textContent = formatted;
+
+        const cardDateEl = document.getElementById('card-date-full');
+        if (cardDateEl) cardDateEl.textContent = formatted;
     }
 
     // --- Header Spacing ---
@@ -71,8 +74,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 2. Останавливаем динамически созданные объекты Audio (окно-уровень)
         if (window.currentAudio) {
+            const wasReading = !!window.currentAudio._readingUrl;
             window.currentAudio.pause();
             window.currentAudio = null;
+            if (wasReading) hideMediaNotification();
         }
 
         // 3. Останавливаем глобальный аудио-плеер (нижняя панель)
@@ -95,6 +100,51 @@ document.addEventListener('DOMContentLoaded', () => {
 
         isAudioPlaying = false;
         console.log('[Audio] All media stopped.');
+    }
+
+    // --- Media Notification helpers (Android) ---
+    function showMediaNotification(title, isPlaying) {
+        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AudioNotification) {
+            window.Capacitor.Plugins.AudioNotification.show({ title, isPlaying });
+        }
+    }
+    function updateMediaNotification(isPlaying) {
+        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AudioNotification) {
+            window.Capacitor.Plugins.AudioNotification.updatePlayState({ isPlaying });
+        }
+    }
+    function hideMediaNotification() {
+        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AudioNotification) {
+            window.Capacitor.Plugins.AudioNotification.hide({});
+        }
+    }
+
+    // Слушаем нажатия кнопок в уведомлении
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AudioNotification) {
+        window.Capacitor.Plugins.AudioNotification.addListener('mediaAction', function(data) {
+            const action = data.action;
+            if (action === 'pause') {
+                if (window.currentAudio && !window.currentAudio.paused) {
+                    window.currentAudio.pause();
+                    if (window.currentReadingAudioIcon) {
+                        window.currentReadingAudioIcon.textContent = 'volume_up';
+                    }
+                }
+            } else if (action === 'play') {
+                if (window.currentAudio && window.currentAudio.paused) {
+                    window.currentAudio.play().catch(() => {});
+                    if (window.currentReadingAudioIcon) {
+                        window.currentReadingAudioIcon.textContent = 'pause';
+                    }
+                }
+            } else if (action === 'stop') {
+                stopAllAudio();
+                if (window.currentReadingAudioIcon) {
+                    window.currentReadingAudioIcon.textContent = 'volume_up';
+                }
+                window.currentReadingAudioIcon = null;
+            }
+        });
     }
 
     // --- Global Speech Function ---
@@ -341,8 +391,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const randomIndex = Math.floor(Math.random() * quotes.length);
         const quote = quotes[randomIndex];
 
-        quoteTextEl.textContent = `«${quote.text}»`;
-        quoteAuthorEl.textContent = quote.author;
+        // Fade out
+        quoteTextEl.classList.add('quote-fading');
+        quoteAuthorEl.classList.add('quote-fading');
+
+        setTimeout(() => {
+            quoteTextEl.textContent = `«${quote.text}»`;
+            quoteAuthorEl.textContent = quote.author;
+            // Fade in
+            quoteTextEl.classList.remove('quote-fading');
+            quoteAuthorEl.classList.remove('quote-fading');
+        }, 200);
 
         console.log('Цитата обновлена:', quote);
     }
@@ -376,7 +435,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         Object.keys(tabContents).forEach(id => {
             if (tabContents[id]) {
-                tabContents[id].classList.toggle('hidden', id !== tabId);
+                const isTarget = id === tabId;
+                tabContents[id].classList.toggle('hidden', !isTarget);
+                if (isTarget) {
+                    tabContents[id].classList.remove('tab-entering');
+                    void tabContents[id].offsetWidth; // reflow to restart animation
+                    tabContents[id].classList.add('tab-entering');
+                }
                 console.log('[switchTab] Tab', id, 'hidden:', tabContents[id].classList.contains('hidden'));
             }
         });
@@ -386,17 +451,9 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.classList.toggle('active', isTarget);
         });
 
-        // Обновляем дату только для вкладки Церковный календарь
-        const headerDateContainer = document.getElementById('header-date-container');
-        if (headerDateContainer) {
-            if (tabId === 'church-empty') {
-                headerDateContainer.style.display = '';
-                headerDateContainer.classList.remove('hidden');
-                updateHeaderDate();
-            } else {
-                headerDateContainer.style.display = 'none';
-                headerDateContainer.classList.add('hidden');
-            }
+        // Обновляем дату в карточке при переключении на вкладку церкви
+        if (tabId === 'church-empty') {
+            updateHeaderDate();
         }
 
         updateHeader();
@@ -1222,13 +1279,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // Создаем и добавляем экран пожертвований
     const donationScreen = createDonationScreen();
     document.body.appendChild(donationScreen);
-    
+
     // Инициализируем обработчики экрана пожертвований
     initDonationScreen();
 
-    // Открытие экрана пожертвований
+    // Открытие экрана пожертвований (кнопка в настройках)
     if (donateBtn) {
         donateBtn.addEventListener('click', () => {
+            openDonationScreen();
+        });
+    }
+
+    // Открытие экрана пожертвований (кнопка в модальном окне «О приложении»)
+    const donateFromAboutBtn = document.getElementById('donate-from-about-btn');
+    if (donateFromAboutBtn) {
+        donateFromAboutBtn.addEventListener('click', () => {
             openDonationScreen();
         });
     }
@@ -1908,7 +1973,67 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (shareSheetBtn) {
-        shareSheetBtn.addEventListener('click', generatePDF);
+        shareSheetBtn.addEventListener('click', shareConfession);
+    }
+
+    // --- Share Confession ---
+    function buildShareText() {
+        if (selectedSins.length === 0 && !personalNotes.trim()) return '';
+        const data = getSinsData();
+        const date = new Date().toLocaleDateString('ru', { day: 'numeric', month: 'long', year: 'numeric' });
+        let lines = [`🕊 Моя исповедь — ${date}\n`];
+        selectedSins.forEach(item => {
+            let sinText = '';
+            if (item.type === 'predefined') {
+                const category = data.find(cat => cat.sins.some(s => s.id === item.id));
+                const sin = category ? category.sins.find(s => s.id === item.id) : null;
+                sinText = sin ? (sin.text[currentLanguage] || sin.text.ru) : item.id;
+            } else {
+                sinText = item.text;
+            }
+            lines.push(`• ${sinText}${item.note ? `\n  (${item.note})` : ''}`);
+        });
+        if (personalNotes.trim()) {
+            lines.push(`\nЛичные заметки:\n${personalNotes.trim()}`);
+        }
+        return lines.join('\n');
+    }
+
+    async function shareConfession() {
+        if (selectedSins.length === 0 && !personalNotes.trim()) return;
+        const text = buildShareText();
+
+        // Нативный шит (iOS Safari, Android Chrome, Capacitor)
+        if (navigator.share) {
+            try {
+                await navigator.share({ title: 'Моя исповедь', text });
+                return;
+            } catch (e) {
+                if (e.name === 'AbortError') return; // пользователь закрыл
+            }
+        }
+
+        // Fallback — показываем мессенджеры
+        const encoded = encodeURIComponent(text);
+        const messengers = [
+            { name: 'Telegram',  icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/telegram.svg',  url: `https://t.me/share/url?url=&text=${encoded}` },
+            { name: 'WhatsApp',  icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/whatsapp.svg',  url: `https://wa.me/?text=${encoded}` },
+            { name: 'Viber',     icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/viber.svg',     url: `viber://forward?text=${encoded}` },
+            { name: 'VK',        icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/vk.svg',        url: `https://vk.com/share.php?comment=${encoded}` },
+        ];
+
+        const list = document.getElementById('messenger-share-list');
+        list.innerHTML = messengers.map(m => `
+            <a href="${m.url}" target="_blank" rel="noopener"
+               class="flex flex-col items-center gap-2 active:scale-95 transition-all">
+                <div class="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center p-3">
+                    <img src="${m.icon}" alt="${m.name}" class="w-8 h-8" style="filter:invert(0.3)">
+                </div>
+                <span class="text-[11px] font-semibold text-slate-600">${m.name}</span>
+            </a>
+        `).join('');
+
+        document.getElementById('messenger-share-modal').classList.remove('hidden');
     }
 
     // --- PDF Generation ---
@@ -3112,23 +3237,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const readingsCount = document.getElementById('readings-count');
         if (!container) return;
 
-        // Если readings пустой, пробуем распарсить texts
+        // Если readings пустой, собираем из всех записей texts
         if ((!readings || readings.length === 0) && texts && texts.length > 0) {
-            const textData = texts[0].text;
-            const parsedReadings = parseReadingsText(textData);
-            if (parsedReadings.length > 0) {
-                readings = parsedReadings;
-
-                // Привязываем MP3 ссылки из refs, если количество совпадает
-                if (texts[0].refs && texts[0].refs.length === readings.length) {
-                    readings.forEach((r, i) => {
-                        const ref = texts[0].refs[i];
-                        const bookPart = ref.split('.')[0];
-                        // Формируем ссылку по шаблону Азбуки
-                        r.link_mp3 = 'https://azbyka.ru/audio/audio1/zachala/' + bookPart + '/' + ref + '.mp3';
-                    });
+            const allParsed = [];
+            texts.forEach(textEntry => {
+                if (!textEntry.text) return;
+                const parsedReadings = parseReadingsText(textEntry.text);
+                if (parsedReadings.length > 0) {
+                    // Привязываем MP3 ссылки из refs если количество совпадает
+                    if (textEntry.refs && textEntry.refs.length === parsedReadings.length) {
+                        parsedReadings.forEach((r, i) => {
+                            const ref = textEntry.refs[i];
+                            const bookPart = ref.split('.')[0];
+                            r.link_mp3 = 'https://azbyka.ru/audio/audio1/zachala/' + bookPart + '/' + ref + '.mp3';
+                        });
+                    }
+                    allParsed.push(...parsedReadings);
                 }
-            }
+            });
+            if (allParsed.length > 0) readings = allParsed;
         }
 
         // Расшифровка сокращений книг
@@ -3267,6 +3394,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (window.currentAudio && window.currentAudio._readingUrl === audioUrl && !window.currentAudio.paused) {
                         window.currentAudio.pause();
                         icon.textContent = 'volume_up';
+                        updateMediaNotification(false);
                         return;
                     }
 
@@ -3277,6 +3405,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             icon.textContent = 'volume_up';
                         });
                         icon.textContent = 'pause';
+                        updateMediaNotification(true);
                         return;
                     }
 
@@ -3289,9 +3418,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
 
                     // Запускаем новое аудио
+                    const container = this.closest('.group');
+                    const titleEl = container ? container.querySelector('h5') : null;
+                    const readingTitle = titleEl ? titleEl.textContent.trim() : 'Отрывок из Писания';
+
                     const audio = new Audio(audioUrl);
                     audio._readingUrl = audioUrl;
                     window.currentAudio = audio;
+                    window.currentReadingAudioIcon = icon;
 
                     icon.textContent = 'pause';
 
@@ -3321,11 +3455,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     audio.play().catch(err => {
                         console.error('[Reading Audio] Play error:', err);
                         icon.textContent = 'volume_up';
+                        hideMediaNotification();
                     });
+                    showMediaNotification(readingTitle, true);
 
                     audio.addEventListener('ended', () => {
                         icon.textContent = 'volume_up';
                         window.currentAudio = null;
+                        window.currentReadingAudioIcon = null;
+                        hideMediaNotification();
                         // Скрываем время
                         const timeEl = document.querySelector(`.reading-audio-time[data-reading-index="${readingIndex}"]`);
                         if (timeEl) timeEl.textContent = '';
@@ -3335,6 +3473,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         console.error('[Reading Audio] Error loading:', audioUrl);
                         icon.textContent = 'volume_off';
                         window.currentAudio = null;
+                        window.currentReadingAudioIcon = null;
+                        hideMediaNotification();
                     });
                 });
             });
@@ -3536,24 +3676,50 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadCalendarDate(date) {
         const dateStr = getDateString(date);
 
+        // Обновляем дату и день недели сразу (не зависит от API)
+        const cardDateDay = document.getElementById('card-date-day');
+        const cardDateMonth = document.getElementById('card-date-month');
+        if (cardDateDay) cardDateDay.textContent = formatDateDay(date);
+        if (cardDateMonth) cardDateMonth.textContent = formatDateMonth(date);
+
+        const dayOfWeek = document.getElementById('day-of-week');
+        const isSunday = date.getDay() === 0;
+        if (dayOfWeek) {
+            const days = ['воскресенье', 'понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота'];
+            dayOfWeek.textContent = days[date.getDay()];
+            dayOfWeek.style.color = isSunday ? '#ef4444' : '';
+        }
+        if (cardDateDay) cardDateDay.style.color = isSunday ? '#ef4444' : '';
+        if (cardDateMonth) cardDateMonth.style.color = isSunday ? '#ef4444' : '';
+
+        // Вспомогательные функции прогресс-бара кэша
+        function showProgress(pct, label) {
+            const wrap = document.getElementById('cache-progress-wrap');
+            const bar = document.getElementById('cache-progress-bar');
+            const pctEl = document.getElementById('cache-progress-pct');
+            const lblEl = document.getElementById('cache-progress-label');
+            if (!wrap) return;
+            wrap.classList.remove('hidden');
+            if (bar) bar.style.width = pct + '%';
+            if (pctEl) pctEl.textContent = pct + '%';
+            if (lblEl && label) lblEl.textContent = label;
+        }
+        function hideProgress() {
+            const wrap = document.getElementById('cache-progress-wrap');
+            if (wrap) {
+                showProgress(100, 'Сохранено в кэш');
+                setTimeout(() => wrap.classList.add('hidden'), 1200);
+            }
+        }
+
+        showProgress(10, 'Загрузка данных...');
+
         try {
             const response = await fetch(`https://azbyka.ru/days/api/day/${dateStr}.json`);
             if (!response.ok) throw new Error('API error');
+            showProgress(40, 'Получены данные...');
             const data = await response.json();
-
-            // Update New Style Date (day and month separately)
-            const cardDateDay = document.getElementById('card-date-day');
-            const cardDateMonth = document.getElementById('card-date-month');
-            if (cardDateDay) cardDateDay.textContent = formatDateDay(date);
-            if (cardDateMonth) cardDateMonth.textContent = formatDateMonth(date);
-
-            // Update Day of Week
-            const dayOfWeek = document.getElementById('day-of-week');
-            if (dayOfWeek) {
-                const days = ['воскресенье', 'понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота'];
-                const dayName = days[date.getDay()];
-                dayOfWeek.textContent = dayName;
-            }
+            showProgress(70, 'Обработка чтений...');
 
             // Update Old Style Date (day and month separately)
             const oldStyleDateDay = document.getElementById('old-style-date-day');
@@ -3564,24 +3730,78 @@ document.addEventListener('DOMContentLoaded', () => {
             // Update Sedmitsa & Fasting Info
             const sedmitsaText = document.getElementById('sedmitsa-text');
             const fastingToneText = document.getElementById('fasting-tone-text');
-            if (sedmitsaText) {
-                const sedmitsa = data.fasting?.round_week || '';
-                // Remove HTML tags
-                const plainText = sedmitsa.replace(/<[^>]*>/g, '');
-                sedmitsaText.textContent = plainText || 'Седмица 4-я Великого поста, Крестопоклонная';
+            const holidayTitleEl = document.getElementById('holiday-title-text');
+            const holidayTitle = data.holidays?.find(h => h.title)?.title?.replace(/<[^>]*>/g, '') || '';
+            const roundWeek = (data.fasting?.round_week || '').replace(/<[^>]*>/g, '');
+
+            if (holidayTitleEl) {
+                if (holidayTitle) {
+                    holidayTitleEl.textContent = holidayTitle;
+                    holidayTitleEl.classList.remove('hidden');
+                } else {
+                    holidayTitleEl.textContent = '';
+                    holidayTitleEl.classList.add('hidden');
+                }
             }
+
+            // Красный цвет даты в праздник или воскресенье
+            const dateColor = (holidayTitle || isSunday) ? '#ef4444' : '';
+            if (cardDateDay) cardDateDay.style.color = dateColor;
+            if (cardDateMonth) cardDateMonth.style.color = dateColor;
+            if (sedmitsaText) {
+                const isDuplicate = holidayTitle && roundWeek && roundWeek.includes(holidayTitle.split('.')[0]);
+                sedmitsaText.textContent = isDuplicate ? '' : roundWeek;
+            }
+
+            const memorialEl = document.getElementById('memorial-text');
+            if (memorialEl) {
+                const fastingWeeks = (data.fasting?.weeks || '').replace(/<[^>]*>/g, '').trim();
+                const isMemorial = /родительская|Радоница|поминовение/i.test(fastingWeeks);
+                if (isMemorial && fastingWeeks) {
+                    memorialEl.textContent = '† ' + fastingWeeks;
+                    memorialEl.classList.remove('hidden');
+                } else {
+                    memorialEl.textContent = '';
+                    memorialEl.classList.add('hidden');
+                }
+            }
+
             if (fastingToneText) {
                 const fastingInfo = [];
-                const fastingType = data.fasting?.type || data.fasting?.fasting || '';
+                let fastingType = data.fasting?.type || data.fasting?.fasting || '';
                 const voice = data.fasting?.voice || null;
+                const NON_FAST_TYPES = ['no_fast', 'not_fasting', 'unknown', ''];
 
-                if (fastingType && fastingType !== 'no_fast' && fastingType !== 'unknown') {
-                    fastingInfo.push('Постный день');
+                // Праздники, в которые разрешается рыба даже в пост
+                const FISH_FEAST_URIS = [
+                    'blagoveshchenie-presvjatoj-bogorodicy', // Благовещение
+                    'vhod-gospoden-v-ierusalim',             // Вербное воскресенье
+                    'vxod-gospoden-v-ierusalim',
+                ];
+                const holidays = data.holidays || [];
+                const hasFishFeast = holidays.some(h =>
+                    FISH_FEAST_URIS.includes(h.uri) ||
+                    (h.title && /благовещение|вход господень/i.test(h.title))
+                );
+                if (hasFishFeast && fastingType && !NON_FAST_TYPES.includes(fastingType)) {
+                    fastingType = 'fish_fast';
+                }
+
+                if (fastingType && !NON_FAST_TYPES.includes(fastingType)) {
+                    const fastingLabels = {
+                        'fish_fast':   'Постный день. 🐟 Рыба разрешена',
+                        'strict_fast': 'Строгий пост',
+                        'milk_fast':   'Постный день. Молочная пища разрешена',
+                        'full_fast':   'Полный пост (без пищи)',
+                        'fast':        'Постный день',
+                        'fasting':     'Постный день',
+                    };
+                    fastingInfo.push(fastingLabels[fastingType] || 'Постный день');
                 }
                 if (voice) {
                     fastingInfo.push(`Глас ${voice}`);
                 }
-                fastingToneText.textContent = fastingInfo.length > 0 ? fastingInfo.join('. ') : 'Постный день. Глас 7-й';
+                fastingToneText.textContent = fastingInfo.join('. ');
             }
 
             // Vigil Block
@@ -3619,11 +3839,34 @@ document.addEventListener('DOMContentLoaded', () => {
             // Fasting Pill
             const fastingPillText = document.getElementById('fasting-pill-text');
             if (fastingPillText) {
-                const desc = data.fastingDescription || '';
-                if (desc.length > 0) {
-                    fastingPillText.textContent = desc.split(',')[0].toUpperCase();
+                let fastType = data.fasting?.type || data.fasting?.fasting || '';
+                const NON_FAST_PILL = ['no_fast', 'not_fasting', 'unknown', ''];
+                const roundWeek = data.fasting?.round_week || '';
+                // Переопределяем тип поста при праздниках с рыбой
+                const holidaysList = data.holidays || [];
+                const hasFishFeastPill = holidaysList.some(h =>
+                    ['blagoveshchenie-presvjatoj-bogorodicy', 'vhod-gospoden-v-ierusalim', 'vxod-gospoden-v-ierusalim'].includes(h.uri) ||
+                    (h.title && /благовещение|вход господень/i.test(h.title))
+                );
+                if (hasFishFeastPill && fastType && !NON_FAST_PILL.includes(fastType)) {
+                    fastType = 'fish_fast';
+                }
+                const fastingPillLabels = {
+                    'fish_fast':   '🐟 РЫБА',
+                    'strict_fast': 'СТРОГИЙ ПОСТ',
+                    'milk_fast':   'МОЛОКО',
+                    'full_fast':   'ПОЛНЫЙ ПОСТ',
+                    'fast':        'ПОСТ',
+                    'fasting':     'ПОСТ',
+                };
+                if (fastType === 'fish_fast') {
+                    fastingPillText.textContent = '🐟 РЫБА';
+                } else if (roundWeek) {
+                    fastingPillText.textContent = roundWeek.replace(/<[^>]*>/g, '').split('.')[0].toUpperCase();
+                } else if (!NON_FAST_PILL.includes(fastType)) {
+                    fastingPillText.textContent = fastingPillLabels[fastType] || 'ПОСТ';
                 } else {
-                    fastingPillText.textContent = data.fasting === 1 ? 'МЯСОЕД' : 'ПОСТ';
+                    fastingPillText.textContent = 'МЯСОЕД';
                 }
             }
 
@@ -3683,23 +3926,130 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('[Calendar] API readings:', data.readings);
             console.log('[Calendar] API texts:', data.texts);
 
-            renderReadings(data.readings || [], data.texts || []);
             renderSaints(data.saints || data.memory || []);
+
+            // Собираем все отрывки из всех texts
+            const allTexts = data.texts || [];
+            const allReadings = [];
+            allTexts.forEach(entry => {
+                if (!entry.text) return;
+                const parsed = parseReadingsText(entry.text);
+                if (parsed.length > 0) {
+                    if (entry.refs && entry.refs.length === parsed.length) {
+                        parsed.forEach((r, i) => {
+                            const ref = entry.refs[i];
+                            r.link_mp3 = 'https://azbyka.ru/audio/audio1/zachala/' + ref.split('.')[0] + '/' + ref + '.mp3';
+                        });
+                    }
+                    allReadings.push(...parsed);
+                }
+            });
+
+            // Показываем каждый отрывок пошагово в прогресс-баре
+            const total = allReadings.length || 1;
+            let saved = 0;
+            showProgress(0, `Сохранение отрывков: 0 / ${allReadings.length}`);
+
+            function saveNext() {
+                if (saved >= allReadings.length) {
+                    // Сохраняем только нужные поля — без изображений
+                    const textsSlim = (data.texts || []).map(t => ({
+                        text: t.text || '',
+                        refs: t.refs || [],
+                        type: t.type
+                    }));
+                    const saintsSlim = (data.saints || data.memory || []).map(s => ({
+                        title: s.title || '',
+                        name: s.name || '',
+                        type_of_sanctity: s.type_of_sanctity || ''
+                    }));
+                    try {
+                        localStorage.setItem('day_cache_' + dateStr, JSON.stringify({
+                            texts: textsSlim,
+                            saints: saintsSlim,
+                            ts: Date.now()
+                        }));
+                    } catch (e) {
+                        console.error('[Cache] Ошибка сохранения:', e);
+                    }
+                    hideProgress();
+                    return;
+                }
+                const r = allReadings[saved];
+                saved++;
+                const pct = Math.round((saved / total) * 100);
+                const readingLabel = r.text ? r.text.split(',')[0] : 'отрывок ' + saved;
+
+                // Предзагружаем MP3 — SW сохранит в azbyka-audio-cache
+                if (r.link_mp3) {
+                    showProgress(pct, `Аудио: ${readingLabel} (${saved}/${allReadings.length})`);
+                    fetch(r.link_mp3, { mode: 'no-cors' })
+                        .catch(() => {})
+                        .finally(() => setTimeout(saveNext, 80));
+                } else {
+                    showProgress(pct, `${readingLabel} (${saved}/${allReadings.length})`);
+                    setTimeout(saveNext, 80);
+                }
+            }
+            saveNext();
+
+            renderReadings(data.readings || [], data.texts || []);
 
         } catch (error) {
             console.error('[Calendar] Error:', error);
-            renderDateSlider(date);
+            const wrap = document.getElementById('cache-progress-wrap');
+            if (wrap) wrap.classList.add('hidden');
+
+            // Пробуем загрузить из кэша
+            try {
+                const raw = localStorage.getItem('day_cache_' + dateStr);
+                if (raw) {
+                    const cached = JSON.parse(raw);
+                    showProgress(100, 'Загружено из кэша');
+                    setTimeout(() => {
+                        const w = document.getElementById('cache-progress-wrap');
+                        if (w) w.classList.add('hidden');
+                    }, 1200);
+                    renderReadings([], cached.texts || []);
+                    renderSaints(cached.saints || []);
+                } else {
+                    // Нет кэша и нет интернета
+                    showOfflineMessage();
+                }
+            } catch {
+                showOfflineMessage();
+            }
         }
     }
 
-    // Initialize calendar with today's date or saved date
-    async function loadChurchToday() {
-        const savedDate = localStorage.getItem('selectedDate');
-        if (savedDate) {
-            currentNavDate = new Date(savedDate);
-        } else {
-            currentNavDate = new Date();
+    function showOfflineMessage() {
+        // Блок календарной информации (седмица, пост)
+        const sedmitsaText = document.getElementById('sedmitsa-text');
+        const fastingToneText = document.getElementById('fasting-tone-text');
+        const holidayTitleEl = document.getElementById('holiday-title-text');
+        const memorialEl = document.getElementById('memorial-text');
+        if (sedmitsaText) sedmitsaText.textContent = 'Нет подключения к интернету';
+        if (fastingToneText) fastingToneText.textContent = '';
+        if (holidayTitleEl) { holidayTitleEl.textContent = ''; holidayTitleEl.classList.add('hidden'); }
+        if (memorialEl) { memorialEl.textContent = ''; memorialEl.classList.add('hidden'); }
+
+        // Блок чтений дня
+        const container = document.getElementById('readings-container');
+        if (container) {
+            container.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-8 gap-3 text-center">
+                    <span class="material-symbols-outlined text-5xl" style="color: var(--color-text-muted); opacity: 0.5;">wifi_off</span>
+                    <p class="font-bold text-base" style="color: var(--color-text-muted);">Нет интернета</p>
+                    <p class="text-sm" style="color: var(--color-text-muted); opacity: 0.7;">Данные за этот день ещё не сохранены в кэш. Откройте этот день при наличии интернета.</p>
+                </div>`;
         }
+        const readingsCount = document.getElementById('readings-count');
+        if (readingsCount) readingsCount.textContent = '';
+    }
+
+    // Initialize calendar with today's date
+    async function loadChurchToday() {
+        currentNavDate = new Date();
         currentCalendarDate = new Date(currentNavDate);
         await loadCalendarDate(currentNavDate);
         if (typeof renderCalendar === 'function') {
@@ -3735,14 +4085,20 @@ document.addEventListener('DOMContentLoaded', () => {
             fetch(`https://azbyka.ru/days/api/day/${dateStr}.json`)
                 .then(res => res.json())
                 .then(data => {
-                    const fastingType = data.fasting;
-                    const fastingDescription = data.fastingDescription || data.description || '';
-                    const isFast = (fastingType && fastingType !== 'no_fast' && fastingType !== 'unknown') ||
-                        fastingDescription.toLowerCase().includes('пост');
+                    const fastingType = data.fasting?.type || data.fasting?.fasting || '';
+                    const NON_FAST = ['no_fast', 'not_fasting', 'unknown', ''];
+                    const isFast = !NON_FAST.includes(fastingType);
+
+                    const roundWeek = (data.fasting?.round_week || '').replace(/<[^>]*>/g, '');
+                    const fastingWeeks = (data.fasting?.weeks || '').replace(/<[^>]*>/g, '');
+                    const isBrightWeek = roundWeek.includes('Светл') && !roundWeek.includes('Воскресение');
+                    const isMemorial = /родительская|Радоница|поминовение/i.test(roundWeek + ' ' + fastingWeeks);
 
                     liturgicalCache[key].days[d] = {
                         isFast: isFast,
-                        isHoliday: (data.priority && data.priority > 3) || (data.holy_day && data.holy_day.length > 0)
+                        isHoliday: (data.holidays && data.holidays.length > 0),
+                        isBrightWeek: isBrightWeek,
+                        isMemorial: isMemorial
                     };
                 })
                 .catch(() => { })
@@ -3814,19 +4170,39 @@ document.addEventListener('DOMContentLoaded', () => {
             const isSelected = date.toDateString() === currentNavDate.toDateString();
 
             const cell = document.createElement('div');
-            cell.className = `calendar-day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}`;
+            const isCellSunday = date.getDay() === 0;
+            cell.className = `calendar-day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''} ${isCellSunday ? 'is-sunday' : ''}`;
+
+            // Дни особого поминовения усопших 2026 (month - 0-based)
+            const MEMORIAL_2026 = [
+                [1, 14],  // 14 фев — Мясопустная родительская суббота
+                [2,  7],  // 7 мар — 2-я Великопостная
+                [2, 14],  // 14 мар — 3-я Великопостная
+                [2, 21],  // 21 мар — 4-я Великопостная
+                [3, 21],  // 21 апр — Радоница
+                [4, 30],  // 30 мая — Троицкая родительская суббота
+                [10, 7],  // 7 ноя — Димитриевская родительская суббота
+            ];
 
             // 1. Try to use API data from Cache
             if (liturgicalCache[cacheKey] && liturgicalCache[cacheKey].days[day]) {
                 const api = liturgicalCache[cacheKey].days[day];
                 if (api.isFast) cell.classList.add('has-fast');
                 if (api.isHoliday) cell.classList.add('has-holiday');
+                if (api.isBrightWeek) cell.classList.add('bright-week');
+                if (api.isMemorial) cell.classList.add('has-memorial');
             } else {
                 // 2. Fallback: Simulation for 2026 (until API data loads)
                 if (year === 2026) {
                     if (month === 3 && day === 12) {
                         cell.classList.add('important');
                         cell.classList.add('has-holiday');
+                    }
+                    if (month === 3 && day >= 13 && day <= 18) {
+                        cell.classList.add('bright-week');
+                    }
+                    if (MEMORIAL_2026.some(([m, d2]) => m === month && d2 === day)) {
+                        cell.classList.add('has-memorial');
                     }
                     if (((month === 2) || (month === 1 && day >= 23) || (month === 3 && day <= 11))) {
                         cell.classList.add('has-fast');
@@ -3969,6 +4345,46 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.classList.add('bg-primary', 'text-white');
         }
     });
+
+    // --- Pre-cache Psalm 50 audio for offline use ---
+    function precachePsalm50() {
+        const url = 'https://azbyka.ru/audio/audio1/molitvoslov/psalmy/psalom-50.mp3';
+        if (!('caches' in window)) return;
+        caches.open('azbyka-audio-cache').then(cache => {
+            cache.match(url).then(cached => {
+                if (!cached) {
+                    fetch(url, { mode: 'no-cors' }).then(response => {
+                        cache.put(url, response);
+                    }).catch(() => {});
+                }
+            });
+        });
+    }
+    precachePsalm50();
+
+    // --- Pre-cache Prayer audio for offline use ---
+    function precachePrayerAudio() {
+        if (!('caches' in window)) return;
+        const urls = [
+            ['azbyka-audio-cache',       'https://azbyka.ru/audio/audio1/Molitvy-i-bogosluzhenija/ko_svyatomy_prichacheniyu/prichastie/01-bulchuk_kanon_pokayannyy_ko_gospodu_iisusu_hristu.mp3'],
+            ['pravoslavie-audio-cache',  'https://pravoslavie-audio.com/wp-content/uploads/2020/12/kanon-molebnyj-ko-presvyatoj-bogoroditse.mp3'],
+            ['azbyka-audio-cache',       'https://azbyka.ru/audio/audio1/Molitvy-i-bogosluzhenija/ko_svyatomy_prichacheniyu/prichastie/02-bulchuk_kanon_molebnyy_ko_presvyatoy_bogorodice.mp3'],
+            ['azbyka-audio-cache',       'https://azbyka.ru/audio/audio1/Molitvy-i-bogosluzhenija/ko_svyatomy_prichacheniyu/prichastie/03-bulchuk_kanon_angelu_hranitelyu.mp3'],
+            ['azbyka-audio-cache',       'https://azbyka.ru/audio/audio1/Molitvy-i-bogosluzhenija/ko_svyatomy_prichacheniyu/prichastie/32_ermakov-posledovanie-ko-svjatomu-prichashheniju.mp3'],
+        ];
+        urls.forEach(([cacheName, url]) => {
+            caches.open(cacheName).then(cache => {
+                cache.match(url).then(cached => {
+                    if (!cached) {
+                        fetch(url, { mode: 'no-cors' }).then(response => {
+                            cache.put(url, response);
+                        }).catch(() => {});
+                    }
+                });
+            });
+        });
+    }
+    precachePrayerAudio();
 
     // --- Initialization ---
     initPsalm50Audio(); // Настройка аудио Псалма 50

@@ -78,8 +78,8 @@
   /* Error для киновари */
   --color-danger: #ba1a1a;
   /* Danger для кнопки */
-  --header-height: 60px;
-  /* Значение устанавливается через JS */
+  --header-height: calc(56px + env(safe-area-inset-top, 20px));
+  /* Значение переопределяется через JS после рендера */
 }
 
 .dark {
@@ -250,6 +250,25 @@
     overflow: clip;
   }
 
+  /* Текстура пергамента — тонкий зернистый шум поверх фона */
+  .app-wrapper::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 1;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 300px 300px;
+  }
+
+  /* В тёмной теме зерно чуть заметнее */
+  .dark .app-wrapper::before {
+    opacity: 1;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.12'/%3E%3C/svg%3E");
+  }
+
   body {
     color: var(--color-text-main);
     -webkit-font-smoothing: antialiased;
@@ -328,6 +347,11 @@
   font-weight: 700;
 }
 
+/* Safe Area отступ для контента под системной строкой */
+.safe-padding-top {
+  padding-top: env(safe-area-inset-top, 20px);
+}
+
 /* Единая стеклянная шапка для всех вкладок (Stitch Design) */
 .main-header {
   position: fixed;
@@ -339,14 +363,14 @@
   -webkit-backdrop-filter: blur(24px);
   background: rgba(255, 255, 255, 0.8);
   border-bottom: 1px solid rgba(211, 196, 175, 0.2);
-  padding-top: env(safe-area-inset-top, 0px);
+  padding-top: env(safe-area-inset-top, 20px);
   padding-bottom: 8px;
   transition: all 0.3s ease;
   box-shadow: 0 1px 3px 0 rgba(120, 86, 0, 0.05);
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  justify-content: center;
   align-items: center;
-  min-height: calc(56px + env(safe-area-inset-top, 0px));
+  min-height: calc(56px + env(safe-area-inset-top, 20px));
 }
 
 .header-left,
@@ -1149,13 +1173,24 @@ summary::-webkit-details-marker {
   border-radius: 9999px;
 }
 
-.calendar-day.has-holiday::before {
-  content: '';
-  position: absolute;
-  inset: 6px;
+.calendar-day.has-holiday {
+  outline: 2px solid rgba(239, 68, 68, 0.7);
+  outline-offset: -5px;
   border-radius: 9999px;
-  border: 1px solid rgba(239, 68, 68, 0.5);
-  /* red-500 @ 50% */
+}
+
+.calendar-day.has-holiday span,
+.calendar-day.is-sunday span {
+  color: #ef4444 !important;
+}
+
+.calendar-day.bright-week span {
+  color: #E1C16E !important;
+}
+
+.calendar-day.bright-week {
+  background-color: rgba(225, 193, 110, 0.08);
+  border-radius: 9999px;
 }
 
 .calendar-day.has-memorial::before {
@@ -1163,8 +1198,12 @@ summary::-webkit-details-marker {
   position: absolute;
   inset: 6px;
   border-radius: 9999px;
-  border: 1px solid rgba(212, 175, 55, 0.4);
-  /* primary-gold @ 40% */
+  border: 2px solid rgba(125, 211, 252, 0.8);
+  box-shadow: 0 0 6px rgba(125, 211, 252, 0.25);
+}
+
+.calendar-day.has-memorial span {
+  color: #7dd3fc !important;
 }
 
 .calendar-day.today::before {
@@ -1198,8 +1237,8 @@ summary::-webkit-details-marker {
   width: 6px;
   height: 6px;
   border-radius: 9999px;
-  background-color: #E1C16E;
-  box-shadow: 0 0 4px rgba(225, 193, 110, 0.8);
+  background-color: #7f19e6;
+  box-shadow: 0 0 4px rgba(127, 25, 230, 0.6);
 }
 
 /* Container Styles */
@@ -1524,4 +1563,72 @@ summary::-webkit-details-marker {
   border: none;
   border-radius: 50%;
   cursor: pointer;
+}
+
+/* ============================================
+   DESIGN IMPROVEMENTS (frontend-design skill)
+   ============================================ */
+
+/* Пункт 2: Золотое свечение у активной иконки навигации */
+.nav-btn.active .material-symbols-outlined {
+  filter: drop-shadow(0 0 6px rgba(225, 193, 110, 0.75)) !important;
+  color: var(--color-primary-gold) !important;
+}
+
+/* Пункт 3: "Старый стиль" — состаренный вид (сепия, меньше насыщенности) */
+#old-style-date-btn {
+  filter: sepia(0.25) brightness(0.97);
+  position: relative;
+}
+
+#old-style-date-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(120, 80, 20, 0.04) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+#old-style-date-btn:hover {
+  filter: sepia(0.15) brightness(0.99);
+}
+
+/* Пункт 5: Тёмная тема — чёткая иерархия глубины поверхностей */
+.dark {
+  --color-surface-container-lowest: #0e0b13;
+  --color-surface-container-low:    #15121c;
+  --color-surface-container:        #1c1826;
+  --color-surface-container-high:   #242030;
+  --color-surface-container-highest: #2d293a;
+  --color-surface:                  #2a2336;
+  --color-surface-alt:              #342d43;
+}
+
+/* Пункт 6а: Анимация появления вкладки при переключении */
+@keyframes tabEnter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+main[id^="tab-"].tab-entering {
+  animation: tabEnter 0.25s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Пункт 6б: Плавное растворение цитаты при обновлении */
+#confession-quote-text,
+#confession-quote-author {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+#confession-quote-text.quote-fading,
+#confession-quote-author.quote-fading {
+  opacity: 0;
+  transform: translateY(-4px);
 }

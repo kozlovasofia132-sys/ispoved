@@ -9,6 +9,7 @@ const API_BASE_URL = 'https://azbyka.ru/days/api/day';
 const fastingTranslations = {
     ru: {
         'no_fast': 'Мясоед',
+        'not_fasting': 'Мясоед',
         'strict_fast': 'Строгий пост',
         'fast': 'Постный день',
         'fish_fast': 'Рыба разрешена',
@@ -18,6 +19,7 @@ const fastingTranslations = {
     },
     uk: {
         'no_fast': 'М\'ясоїд',
+        'not_fasting': 'М\'ясоїд',
         'strict_fast': 'Суворий піст',
         'fast': 'Пісний день',
         'fish_fast': 'Риба дозволена',
@@ -27,6 +29,7 @@ const fastingTranslations = {
     },
     en: {
         'no_fast': 'Fast-free',
+        'not_fasting': 'Fast-free',
         'strict_fast': 'Strict Fast',
         'fast': 'Fast Day',
         'fish_fast': 'Fish Allowed',
@@ -36,6 +39,7 @@ const fastingTranslations = {
     },
     cs: {
         'no_fast': 'Мясояденіе',
+        'not_fasting': 'Мясояденіе',
         'strict_fast': 'Строгій постъ',
         'fast': 'Постный день',
         'fish_fast': 'Рыба разрешена',
@@ -45,39 +49,64 @@ const fastingTranslations = {
     }
 };
 
+const CACHE_PREFIX = 'calendar_cache_';
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 часа
+
+function getCached(key) {
+    try {
+        const raw = localStorage.getItem(CACHE_PREFIX + key);
+        if (!raw) return null;
+        const { data, ts } = JSON.parse(raw);
+        if (Date.now() - ts > CACHE_TTL_MS) return null;
+        return data;
+    } catch {
+        return null;
+    }
+}
+
+function setCache(key, data) {
+    try {
+        localStorage.setItem(CACHE_PREFIX + key, JSON.stringify({ data, ts: Date.now() }));
+    } catch {
+        // ignore quota errors
+    }
+}
+
+function parseApiData(data) {
+    const fastingType = data.fasting?.type || data.fasting?.fasting || 'unknown';
+    return {
+        date: data.date || null,
+        day: data.day || null,
+        fasting: fastingType,
+        fastingDescription: getFastingDescription(fastingType),
+        memory: data.saints || data.memory || [],
+        icon: data.icon || null,
+        description: data.fasting?.round_week || data.description || ''
+    };
+}
+
 /**
  * Get today's Orthodox calendar information
  * @returns {Promise<Object>} Today's calendar data
  */
 export async function getTodayInfo() {
+    const today = new Date().toISOString().slice(0, 10);
+    const cached = getCached(today);
+
     try {
         const response = await fetch(`${API_BASE_URL}/today.json`).catch(() => ({ ok: false }));
-        
+
         if (!response.ok) {
-            return getFallbackData();
+            return { success: !!cached, data: cached || getFallbackData() };
         }
-        
+
         const data = await response.json();
-        
-        return {
-            success: true,
-            data: {
-                date: data.date || null,
-                day: data.day || null,
-                fasting: data.fasting || 'unknown',
-                fastingDescription: getFastingDescription(data.fasting),
-                memory: data.memory || [],
-                icon: data.icon || null,
-                description: data.description || ''
-            }
-        };
+        const parsed = parseApiData(data);
+        setCache(today, parsed);
+        return { success: true, data: parsed };
     } catch (error) {
         console.error('[Calendar] Error fetching today info:', error);
-        return {
-            success: false,
-            error: error.message,
-            data: getFallbackData()
-        };
+        return { success: false, error: error.message, data: cached || getFallbackData() };
     }
 }
 
@@ -87,34 +116,22 @@ export async function getTodayInfo() {
  * @returns {Promise<Object>} Calendar data for the specified date
  */
 export async function getDateInfo(date) {
+    const cached = getCached(date);
+
     try {
-        const response = await fetch(`${API_BASE_URL}/${date}.json`);
-        
+        const response = await fetch(`${API_BASE_URL}/${date}.json`).catch(() => ({ ok: false }));
+
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            return { success: !!cached, data: cached || getFallbackData() };
         }
-        
+
         const data = await response.json();
-        
-        return {
-            success: true,
-            data: {
-                date: data.date || null,
-                day: data.day || null,
-                fasting: data.fasting || 'unknown',
-                fastingDescription: getFastingDescription(data.fasting),
-                memory: data.memory || [],
-                icon: data.icon || null,
-                description: data.description || ''
-            }
-        };
+        const parsed = parseApiData(data);
+        setCache(date, parsed);
+        return { success: true, data: parsed };
     } catch (error) {
         console.error('[Calendar] Error fetching date info:', error);
-        return {
-            success: false,
-            error: error.message,
-            data: getFallbackData()
-        };
+        return { success: false, error: error.message, data: cached || getFallbackData() };
     }
 }
 

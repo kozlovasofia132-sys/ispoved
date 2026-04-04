@@ -76,7 +76,7 @@ export function createDonationScreen() {
                     <div class="flex items-start gap-3">
                         <span class="material-symbols-outlined text-text-muted text-xl mt-0.5">info</span>
                         <p class="text-sm text-text-muted leading-relaxed">
-                            Откройте приложение вашего банка → «Перевод по номеру телефона» → вставьте номер
+                            Откройте приложение вашего банка → «Перевод по номеру карты» → вставьте номер карты
                         </p>
                     </div>
                 </div>

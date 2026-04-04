@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl:*)",
+      "WebFetch(domain:azbyka.ru)",
+      "Bash(python3 -c \"from PIL import Image; img=Image.open\\('d:/Ispoved/public/mobile_app.jpg'\\); print\\(img.size\\)\")",
+      "Bash(python -c \"from PIL import Image; img=Image.open\\('d:/Ispoved/public/mobile_app.jpg'\\); print\\(img.size\\)\")",
+      "Bash(powershell -Command 'Add-Type -AssemblyName System.Drawing; $img = [System.Drawing.Image]::FromFile\\('\\\\''d:\\\\Ispoved\\\\public\\\\tablet_app.jpg'\\\\''\\); Write-Host \"$\\($img.Width\\)x$\\($img.Height\\)\"; $img.Dispose\\(\\)')",
+      "Bash(powershell -Command ':*)",
+      "Bash(npx cap:*)",
+      "Bash(xargs grep:*)",
+      "Bash(find:*)",
+      "Bash(adb devices:*)",
+      "Bash(python:*)",
+      "Skill(update-config)",
+      "Bash(powershell:*)",
+      "Bash(rm -rf \"D:/hf_cache/hub/models--Qwen--Qwen3-TTS-12Hz-1.7B-Base\" \"D:/hf_cache/hub/models--Qwen--Qwen3-TTS-12Hz-1.7B-CustomVoice\")",
+      "Read(//d/hf_cache/hub/**)",
+      "Bash(ls D:/Ispoved/*.js D:/Ispoved/*.mjs)",
+      "Bash(netstat -ano)",
+      "mcp__chrome-devtools__navigate_page",
+      "Bash(powershell.exe:*)",
+      "Bash(mkdir -p \"C:/Users/PavelPis1/Documents/WindowsPowerShell\")"
+    ]
+  }
+}
