@@ -29,7 +29,7 @@ export function createDonationScreen() {
             <div class="p-6 flex flex-col gap-5">
                 <!-- Bible Quote -->
                 <div class="p-4 rounded-xl bg-primary-gold/5 border border-primary-gold/10">
-                    <p class="text-sm font-serif italic text-primary-gold leading-relaxed">
+                    <p class="text-sm font-serif italic text-primary leading-relaxed">
                         «Благая лепта вдовицы не оскудеет, но умножится»
                     </p>
                     <p class="text-[10px] text-text-muted mt-2">— Евангелие от Луки, 21:1-4</p>

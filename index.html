@@ -148,7 +148,7 @@
                                         class="font-headline italic text-2xl text-primary mb-2 leading-tight">Седмица
                                         4-я Великого поста, Крестопоклонная</p>
                                     <p id="memorial-text"
-                                        class="font-headline text-base mb-3 leading-tight hidden" style="color: #7dd3fc;">† Поминовение усопших</p>
+                                        class="font-headline text-base mb-3 leading-tight hidden" style="color: var(--color-memorial);">† Поминовение усопших</p>
                                     <div class="inline-flex items-center px-3 py-1 rounded-md"
                                         style="background-color: var(--color-surface-container-low);">
                                         <span id="fasting-tone-text"
@@ -189,8 +189,8 @@
                         <!-- Прогресс-бар кэша -->
                         <div id="cache-progress-wrap" class="hidden">
                             <div class="flex items-center justify-between mb-1">
-                                <span id="cache-progress-label" class="text-[9px] font-bold uppercase tracking-widest" style="color: var(--color-primary-gold); opacity: 0.8;">Загрузка...</span>
-                                <span id="cache-progress-pct" class="text-[9px] font-bold" style="color: var(--color-primary-gold); opacity: 0.8;">0%</span>
+                                <span id="cache-progress-label" class="text-[9px] font-bold uppercase tracking-widest" style="color: var(--color-primary);">Загрузка...</span>
+                                <span id="cache-progress-pct" class="text-[9px] font-bold" style="color: var(--color-primary);">0%</span>
                             </div>
                             <div class="w-full h-[3px] rounded-full overflow-hidden" style="background: var(--color-surface-alt);">
                                 <div id="cache-progress-bar" class="h-full rounded-full transition-all duration-300" style="width: 0%; background: linear-gradient(90deg, var(--color-primary-gold), #ef4444);"></div>
@@ -1005,7 +1005,7 @@
                         <h2 class="text-4xl font-bold mb-3 tracking-tight text-slate-800" data-t="pdfTitle">Моя исповедь
                         </h2>
                         <p id="preview-date"
-                            class="text-sm font-sans font-bold text-slate-400 uppercase tracking-widest"></p>
+                            class="text-sm font-sans font-bold text-slate-600 uppercase tracking-widest"></p>
                     </div>
 
                     <p id="preview-intro"
@@ -1017,7 +1017,7 @@
                     </div>
 
                     <div id="preview-notes-section" class="pt-10 border-t border-slate-100 hidden">
-                        <p class="text-[10px] font-bold uppercase tracking-[0.3em] mb-6 text-slate-400"
+                        <p class="text-[10px] font-bold uppercase tracking-[0.3em] mb-6 text-slate-600"
                             data-t="personalReflections">Личные заметки</p>
                         <p id="preview-notes" class="text-xl italic text-slate-600 leading-relaxed"></p>
                     </div>
@@ -1294,14 +1294,14 @@
                 </div>
                 <div class="flex items-center gap-2.5">
                     <div class="w-3.5 h-3.5 rounded-full" style="border: 2px solid #7dd3fc; box-shadow: 0 0 6px rgba(125,211,252,0.4);"></div>
-                    <span class="text-[9px] font-bold uppercase tracking-[0.15em]" style="color:#7dd3fc; text-shadow: 0 0 8px rgba(125,211,252,0.3);">ЗА УПОКОЙ</span>
+                    <span class="text-[9px] font-bold uppercase tracking-[0.15em]" style="color: var(--color-memorial);">ЗА УПОКОЙ</span>
                 </div>
             </div>
 
             <!-- Bottom Actions -->
             <div class="grid grid-cols-2 gap-4">
                 <button id="date-picker-today-btn"
-                    class="py-5 rounded-[24px] bg-surface-alt border border-border font-bold text-primary-gold hover:opacity-80 active:scale-95 transition-all uppercase tracking-[0.2em] text-[11px]">Сегодня</button>
+                    class="py-5 rounded-[24px] bg-surface-alt border border-border font-bold text-primary hover:opacity-80 active:scale-95 transition-all uppercase tracking-[0.2em] text-[11px]">Сегодня</button>
                 <button id="date-picker-close-btn"
                     class="py-5 rounded-[24px] bg-text-main text-bg border border-border font-bold hover:opacity-80 active:scale-95 transition-all uppercase tracking-[0.2em] text-[11px]">Закрыть</button>
             </div>
