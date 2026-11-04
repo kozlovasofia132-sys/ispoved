@@ -1,0 +1,40 @@
+# Пример nginx-конфига для ispoved.app
+# 1. Скопируйте в /etc/nginx/sites-available/ispoved.app
+# 2. ln -s /etc/nginx/sites-available/ispoved.app /etc/nginx/sites-enabled/
+# 3. sudo certbot --nginx -d ispoved.app
+# 4. sudo nginx -t && sudo systemctl reload nginx
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name ispoved.app;
+
+    # Certbot сам добавит редирект на HTTPS
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name ispoved.app;
+
+    # Пути подставит certbot
+    ssl_certificate     /etc/letsencrypt/live/ispoved.app/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/ispoved.app/privkey.pem;
+
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header X-Content-Type-Options "nosniff" always;
+
+    client_max_body_size 64k;
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}

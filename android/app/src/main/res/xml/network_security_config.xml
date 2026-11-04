@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- ВРЕМЕННО: HTTP до переезда на HTTPS.
+         После настройки домена и сертификата (см. server/README.md)
+         удалите этот блок — приложение будет работать только по HTTPS. -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">82.146.34.140</domain>
+    </domain-config>
+</network-security-config>

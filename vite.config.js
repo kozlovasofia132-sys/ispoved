@@ -1,7 +1,40 @@
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
-export default defineConfig({
+// Content-Security-Policy добавляется только в production-сборку:
+// в dev-режиме Vite использует inline-скрипты и websocket для HMR.
+const CSP = [
+    "default-src 'self'",
+    "base-uri 'self'",
+    "object-src 'none'",
+    "frame-src 'none'",
+    "manifest-src 'self'",
+    "worker-src 'self'",
+    "script-src 'self'",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' data: https://fonts.gstatic.com",
+    "img-src 'self' data: blob: https:",
+    "media-src 'self' blob: https:",
+    "connect-src 'self' https://azbyka.ru https://*.azbyka.ru https://pravoslavie-audio.com https://ispoved.app http://82.146.34.140:3000",
+    "form-action 'self'"
+].join('; ');
+
+const cspPlugin = {
+    name: 'inject-csp',
+    transformIndexHtml(html, ctx) {
+        if (ctx.server) return html;
+        return {
+            html,
+            tags: [{
+                tag: 'meta',
+                attrs: { 'http-equiv': 'Content-Security-Policy', content: CSP },
+                injectTo: 'head-prepend'
+            }]
+        };
+    }
+};
+
+export default defineConfig(({ command }) => ({
     server: {
         host: true,
         port: 5173,
@@ -21,7 +54,12 @@ export default defineConfig({
         loader: 'js',
         include: /^src\/.*\.js$/,
         exclude: [/node_modules/, /\.agents\//, /my-video\//, /\.jsx$/, /\.tsx$/],
-        jsx: 'preserve'
+        jsx: 'preserve',
+        // В production убираем отладочные логи, но оставляем console.warn/error.
+        ...(command === 'build' ? {
+            pure: ['console.log', 'console.debug', 'console.info'],
+            drop: ['debugger']
+        } : {})
     },
     optimizeDeps: {
         esbuildOptions: {
@@ -31,6 +69,7 @@ export default defineConfig({
         }
     },
     plugins: [
+        cspPlugin,
         VitePWA({
             strategy: 'generateSW',
             registerType: 'autoUpdate',
@@ -38,21 +77,33 @@ export default defineConfig({
             manifest: {
                 name: 'Исповедь',
                 short_name: 'Исповедь',
-                theme_color: '#ffffff',
-                background_color: '#ffffff',
+                theme_color: '#fbf9f4',
+                background_color: '#fbf9f4',
                 display: 'standalone',
                 icons: [
                     {
-                        src: '/icon.svg',
+                        src: '/pwa-192x192.png',
                         sizes: '192x192',
-                        type: 'image/svg+xml',
-                        purpose: 'any maskable'
+                        type: 'image/png',
+                        purpose: 'any'
+                    },
+                    {
+                        src: '/pwa-512x512.png',
+                        sizes: '512x512',
+                        type: 'image/png',
+                        purpose: 'any'
+                    },
+                    {
+                        src: '/pwa-maskable-512.png',
+                        sizes: '512x512',
+                        type: 'image/png',
+                        purpose: 'maskable'
                     },
                     {
                         src: '/icon.svg',
-                        sizes: '512x512',
+                        sizes: 'any',
                         type: 'image/svg+xml',
-                        purpose: 'any maskable'
+                        purpose: 'any'
                     }
                 ]
             },
@@ -133,4 +184,4 @@ export default defineConfig({
             }
         })
     ]
-});
+}));

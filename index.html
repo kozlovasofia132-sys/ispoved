@@ -1,8 +1,10 @@
+<!DOCTYPE html>
 <html lang="ru">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Православное приложение для подготовки к исповеди: испытание совести, церковный календарь, молитвы и чтения дня.">
     <title>Исповедь</title>
     <!-- Fonts and Icons -->
     <link
@@ -14,7 +16,7 @@
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <meta name="theme-color" content="#fbf9f4" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#120F16" media="(prefers-color-scheme: dark)">
-    <link rel="apple-touch-icon" href="/icon.svg">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <style>
         .text-shadow-subtle {
             text-shadow: 0 0 1px rgba(255, 255, 255, 0.1), 0 0 2px rgba(255, 255, 255, 0.05);
@@ -87,7 +89,7 @@
                                 <!-- 2 Cells Block (New and Old Style) -->
                                 <div class="flex items-center justify-center gap-2 mt-4 relative group w-full">
                                     <!-- Prev Day Button -->
-                                    <button id="prev-date-btn"
+                                    <button id="prev-date-btn" aria-label="Предыдущий день"
                                         class="absolute -left-12 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-[var(--color-surface)] rounded-xl border border-[#E1C16E]/20 text-[#E1C16E] flex items-center justify-center hover:bg-[#E1C16E]/10 active:scale-95 active:opacity-100 transition-all shadow-lg shadow-black/20 dark:shadow-black/40">
                                         <span class="material-symbols-outlined text-2xl">chevron_left</span>
                                     </button>
@@ -124,7 +126,7 @@
                                     </button>
 
                                     <!-- Next Day Button -->
-                                    <button id="next-date-btn"
+                                    <button id="next-date-btn" aria-label="Следующий день"
                                         class="absolute -right-12 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-[var(--color-surface)] rounded-xl border border-[#E1C16E]/20 text-[#E1C16E] flex items-center justify-center hover:bg-[#E1C16E]/10 active:scale-95 active:opacity-100 transition-all shadow-lg shadow-black/20 dark:shadow-black/40">
                                         <span class="material-symbols-outlined text-2xl">chevron_right</span>
                                     </button>
@@ -141,7 +143,7 @@
                                 <!-- Sedmitsa & Fasting Info -->
                                 <div class="mt-8 text-center">
                                     <p id="holiday-title-text"
-                                        class="font-headline text-xl font-semibold mb-1 leading-tight hidden" style="color: #ef4444;"></p>
+                                        class="font-headline text-xl font-semibold mb-1 leading-tight hidden" style="color: var(--color-accent-red);"></p>
                                     <p id="sedmitsa-text"
                                         class="font-headline italic text-2xl text-primary mb-2 leading-tight">Седмица
                                         4-я Великого поста, Крестопоклонная</p>
@@ -177,11 +179,11 @@
                 <div class="px-4 mt-12 animate-fade-in-up" style="animation-delay: 0.1s">
                     <section class="space-y-6">
                         <div class="flex items-baseline justify-between pb-4">
-                            <h3 class="font-headline text-3xl italic" data-t="readingsOfDay"
+                            <h2 class="font-headline text-3xl italic" data-t="readingsOfDay"
                                 style="color: var(--color-on-surface);">Чтения дня
-                            </h3>
+                            </h2>
                             <span class="font-label text-[10px] font-bold uppercase tracking-widest" id="readings-count"
-                                style="color: var(--color-on-surface-variant); opacity: 0.5;">0 чтений</span>
+                                style="color: var(--color-on-surface-variant); opacity: 0.8;">0 чтений</span>
                         </div>
 
                         <!-- Прогресс-бар кэша -->
@@ -237,8 +239,8 @@
                                 <span class="material-symbols-outlined"
                                     style="color: #92400e; font-size: 20px;">auto_stories</span>
                             </div>
-                            <h3 class="text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.2em]"
-                                data-t="wisdomTitle">Мудрость святых</h3>
+                            <h2 class="text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.2em]"
+                                data-t="wisdomTitle">Мудрость святых</h2>
                         </div>
                         <p id="confession-quote-text"
                             class="text-base font-body italic leading-relaxed mb-4 text-on-surface">
@@ -263,7 +265,7 @@
                         <p data-t="psalm50Recommendation"
                             class="text-[11px] font-bold text-on-surface text-center uppercase tracking-[0.1em] m-0">
                             Рекомендуется прочитать Псалом 50</p>
-                        <button id="psalm-50-play-btn"
+                        <button id="psalm-50-play-btn" aria-label="Воспроизвести псалом 50"
                             class="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary transition-all active:scale-95">
                             <span class="material-symbols-outlined text-lg">play_arrow</span>
                         </button>
@@ -457,11 +459,11 @@
                     <!-- Appearance Section -->
                     <section>
                         <div class="flex items-baseline justify-between pb-2">
-                            <h3 class="font-headline text-xl italic" data-t="sectionAppearance"
+                            <h2 class="font-headline text-xl italic" data-t="sectionAppearance"
                                 style="color: var(--color-on-surface);">
-                                Настройки вида</h3>
+                                Настройки вида</h2>
                             <span class="font-label text-[10px] font-bold uppercase tracking-widest"
-                                style="color: var(--color-on-surface-variant); opacity: 0.5;">Внешний вид</span>
+                                style="color: var(--color-on-surface-variant); opacity: 0.8;">Внешний вид</span>
                         </div>
                         <div class="bg-surface-container-low rounded-lg overflow-hidden">
                             <!-- Theme Toggle -->
@@ -475,7 +477,7 @@
                                         храма</span>
                                 </div>
                                 <label class="relative inline-flex items-center cursor-pointer">
-                                    <input id="theme-toggle" type="checkbox" class="sr-only peer" checked>
+                                    <input id="theme-toggle" type="checkbox" class="sr-only peer" aria-label="Режим для храма" checked>
                                     <div
                                         class="w-12 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:left-[2px] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary shadow-sm">
                                     </div>
@@ -525,11 +527,11 @@
                     <!-- Age Profile Section -->
                     <section>
                         <div class="flex items-baseline justify-between pb-2">
-                            <h3 class="font-headline text-xl italic" data-t="sectionProfile"
+                            <h2 class="font-headline text-xl italic" data-t="sectionProfile"
                                 style="color: var(--color-on-surface);">Профиль
-                                верующего</h3>
+                                верующего</h2>
                             <span class="font-label text-[10px] font-bold uppercase tracking-widest"
-                                style="color: var(--color-on-surface-variant); opacity: 0.5;">Профиль</span>
+                                style="color: var(--color-on-surface-variant); opacity: 0.8;">Профиль</span>
                         </div>
                         <div class="glass-card p-2 grid grid-cols-3 gap-2 rounded-[32px] overflow-hidden">
                             <button data-profile="adult"
@@ -547,11 +549,11 @@
                     <!-- Language Section -->
                     <section>
                         <div class="flex items-baseline justify-between pb-2">
-                            <h3 class="font-headline text-xl italic" data-t="sectionLanguage"
+                            <h2 class="font-headline text-xl italic" data-t="sectionLanguage"
                                 style="color: var(--color-on-surface);">Язык
-                                богослужения</h3>
+                                богослужения</h2>
                             <span class="font-label text-[10px] font-bold uppercase tracking-widest"
-                                style="color: var(--color-on-surface-variant); opacity: 0.5;">Язык</span>
+                                style="color: var(--color-on-surface-variant); opacity: 0.8;">Язык</span>
                         </div>
                         <div class="glass-card p-2 grid grid-cols-2 gap-2 rounded-[32px] overflow-hidden">
                             <button data-lang="ru"
@@ -565,11 +567,11 @@
                     <!-- Privacy Section -->
                     <section>
                         <div class="flex items-baseline justify-between pb-2">
-                            <h3 class="font-headline text-xl italic" data-t="sectionPrivacy"
+                            <h2 class="font-headline text-xl italic" data-t="sectionPrivacy"
                                 style="color: var(--color-on-surface);">Хранение
-                                данных</h3>
+                                данных</h2>
                             <span class="font-label text-[10px] font-bold uppercase tracking-widest"
-                                style="color: var(--color-on-surface-variant); opacity: 0.5;">Данные</span>
+                                style="color: var(--color-on-surface-variant); opacity: 0.8;">Данные</span>
                         </div>
                         <div class="glass-card divide-y divide-white/5 rounded-[32px] overflow-hidden">
                             <!-- PIN Code Entry -->
@@ -583,7 +585,7 @@
                                         ПИН-коду</span>
                                 </div>
                                 <label class="relative inline-flex items-center cursor-pointer">
-                                    <input id="pin-toggle" type="checkbox" class="sr-only peer" />
+                                    <input id="pin-toggle" type="checkbox" class="sr-only peer" aria-label="Вход по ПИН-коду" />
                                     <div
                                         class="w-14 h-7 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:left-[4px] after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary shadow-lg shadow-black/20">
                                     </div>
@@ -595,11 +597,11 @@
                     <!-- App Section -->
                     <section>
                         <div class="flex items-baseline justify-between pb-2">
-                            <h3 class="font-headline text-xl italic" data-t="sectionApp"
+                            <h2 class="font-headline text-xl italic" data-t="sectionApp"
                                 style="color: var(--color-on-surface);">Об
-                                приложении</h3>
+                                приложении</h2>
                             <span class="font-label text-[10px] font-bold uppercase tracking-widest"
-                                style="color: var(--color-on-surface-variant); opacity: 0.5;">Приложение</span>
+                                style="color: var(--color-on-surface-variant); opacity: 0.8;">Приложение</span>
                         </div>
                         <div class="glass-card divide-y divide-white/5 rounded-[32px] overflow-hidden">
                             <!-- About Item -->
@@ -620,9 +622,9 @@
                                     class="w-full flex items-center gap-4 px-5 py-4 rounded-2xl
                                            bg-primary-gold hover:bg-amber-500 active:scale-[0.98]
                                            transition-all duration-200 shadow-lg shadow-primary-gold/30 text-left">
-                                    <span class="material-symbols-outlined text-bg text-2xl">favorite</span>
-                                    <span class="text-lg font-bold text-bg flex-1" data-t="donateTitle">Поддержать проект</span>
-                                    <span class="material-symbols-outlined text-bg/70">chevron_right</span>
+                                    <span class="material-symbols-outlined text-[#3D2B1F] text-2xl">favorite</span>
+                                    <span class="text-lg font-bold text-[#3D2B1F] flex-1" data-t="donateTitle">Поддержать проект</span>
+                                    <span class="material-symbols-outlined text-[#3D2B1F]/70">chevron_right</span>
                                 </button>
                             </div>
 
@@ -810,7 +812,7 @@
     <div id="prayer-modal"
         class="fixed inset-0 z-[300] flex items-end justify-center p-0 bg-black/70 backdrop-blur-sm hidden">
         <!-- Close Button (X) - Top Right Corner of Screen -->
-        <button id="prayer-modal-close-x-btn"
+        <button id="prayer-modal-close-x-btn" aria-label="Закрыть молитву"
             class="fixed top-6 right-6 z-[310] w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md flex items-center justify-center text-white active:scale-90 transition-all">
             <span class="material-symbols-outlined text-3xl">close</span>
         </button>
@@ -842,7 +844,7 @@
         <div
             class="bg-surface w-full max-w-md rounded-[40px] overflow-hidden shadow-2xl border border-border animate-fade-in-up relative">
             <!-- Close Button -->
-            <button id="close-donate-btn"
+            <button id="close-donate-btn" aria-label="Закрыть экран пожертвований"
                 class="absolute top-4 right-4 w-10 h-10 rounded-full bg-surface-alt flex items-center justify-center text-text-muted hover:text-text-main transition-all active:scale-90 z-50">
                 <span class="material-symbols-outlined text-xl">close</span>
             </button>
@@ -949,7 +951,7 @@
                     Господи, помоги мне исповедать грехи мои искренне и без утайки...
                 </p>
                 <!-- Close Button -->
-                <button id="close-read-mode-btn"
+                <button id="close-read-mode-btn" aria-label="Закрыть режим чтения"
                     class="absolute -bottom-14 right-0 w-12 h-12 rounded-full bg-surface-alt flex items-center justify-center text-text-muted active:scale-90 transition-all shadow-sm">
                     <span class="material-symbols-outlined text-2xl">close</span>
                 </button>
@@ -985,7 +987,7 @@
         class="fixed inset-0 z-[500] bg-black/80 backdrop-blur-xl flex items-center justify-center hidden p-4 sm:p-8 overflow-hidden">
         <div class="relative w-full max-w-2xl h-full flex flex-col animate-slide-up">
             <!-- Floating Close -->
-            <button id="close-preview-btn"
+            <button id="close-preview-btn" aria-label="Закрыть предпросмотр"
                 class="absolute top-0 right-0 flex items-center gap-3 text-black hover:text-black transition-opacity group">
 
                 <div
@@ -1026,12 +1028,17 @@
                 </div>
             </div>
 
-            <!-- Share Button -->
-            <div class="mt-8 flex justify-center">
+            <!-- Actions -->
+            <div class="mt-8 flex flex-wrap justify-center gap-3">
                 <button id="share-sheet-btn"
                     class="flex items-center gap-3 px-8 py-4 rounded-2xl bg-slate-900 text-white font-bold shadow-lg active:scale-95 transition-all">
                     <span class="material-symbols-outlined">share</span>
-                    <span>Поделиться</span>
+                    <span data-t="shareAction">Поделиться</span>
+                </button>
+                <button id="download-pdf-btn"
+                    class="flex items-center gap-3 px-8 py-4 rounded-2xl bg-white text-slate-900 font-bold shadow-lg active:scale-95 transition-all border border-slate-200">
+                    <span class="material-symbols-outlined">picture_as_pdf</span>
+                    <span data-t="downloadPdf">Скачать PDF</span>
                 </button>
             </div>
         </div>
@@ -1039,8 +1046,7 @@
 
     <!-- Messenger Share Modal -->
     <div id="messenger-share-modal"
-        class="fixed inset-0 z-[600] bg-black/60 backdrop-blur-sm flex items-end justify-center hidden"
-        onclick="if(event.target===this)document.getElementById('messenger-share-modal').classList.add('hidden')">
+        class="fixed inset-0 z-[600] bg-black/60 backdrop-blur-sm flex items-end justify-center hidden">
         <div class="w-full max-w-lg bg-white rounded-t-3xl p-6 pb-10 animate-slide-up">
             <div class="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-6"></div>
             <p class="text-center text-sm font-bold uppercase tracking-widest text-slate-400 mb-6">Поделиться через</p>
@@ -1059,7 +1065,7 @@
                 <!-- Audio Player in Header -->
                 <div id="audio-player-bar"
                     class="flex-1 bg-[#1a1914]/80 backdrop-blur-xl border border-[#E1C16E]/20 rounded-xl p-3 pr-4 flex items-center gap-3 shadow-lg hidden animate-fade-in">
-                    <button id="audio-play-pause-btn"
+                    <button id="audio-play-pause-btn" aria-label="Воспроизвести"
                         class="w-10 h-10 rounded-full bg-[#E1C16E]/10 border-2 border-[#E1C16E]/30 flex items-center justify-center text-[#E1C16E] hover:bg-[#E1C16E]/20 active:scale-95 transition-all shrink-0">
                         <span id="audio-play-icon" class="material-symbols-outlined text-2xl">play_arrow</span>
                     </button>
@@ -1078,7 +1084,7 @@
                     </div>
                 </div>
                 <!-- Close Button inline with player -->
-                <button id="close-prayers-modal-btn"
+                <button id="close-prayers-modal-btn" aria-label="Закрыть молитвы"
                     class="shrink-0 w-10 h-10 rounded-full bg-[#E1C16E]/10 border border-[#E1C16E]/30 flex items-center justify-center text-[#E1C16E] active:scale-90 transition-all">
                     <span class="material-symbols-outlined text-xl">close</span>
                 </button>
@@ -1120,13 +1126,13 @@
         <div id="teleprompter-controls"
              class="fixed bottom-24 right-4 z-[99999] hidden flex-col items-center gap-10 p-4 rounded-[40px] bg-[#120F16]/80 backdrop-blur-md border border-white/10 shadow-3xl transition-all duration-300">
 
-            <button id="toggle-autoscroll-btn"
+            <button id="toggle-autoscroll-btn" aria-label="Автопрокрутка"
                     class="w-14 h-14 rounded-full bg-primary-gold text-[#120F16] flex items-center justify-center shadow-lg shadow-primary-gold/20 active:scale-95 transition-all">
                 <span id="autoscroll-icon" class="material-symbols-outlined text-3xl font-bold">play_arrow</span>
             </button>
 
             <div id="teleprompter-content" class="flex flex-col items-center gap-4 transition-all duration-[800ms] opacity-0 max-h-0 overflow-hidden mt-6">
-                <button id="speed-up-btn"
+                <button id="speed-up-btn" aria-label="Увеличить скорость прокрутки"
                         class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-primary-gold active:scale-90 transition-all">
                     <span class="material-symbols-outlined text-2xl">add</span>
                 </button>
@@ -1137,7 +1143,7 @@
                            style="transform: rotate(-90deg); -webkit-appearance: none;">
                 </div>
 
-                <button id="speed-down-btn"
+                <button id="speed-down-btn" aria-label="Уменьшить скорость прокрутки"
                         class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-primary-gold active:scale-90 transition-all">
                     <span class="material-symbols-outlined text-2xl">remove</span>
                 </button>
@@ -1168,7 +1174,7 @@
     </div>
 
     <!-- PIN Pad Modal -->
-    <button id="pin-pad-close-btn"
+    <button id="pin-pad-close-btn" aria-label="Закрыть"
         class="fixed top-8 right-8 z-[10001] w-12 h-12 rounded-full bg-surface-alt/80 backdrop-blur-md flex items-center justify-center text-text-muted hover:text-text-main transition-all active:scale-90 hidden border border-border">
         <span class="material-symbols-outlined text-2xl">close</span>
     </button>
@@ -1232,7 +1238,7 @@
                     data-val="0">0</button>
                 <button
                     class="w-20 h-20 rounded-full flex items-center justify-center text-text-muted active:scale-90 transition-all"
-                    id="pin-delete-btn">
+                    id="pin-delete-btn" aria-label="Удалить цифру">
                     <span class="material-symbols-outlined text-3xl">backspace</span>
                 </button>
             </div>
@@ -1246,12 +1252,12 @@
             class="bg-surface rounded-[48px] p-8 border border-border shadow-2xl flex flex-col gap-8 w-full max-w-sm animate-fade-in-up">
             <!-- Header -->
             <div class="flex items-center justify-between px-2">
-                <button id="date-picker-prev-month"
+                <button id="date-picker-prev-month" aria-label="Предыдущий месяц"
                     class="w-14 h-14 rounded-2xl border border-border flex items-center justify-center text-primary-gold hover:bg-surface-alt active:scale-90 transition-all">
                     <span class="material-symbols-outlined text-2xl">chevron_left</span>
                 </button>
                 <h2 id="date-picker-month-year" class="font-serif text-2xl font-bold text-text-main tracking-wide"></h2>
-                <button id="date-picker-next-month"
+                <button id="date-picker-next-month" aria-label="Следующий месяц"
                     class="w-14 h-14 border border-border rounded-2xl flex items-center justify-center text-primary-gold hover:bg-surface-alt active:scale-90 transition-all">
                     <span class="material-symbols-outlined text-2xl">chevron_right</span>
                 </button>

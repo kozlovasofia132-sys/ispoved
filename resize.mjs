@@ -4,34 +4,56 @@ import path from 'path';
 
 const resDir = 'D:\\Ispoved\\android\\app\\src\\main\\res';
 const mobileImg  = 'D:\\Ispoved\\public\\mobile_app.jpg';   // для телефонов (портрет)
-const tabletImg  = 'D:\\Ispoved\\public\\tablet_app.jpg';   // для планшетов (альбом)
+const tabletImg  = 'D:\\Ispoved\\public\\tablet_app.jpg';   // для планшетов
 
 // Телефоны — портретные папки
 const phoneSizes = [
-    { folder: 'drawable',              width: 320,  height: 480  },
-    { folder: 'drawable-port-mdpi',    width: 320,  height: 480  },
-    { folder: 'drawable-port-hdpi',    width: 480,  height: 800  },
+    { folder: 'drawable',              width: 720,  height: 1280 },
+    { folder: 'drawable-xhdpi',        width: 720,  height: 1280 },
+    { folder: 'drawable-xxhdpi',       width: 1080, height: 1920 },
+    { folder: 'drawable-xxxhdpi',      width: 1440, height: 2560 },
     { folder: 'drawable-port-xhdpi',   width: 720,  height: 1280 },
     { folder: 'drawable-port-xxhdpi',  width: 1080, height: 1920 },
     { folder: 'drawable-port-xxxhdpi', width: 1440, height: 2560 },
 ];
 
-// Телефоны — альбомные папки
-const phoneLandSizes = [
-    { folder: 'drawable-land-mdpi',    width: 480,  height: 320  },
-    { folder: 'drawable-land-hdpi',    width: 800,  height: 480  },
-    { folder: 'drawable-land-xhdpi',   width: 1280, height: 720  },
-    { folder: 'drawable-land-xxhdpi',  width: 1920, height: 1080 },
-    { folder: 'drawable-land-xxxhdpi', width: 2560, height: 1440 },
-];
 
-// Планшеты — smallest width (sw) — работают для обеих ориентаций
+// Планшеты
 const tabletSizes = [
-    { folder: 'drawable-sw600dp',  width: 1280, height: 800  }, // 7" планшеты
-    { folder: 'drawable-sw720dp',  width: 1920, height: 1200 }, // 10" планшеты
+    { folder: 'drawable-sw600dp',  width: 1280, height: 800  },
+    { folder: 'drawable-sw720dp',  width: 1920, height: 1200 },
 ];
 
-async function generate(inputPath, sizes, fit = 'cover') {
+// Цвета фона телефонов: сверху #120A07, снизу #0E0A07
+const PHONE_COLOR_TOP    = '#120A07';
+const PHONE_COLOR_BOTTOM = '#0E0A07';
+
+// Цвет фона планшетов (слева и справа): #0E0905
+const TABLET_BG = '#0E0905';
+
+function makeSvgGradient(width, height) {
+    return Buffer.from(
+        `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%"   stop-color="${PHONE_COLOR_TOP}"/>
+                    <stop offset="100%" stop-color="${PHONE_COLOR_BOTTOM}"/>
+                </linearGradient>
+            </defs>
+            <rect width="${width}" height="${height}" fill="url(#bg)"/>
+        </svg>`
+    );
+}
+
+function makeSvgSolid(width, height, color) {
+    return Buffer.from(
+        `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+            <rect width="${width}" height="${height}" fill="${color}"/>
+        </svg>`
+    );
+}
+
+async function generate(inputPath, sizes, bgType = 'gradient') {
     for (const size of sizes) {
         const outFolder = path.join(resDir, size.folder);
         if (!fs.existsSync(outFolder)) {
@@ -39,29 +61,38 @@ async function generate(inputPath, sizes, fit = 'cover') {
         }
         const outPath = path.join(outFolder, 'splash.png');
         console.log(`Генерирую ${size.folder}/splash.png (${size.width}x${size.height})...`);
-        await sharp(inputPath)
+
+        // Вписываем картинку с прозрачным фоном
+        const resized = await sharp(inputPath)
             .resize({
                 width: size.width,
                 height: size.height,
-                fit: fit,
-                position: 'centre',
-                background: { r: 0, g: 0, b: 0, alpha: 1 }
+                fit: 'contain',
+                background: { r: 0, g: 0, b: 0, alpha: 0 }
             })
             .png()
+            .toBuffer();
+
+        // Фон: градиент для телефонов, сплошной для планшетов
+        const bg = bgType === 'solid'
+            ? makeSvgSolid(size.width, size.height, TABLET_BG)
+            : makeSvgGradient(size.width, size.height);
+
+        await sharp(bg)
+            .composite([{ input: resized, gravity: 'centre' }])
+            .png()
             .toFile(outPath);
+
         console.log(`✓ ${size.folder}/splash.png`);
     }
 }
 
 async function main() {
     console.log('\n📱 Телефоны (портрет)...');
-    await generate(mobileImg, phoneSizes, 'cover');
-
-    console.log('\n📱 Телефоны (альбом)...');
-    await generate(mobileImg, phoneLandSizes, 'cover');
+    await generate(mobileImg, phoneSizes);
 
     console.log('\n🖥️ Планшеты...');
-    await generate(mobileImg, tabletSizes, 'cover');
+    await generate(tabletImg, tabletSizes, 'solid');
 
     console.log('\n✅ Все заставки сгенерированы!');
 }

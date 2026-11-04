@@ -16,7 +16,7 @@ export function createDonationScreen() {
                         </div>
                         <h2 class="text-2xl font-serif font-bold text-text-main">Принести лепту</h2>
                     </div>
-                    <button id="close-donation-btn" class="w-10 h-10 rounded-full hover:bg-surface-alt flex items-center justify-center text-text-muted transition-all active:scale-90">
+                    <button id="close-donation-btn" aria-label="Закрыть" class="w-10 h-10 rounded-full hover:bg-surface-alt flex items-center justify-center text-text-muted transition-all active:scale-90">
                         <span class="material-symbols-outlined text-2xl">close</span>
                     </button>
                 </div>
@@ -43,7 +43,7 @@ export function createDonationScreen() {
                             <p class="text-xl font-bold text-text-main tracking-wide font-mono">2200 7004 2585 7306</p>
                             <p class="text-xs text-text-muted mt-1">Т-Банк · Карта МИР</p>
                         </div>
-                        <button id="copy-card-btn" class="shrink-0 w-12 h-12 rounded-xl bg-primary-gold/10 border border-primary-gold/20
+                        <button id="copy-card-btn" aria-label="Скопировать номер карты Т-Банк" class="shrink-0 w-12 h-12 rounded-xl bg-primary-gold/10 border border-primary-gold/20
                                hover:bg-primary-gold/20 active:scale-90 transition-all flex items-center justify-center">
                             <span class="material-symbols-outlined text-primary-gold text-2xl">content_copy</span>
                         </button>
@@ -61,7 +61,7 @@ export function createDonationScreen() {
                             <p class="text-xl font-bold text-text-main tracking-wide font-mono">2202 2088 8035 5541</p>
                             <p class="text-xs text-text-muted mt-1">Сбербанк · Карта МИР</p>
                         </div>
-                        <button id="copy-sber-btn" class="shrink-0 w-12 h-12 rounded-xl bg-primary-gold/10 border border-primary-gold/20
+                        <button id="copy-sber-btn" aria-label="Скопировать номер карты Сбербанк" class="shrink-0 w-12 h-12 rounded-xl bg-primary-gold/10 border border-primary-gold/20
                                hover:bg-primary-gold/20 active:scale-90 transition-all flex items-center justify-center">
                             <span class="material-symbols-outlined text-primary-gold text-2xl">content_copy</span>
                         </button>

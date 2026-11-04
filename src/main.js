@@ -3,8 +3,6 @@ import { Capacitor } from '@capacitor/core';
 import { App } from '@capacitor/app';
 import { Browser } from '@capacitor/browser';
 import { TextToSpeech } from '@capacitor-community/text-to-speech';
-import { jsPDF } from 'jspdf';
-import html2canvas from 'html2canvas';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { NavigationBar } from '@capgo/capacitor-navigation-bar';
 import { getSinsData, setProfile, getProfile } from './data/sins.js';
@@ -17,9 +15,59 @@ import { quotes } from './data/quotes.js';
 import { prayersData } from './data/prayers.js';
 import { createDonationScreen, initDonationScreen, openDonationScreen, closeDonationScreen } from './components/DonationScreen.js';
 import { readingSummaries } from './data/readingSummaries.js';
+import { escapeHtml, escapeAttr, safeUrl } from './utils/escapeHtml.js';
+
+// Удалённые ИИ-комментарии к чтениям (загружаются раз в неделю).
+// URL задаётся в .env (VITE_SUMMARIES_URL), например:
+// VITE_SUMMARIES_URL=https://ispoved.app/summaries.json
+const REMOTE_SUMMARIES_URL = (
+    import.meta.env.VITE_SUMMARIES_URL || 'http://82.146.34.140:3000/summaries.json'
+).trim();
+const REMOTE_SUMMARIES_KEY = 'remote_summaries_v1';
+const REMOTE_SUMMARIES_TTL = 7 * 24 * 60 * 60 * 1000; // 7 дней
+
+// Незащищённый HTTP допустим только для локальной разработки.
+if (/^http:\/\//i.test(REMOTE_SUMMARIES_URL) && !/^http:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/i.test(REMOTE_SUMMARIES_URL)) {
+    console.warn('[Summaries] Используется незащищённый HTTP. Укажите VITE_SUMMARIES_URL с https://');
+}
+
+function getRemoteSummaries() {
+    try {
+        const raw = localStorage.getItem(REMOTE_SUMMARIES_KEY);
+        if (!raw) return null;
+        const { data } = JSON.parse(raw);
+        return data || null;
+    } catch { return null; }
+}
+
+function fetchRemoteSummariesIfStale() {
+    try {
+        const raw = localStorage.getItem(REMOTE_SUMMARIES_KEY);
+        if (raw) {
+            const { ts } = JSON.parse(raw);
+            if (Date.now() - ts < REMOTE_SUMMARIES_TTL) return;
+        }
+    } catch {}
+    fetch(REMOTE_SUMMARIES_URL, { cache: 'no-store' })
+        .then(r => {
+            if (!r.ok) return null;
+            const contentType = r.headers.get('content-type') || '';
+            if (!contentType.includes('json')) return null;
+            return r.json();
+        })
+        .then(data => {
+            // Ожидаем объект вида { "2026-04-05": { ... } }
+            if (!data || typeof data !== 'object' || Array.isArray(data)) return;
+            localStorage.setItem(REMOTE_SUMMARIES_KEY, JSON.stringify({ data, ts: Date.now() }));
+        })
+        .catch(() => {});
+}
 
 
 document.addEventListener('DOMContentLoaded', () => {
+
+    // Фоновая загрузка ИИ-комментариев к чтениям (не блокирует UI)
+    fetchRemoteSummariesIfStale();
 
     // --- Global Error Interceptor ---
     window.addEventListener('error', (event) => {
@@ -234,6 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const readModeContainerChurch = document.getElementById('read-mode-container-church');
     const readingModeContent = document.getElementById('reading-mode-content');
     const printPdfBtn = document.getElementById('print-pdf-btn');
+    const downloadPdfBtn = document.getElementById('download-pdf-btn');
     const previewModal = document.getElementById('preview-modal');
     const closePreviewBtn = document.getElementById('close-preview-btn');
     const previewSheet = document.getElementById('preview-sheet');
@@ -363,6 +412,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     function applyLanguageFont() {
+        document.documentElement.lang = currentLanguage === 'cs' ? 'cu' : 'ru';
         document.body.classList.toggle('font-cs', currentLanguage === 'cs');
 
         // Обновляем отступ для шапки
@@ -533,19 +583,19 @@ document.addEventListener('DOMContentLoaded', () => {
                             <div class="flex-1">
                                 <div class="flex items-start justify-between gap-2">
                                     <div class="flex-1">
-                                        <p class="text-sm text-slate-900 dark:text-slate-200 font-bold group-hover/item:text-black dark:group-hover/item:text-white transition-colors leading-[1.4]">${sinText}</p>
+                                        <p class="text-sm text-slate-900 dark:text-slate-200 font-bold group-hover/item:text-black dark:group-hover/item:text-white transition-colors leading-[1.4]">${escapeHtml(sinText)}</p>
                                         ${hasDescription ? `
-                                        <p id="desc-${sin.id}" class="description-text hidden text-xs text-slate-400 mt-1 leading-relaxed" data-sin-id="${sin.id}">${sin.explanation[currentLanguage] || sin.explanation.ru}</p>
+                                        <p id="desc-${sin.id}" class="description-text hidden text-xs text-slate-400 mt-1 leading-relaxed" data-sin-id="${sin.id}">${escapeHtml(sin.explanation[currentLanguage] || sin.explanation.ru)}</p>
                                         ` : ''}
                                     </div>
                                     <div class="flex items-center gap-1 shrink-0">
                                         ${isDetailedView ? `
-                                        <button type="button" class="note-toggle flex items-center gap-0.5 text-xs text-gray-400 hover:text-primary transition-colors px-2 py-1 rounded-full hover:bg-primary/10" data-sin-id="${sin.id}">
+                                        <button type="button" aria-label="Заметка к греху" class="note-toggle flex items-center gap-0.5 text-xs text-gray-400 hover:text-primary transition-colors px-2 py-1 rounded-full hover:bg-primary/10" data-sin-id="${sin.id}">
                                             <span class="material-symbols-outlined text-sm transition-transform ${hasNote ? 'rotate-180' : ''}" id="note-arrow-${sin.id}">expand_more</span>
                                         </button>
                                         ` : ''}
                                         ${hasDescription ? `
-                                        <button type="button" class="description-toggle w-7 h-7 rounded-full flex items-center justify-center text-slate-400 hover:bg-primary/10 hover:text-primary transition-all" data-sin-id="${sin.id}">
+                                        <button type="button" aria-label="Пояснение к греху" class="description-toggle w-7 h-7 rounded-full flex items-center justify-center text-slate-400 hover:bg-primary/10 hover:text-primary transition-all" data-sin-id="${sin.id}">
                                             <span class="material-symbols-outlined text-lg">help</span>
                                         </button>
                                         ` : ''}
@@ -554,7 +604,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 ${isDetailedView ? `
                                 <textarea class="sin-note-input mt-2 w-full bg-white/5 border border-white/10 rounded-lg p-2 text-xs text-white placeholder:text-gray-500 focus:ring-[#7f19e6] focus:border-[#7f19e6] ${hasNote ? '' : 'hidden'}"
                                     placeholder="Добавить детали..."
-                                    data-sin-id="${sin.id}">${itemNote}</textarea>
+                                    data-sin-id="${sin.id}">${escapeHtml(itemNote)}</textarea>
                                 ` : ''}
                             </div>
                     </label>
@@ -685,6 +735,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Starting renderPreparation. Items count:', preparationData.length);
 
         let resultHtml = '';
+        const speechTexts = new Map();
 
         // 2. Loop through ALL data
         preparationData.forEach((card, index) => {
@@ -702,8 +753,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const speechParts = [body, scripture, scripture2, scripture3, saints, advice, setup].filter(p => p && p.trim().length > 0);
             const fullSpeechText = speechParts.join('. ');
+            speechTexts.set(card.id, fullSpeechText);
             const quoteClass = "italic text-slate-300/90 border-l-4 border-[#E1C16E]/40 pl-4 my-4 leading-relaxed text-sm shadow-[0_0_10px_rgba(225,193,110,0.1)]";
-            const onclickAttr = `onclick="event.preventDefault(); event.stopPropagation(); window.toggleSpeech(\`${fullSpeechText.replace(/"/g, '&quot;').replace(/'/g, "&#39;")}\`, 'tts-icon-${card.id}', ${index + 1}); return false;"`;
 
             resultHtml += `
             <details name="accordion-group" class="group glass-panel rounded-2xl overflow-hidden transition-all duration-500 mb-4
@@ -714,8 +765,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <summary class="cursor-pointer flex items-center gap-4 p-5 select-none list-none [&::-webkit-details-marker]:hidden outline-none
                               hover:bg-[#E1C16E]/5 transition-all duration-300">
                     <span class="flex-1 text-lg font-bold text-[#E1C16E] tracking-tight drop-shadow-[0_0_8px_rgba(225,193,110,0.5)] group-hover:drop-shadow-[0_0_12px_rgba(225,193,110,0.7)] transition-all duration-300">${title}</span>
-                    <button class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 dark:text-white/30 hover:text-primary transition-all active:scale-90"
-                            ${onclickAttr}>
+                    <button type="button" class="tts-btn w-8 h-8 rounded-full flex items-center justify-center text-slate-400 dark:text-white/30 hover:text-primary transition-all active:scale-90"
+                            data-tts-id="${card.id}" data-tts-index="${index + 1}" aria-label="Озвучить раздел">
                         <span id="tts-icon-${card.id}" class="material-symbols-outlined text-xl drop-shadow-sm dark:drop-shadow-[0_0_5px_currentColor]">volume_up</span>
                     </button>
                     <span class="material-symbols-outlined text-slate-400 dark:text-[#E1C16E]/40 group-open:rotate-180 transition-transform duration-300 text-xl drop-shadow-sm dark:drop-shadow-[0_0_5px_rgba(225,193,110,0.3)]">expand_more</span>
@@ -744,6 +795,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 3. Update DOM once
         container.innerHTML = resultHtml;
+
+        container.querySelectorAll('.tts-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const id = btn.getAttribute('data-tts-id');
+                window.toggleSpeech(speechTexts.get(id), 'tts-icon-' + id, Number(btn.getAttribute('data-tts-index')));
+            });
+        });
 
         console.log('renderPreparation finished. Current container children:', container.children.length);
 
@@ -789,7 +849,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const speechParts = [body, scripture, scripture2, setup].filter(p => p && p.trim().length > 0);
         const fullSpeechText = speechParts.join('. ');
         const quoteClass = "italic text-slate-300/90 border-l-4 border-[#E1C16E]/40 pl-4 my-4 leading-relaxed text-sm shadow-[0_0_10px_rgba(225,193,110,0.1)]";
-        const onclickAttr = `onclick="event.preventDefault(); event.stopPropagation(); window.toggleSpeech(\`${fullSpeechText.replace(/"/g, '&quot;').replace(/'/g, "&#39;")}\`, 'tts-icon-${card.id}', 5); return false;"`;
 
         container.innerHTML = `
         <details name="communion-accordion" class="group glass-panel rounded-2xl overflow-hidden transition-all duration-500 mb-4
@@ -800,8 +859,8 @@ document.addEventListener('DOMContentLoaded', () => {
             <summary class="cursor-pointer flex items-center gap-4 p-5 select-none list-none [&::-webkit-details-marker]:hidden outline-none
                           hover:bg-[#E1C16E]/5 transition-all duration-300">
                 <span class="flex-1 text-lg font-bold text-[#E1C16E] tracking-tight drop-shadow-[0_0_8px_rgba(225,193,110,0.5)] group-hover:drop-shadow-[0_0_12px_rgba(225,193,110,0.7)] transition-all duration-300">${title}</span>
-                <button class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 dark:text-white/30 hover:text-primary transition-all active:scale-90"
-                        ${onclickAttr}>
+                <button type="button" class="tts-btn w-8 h-8 rounded-full flex items-center justify-center text-slate-400 dark:text-white/30 hover:text-primary transition-all active:scale-90"
+                        data-tts-id="${card.id}" data-tts-index="5" aria-label="Озвучить раздел">
                     <span id="tts-icon-${card.id}" class="material-symbols-outlined text-xl drop-shadow-sm dark:drop-shadow-[0_0_5px_currentColor]">volume_up</span>
                 </button>
                 <span class="material-symbols-outlined text-slate-400 dark:text-[#E1C16E]/40 group-open:rotate-180 transition-transform duration-300 text-xl drop-shadow-sm dark:drop-shadow-[0_0_5px_rgba(225,193,110,0.3)]">expand_more</span>
@@ -825,6 +884,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     }, 50);
                 }
             };
+        });
+
+        container.querySelectorAll('.tts-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                window.toggleSpeech(fullSpeechText, 'tts-icon-' + card.id, 5);
+            });
         });
     }
 
@@ -871,9 +938,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="sin-card-wrapper animate-fade-in-up" data-sin-id="${item.id}">
                     <div class="sin-card-main">
                         <div class="sin-card-header">
-                            <p class="sin-card-title">${sinTitle}</p>
+                            <p class="sin-card-title">${escapeHtml(sinTitle)}</p>
                             <div class="flex items-center gap-2">
-                                <button class="delete-inline-btn text-red-400/50 hover:text-red-400 transition-colors p-1">
+                                <button class="delete-inline-btn text-red-400/50 hover:text-red-400 transition-colors p-1" aria-label="Удалить из списка">
                                     <span class="material-symbols-outlined text-lg">close</span>
                                 </button>
                                 <span class="sin-card-indicator material-symbols-outlined">${indicatorIcon}</span>
@@ -883,7 +950,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <span class="details-label" data-t="sinDetailsLabel">${t('sinDetailsLabel')}</span>
                             <textarea class="sin-note-input" 
                                       placeholder="${t('sinNotePlaceholder')}"
-                                      data-sin-id="${item.id}">${itemNote}</textarea>
+                                      data-sin-id="${item.id}">${escapeHtml(itemNote)}</textarea>
                         </div>
                     </div>
                 </div>
@@ -893,8 +960,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="sin-card-wrapper simple-view animate-fade-in-up" data-sin-id="${item.id}">
                     <div class="sin-card-main">
                         <div class="sin-card-header flex items-center justify-between py-3 px-4">
-                            <p class="sin-card-title text-sm font-bold flex-1">${sinTitle}</p>
-                            <button class="delete-inline-btn text-red-400 opacity-60 hover:opacity-100 transition-opacity ml-2">
+                            <p class="sin-card-title text-sm font-bold flex-1">${escapeHtml(sinTitle)}</p>
+                            <button class="delete-inline-btn text-red-400 opacity-60 hover:opacity-100 transition-opacity ml-2" aria-label="Удалить из списка">
                                 <span class="material-symbols-outlined text-lg">close</span>
                             </button>
                         </div>
@@ -1012,8 +1079,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             contentHtml += `
                 <div class="reading-sin-item">
-                    <p class="reading-sin-text text-white font-bold">${sinText}</p>
-                    ${item.note ? `<p class="reading-sin-note italic text-slate-400 mt-2">${item.note}</p>` : ''}
+                    <p class="reading-sin-text text-white font-bold">${escapeHtml(sinText)}</p>
+                    ${item.note ? `<p class="reading-sin-note italic text-slate-400 mt-2">${escapeHtml(item.note)}</p>` : ''}
                 </div>
             `;
         });
@@ -1022,7 +1089,7 @@ document.addEventListener('DOMContentLoaded', () => {
             contentHtml += `
                 <div class="pt-8 border-t border-white/10">
                     <p class="text-[11px] font-bold tracking-[0.2em] text-primary uppercase mb-4">${t('personalReflections')}</p>
-                    <p class="text-xl text-slate-300 leading-relaxed italic">${personalNotes}</p>
+                    <p class="text-xl text-slate-300 leading-relaxed italic">${escapeHtml(personalNotes)}</p>
                 </div>
             `;
         }
@@ -1931,8 +1998,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <li class="mb-4 flex items-start gap-3">
                     <span class="font-bold">•</span>
                     <div>
-                        <span class="block font-bold">${sinText}</span>
-                        ${item.note ? `<span class="block italic text-sm mt-1 border-l-2 border-black/10 pl-3">${item.note}</span>` : ''}
+                        <span class="block font-bold">${escapeHtml(sinText)}</span>
+                        ${item.note ? `<span class="block italic text-sm mt-1 border-l-2 border-black/10 pl-3">${escapeHtml(item.note)}</span>` : ''}
                     </div>
                 </li>
             `;
@@ -1961,6 +2028,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (printPdfBtn) {
         printPdfBtn.addEventListener('click', openPreviewModal);
+    }
+
+    if (downloadPdfBtn) {
+        downloadPdfBtn.addEventListener('click', generatePDF);
     }
 
     if (closePreviewBtn) {
@@ -2091,8 +2162,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <li class="pdf-item">
                     <span class="pdf-bullet">•</span>
                     <div>
-                        <span>${sinText}</span>
-                        ${item.note ? `<span class="pdf-note">${item.note}</span>` : ''}
+                        <span>${escapeHtml(sinText)}</span>
+                        ${item.note ? `<span class="pdf-note">${escapeHtml(item.note)}</span>` : ''}
                     </div>
                 </li>
             `;
@@ -2101,7 +2172,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const personalSection = personalNotes.trim() ? `
             <div class="pdf-personal-section">
                 <p class="pdf-personal-title">${t('personalReflections')}</p>
-                <p class="pdf-personal-text">${personalNotes}</p>
+                <p class="pdf-personal-text">${escapeHtml(personalNotes)}</p>
             </div>
         ` : '';
 
@@ -2122,6 +2193,13 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(pdfContent);
 
         try {
+            // Тяжёлые библиотеки PDF грузим только при экспорте,
+            // чтобы не увеличивать стартовый бандл.
+            const [{ jsPDF }, { default: html2canvas }] = await Promise.all([
+                import('jspdf'),
+                import('html2canvas')
+            ]);
+
             const canvas = await html2canvas(pdfContent, {
                 scale: 2,
                 useCORS: true,
@@ -2138,17 +2216,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const pdfBlob = pdf.output('blob');
             const fileName = 'moya-ispoved.pdf';
+            const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
 
-            // Android Share logic or Fallback download
-            if (navigator.canShare && navigator.canShare({ files: [new File([pdfBlob], fileName, { type: 'application/pdf' })] })) {
-                await navigator.share({
-                    files: [new File([pdfBlob], fileName, { type: 'application/pdf' })],
-                    title: t('pdfTitle'),
-                    text: t('pdfTitle')
-                });
-            } else {
-                pdf.save(fileName);
+            // На Android — системное «Поделиться», иначе (или при отказе) — скачивание.
+            let shared = false;
+            if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+                try {
+                    await navigator.share({ files: [pdfFile], title: t('pdfTitle'), text: t('pdfTitle') });
+                    shared = true;
+                } catch (err) {
+                    if (err && err.name !== 'AbortError') {
+                        console.warn('[PDF] Share failed, falling back to download:', err);
+                    }
+                }
             }
+            if (!shared) pdf.save(fileName);
         } catch (error) {
             console.error('PDF Generation failed:', error);
             alert('Ошибка при создании PDF.');
@@ -2378,6 +2460,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Закрытие шторки «Поделиться» по клику на фон.
+    // Inline-onclick нельзя использовать: production-сборка включает CSP.
+    const messengerShareModal = document.getElementById('messenger-share-modal');
+    if (messengerShareModal) {
+        messengerShareModal.addEventListener('click', (e) => {
+            if (e.target === messengerShareModal) messengerShareModal.classList.add('hidden');
+        });
+    }
+
     // --- Toast Notification ---
     function showToast(message) {
         // Remove existing toast if any
@@ -2386,13 +2477,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const toast = document.createElement('div');
         toast.id = 'toast-notification';
+        toast.setAttribute('role', 'status');
+        toast.setAttribute('aria-live', 'polite');
         toast.className = 'fixed bottom-20 left-1/2 -translate-x-1/2 z-[500] ' +
             'bg-[#1a1a1a]/95 backdrop-blur-md border border-white/10 ' +
             'text-white text-sm font-medium px-5 py-3.5 rounded-2xl shadow-2xl ' +
             'flex items-center gap-3 animate-fade-in-up';
         toast.innerHTML = `
             <span class="material-symbols-outlined text-primary text-lg">info</span>
-            <span>${message}</span>
+            <span>${escapeHtml(message)}</span>
         `;
 
         document.body.appendChild(toast);
@@ -2414,6 +2507,7 @@ document.addEventListener('DOMContentLoaded', () => {
             currentGlobalAudio.pause();
             isAudioPlaying = false;
             if (audioPlayIcon) audioPlayIcon.textContent = 'play_arrow';
+            if (audioPlayPauseBtn) audioPlayPauseBtn.setAttribute('aria-label', 'Воспроизвести');
             return;
         }
 
@@ -2536,11 +2630,13 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             isAudioPlaying = true;
             if (audioPlayIcon) audioPlayIcon.textContent = 'pause';
+            if (audioPlayPauseBtn) audioPlayPauseBtn.setAttribute('aria-label', 'Пауза');
         } else {
             console.log('[Audio Debug] Pausing...');
             currentGlobalAudio.pause();
             isAudioPlaying = false;
             if (audioPlayIcon) audioPlayIcon.textContent = 'play_arrow';
+            if (audioPlayPauseBtn) audioPlayPauseBtn.setAttribute('aria-label', 'Воспроизвести');
         }
     }
 
@@ -2556,6 +2652,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isAudioPlaying = false;
         audioProgressValue = 0;
         if (audioPlayIcon) audioPlayIcon.textContent = 'play_arrow';
+        if (audioPlayPauseBtn) audioPlayPauseBtn.setAttribute('aria-label', 'Воспроизвести');
         if (audioProgress) audioProgress.style.width = '0%';
         const timeEl = document.getElementById('audio-time');
         if (timeEl) timeEl.textContent = '00:00 / 00:00';
@@ -2755,6 +2852,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Сбрасываем аккумулятор в 0 при запуске
         preciseScrollTop = 0;
         if (autoscrollIcon) autoscrollIcon.textContent = 'pause';
+        if (toggleAutoscrollBtn) toggleAutoscrollBtn.setAttribute('aria-label', 'Остановить автопрокрутку');
         console.log('[Teleprompter] Starting scroll with speed:', autoscrollSpeed);
         autoscrollRequestId = requestAnimationFrame(smoothAutoscroll);
     }
@@ -2764,6 +2862,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (autoscrollRequestId) cancelAnimationFrame(autoscrollRequestId);
         autoscrollRequestId = null;
         if (autoscrollIcon) autoscrollIcon.textContent = 'play_arrow';
+        if (toggleAutoscrollBtn) toggleAutoscrollBtn.setAttribute('aria-label', 'Автопрокрутка');
     }
 
     // === Обработчик для синхронизации при ручном скролле ===
@@ -3172,7 +3271,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Сброс Псалма 50
         const p50Btn = document.getElementById('psalm-50-play-btn');
-        if (p50Btn) p50Btn.querySelector('span').textContent = 'play_arrow';
+        if (p50Btn) {
+            p50Btn.querySelector('span').textContent = 'play_arrow';
+            p50Btn.setAttribute('aria-label', 'Воспроизвести псалом 50');
+        }
         const p50Progress = document.getElementById('psalm-50-audio-progress-container');
         if (p50Progress) p50Progress.classList.add('hidden');
     }
@@ -3192,6 +3294,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (window.currentAudio && window.currentAudio._isPsalm50 && !window.currentAudio.paused) {
                 window.currentAudio.pause();
                 playBtn.querySelector('span').textContent = 'play_arrow';
+                playBtn.setAttribute('aria-label', 'Воспроизвести псалом 50');
                 return;
             }
 
@@ -3205,6 +3308,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (progressContainer) progressContainer.classList.remove('hidden');
             playBtn.querySelector('span').textContent = 'pause';
+            playBtn.setAttribute('aria-label', 'Пауза');
 
             audio.play().catch(err => {
                 console.error("Psalm 50 audio play error:", err);
@@ -3221,8 +3325,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.currentAudio = null;
             });
 
-            audio.addEventListener('play', () => { playBtn.querySelector('span').textContent = 'pause'; });
-            audio.addEventListener('pause', () => { playBtn.querySelector('span').textContent = 'play_arrow'; });
+            audio.addEventListener('play', () => {
+                playBtn.querySelector('span').textContent = 'pause';
+                playBtn.setAttribute('aria-label', 'Пауза');
+            });
+            audio.addEventListener('pause', () => {
+                playBtn.querySelector('span').textContent = 'play_arrow';
+                playBtn.setAttribute('aria-label', 'Воспроизвести псалом 50');
+            });
         });
     }
 
@@ -3342,12 +3452,14 @@ document.addEventListener('DOMContentLoaded', () => {
             'На вечерне': 'Н'
         };
 
-        // Получение записи дня из readingSummaries
+        // Получение записи дня из readingSummaries (локальные имеют приоритет, затем удалённые)
         function getDayEntry() {
             const dateToUse = (typeof currentNavDate !== 'undefined' && currentNavDate) ? currentNavDate : new Date();
             const pad = n => String(n).padStart(2, '0');
             const dateKey = `${dateToUse.getFullYear()}-${pad(dateToUse.getMonth() + 1)}-${pad(dateToUse.getDate())}`;
-            return readingSummaries[dateKey] || null;
+            if (readingSummaries[dateKey]) return readingSummaries[dateKey];
+            const remote = getRemoteSummaries();
+            return (remote && remote[dateKey]) ? remote[dateKey] : null;
         }
 
         // Поиск краткого содержания по тексту чтения
@@ -3374,8 +3486,8 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="mb-8 p-4 rounded-2xl border flex gap-3 items-start" style="background: ${iconColor}14; border-color: ${iconColor}40;">
                 <span class="text-xl mt-0.5 flex-shrink-0" style="color: ${iconColor};">${icon}</span>
                 <div>
-                    <p class="font-bold text-sm leading-tight" style="color: ${iconColor};">${feast.name}</p>
-                    ${feast.note ? `<p class="text-xs mt-1 leading-relaxed opacity-80" style="color: ${iconColor};">${feast.note}</p>` : ''}
+                    <p class="font-bold text-sm leading-tight" style="color: ${iconColor};">${escapeHtml(feast.name)}</p>
+                    ${feast.note ? `<p class="text-xs mt-1 leading-relaxed opacity-80" style="color: ${iconColor};">${escapeHtml(feast.note)}</p>` : ''}
                 </div>
             </div>`;
         }
@@ -3390,23 +3502,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const typeLabel = reading.type.charAt(0).toUpperCase() + reading.type.slice(1);
             const summaryEntry = findSummary(reading.text || '', dayEntry);
             const summaryHtml = summaryEntry
-                ? `<p class="text-sm leading-relaxed mt-2 italic" style="color: var(--color-on-surface-variant);">${summaryEntry.summary}</p>`
+                ? `<p class="text-sm leading-relaxed mt-3 italic w-full" style="color: var(--color-on-surface-variant);">${escapeHtml(summaryEntry.summary)}</p>`
                 : '';
 
             html += `
-            <div class="group relative transition-all duration-300 hover:translate-x-2 flex items-start justify-between gap-4">
-                <span class="absolute -left-6 -top-6 font-headline text-6xl transition-opacity duration-300 group-hover:opacity-30" style="color: var(--color-primary); opacity: 0.2; pointer-events: none;">${dropCapLetter}</span>
-                <div class="space-y-2 flex-1">
-                    <span class="font-label text-[10px] font-bold uppercase tracking-widest transition-colors duration-300 group-hover:text-primary" style="color: var(--color-secondary);">${typeLabel}</span>
-                    <h5 class="font-headline text-2xl transition-colors duration-300 group-hover:text-primary" style="color: var(--color-on-surface);">${formattedText}</h5>
-                    ${summaryHtml}
+            <div class="group relative transition-all duration-300 hover:translate-x-2">
+                <span class="absolute -left-6 -top-6 font-headline text-6xl transition-opacity duration-300 group-hover:opacity-30" style="color: var(--color-primary); opacity: 0.2; pointer-events: none;">${escapeHtml(dropCapLetter)}</span>
+                <span class="font-label text-[10px] font-bold uppercase tracking-widest transition-colors duration-300 group-hover:text-primary block mb-1" style="color: var(--color-secondary);">${escapeHtml(typeLabel)}</span>
+                <div class="flex items-start justify-between gap-4">
+                    <h3 class="font-headline text-2xl transition-colors duration-300 group-hover:text-primary flex-1" style="color: var(--color-on-surface);">${escapeHtml(formattedText)}</h3>
+                    ${audioUrl ? `<div class="flex flex-col items-center gap-1 flex-shrink-0">
+                        <button class="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary transition-all duration-300 active:scale-95 hover:bg-primary/20 hover:scale-110 reading-audio-btn" aria-label="Прослушать чтение" data-audio-url="${escapeAttr(safeUrl(audioUrl))}" data-reading-index="${index}">
+                            <span class="material-symbols-outlined text-xl">volume_up</span>
+                        </button>
+                        <span class="reading-audio-time text-[9px] font-bold text-primary font-label" data-reading-index="${index}"></span>
+                    </div>` : ''}
                 </div>
-                ${audioUrl ? `<div class="flex flex-col items-center gap-1">
-                    <button class="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary transition-all duration-300 active:scale-95 hover:bg-primary/20 hover:scale-110 reading-audio-btn" data-audio-url="${audioUrl}" data-reading-index="${index}">
-                        <span class="material-symbols-outlined text-xl">volume_up</span>
-                    </button>
-                    <span class="reading-audio-time text-[9px] font-bold text-primary font-label" data-reading-index="${index}"></span>
-                </div>` : ''}
+                ${summaryHtml}
             </div>
             `;
         });
@@ -3693,13 +3805,13 @@ document.addEventListener('DOMContentLoaded', () => {
             saintCard.innerHTML = `
                 <div class="w-16 h-20 overflow-hidden bg-surface-container-highest flex items-center justify-center border-2 border-primary/20 flex-shrink-0">
                     ${iconUrl
-                    ? '<img class="w-full h-full object-contain" src="' + iconUrl + '" alt="' + saintName + '">'
+                    ? '<img class="w-full h-full object-contain" src="' + escapeAttr(safeUrl(iconUrl)) + '" alt="' + escapeAttr(saintName) + '">'
                     : '<span class="material-symbols-outlined" style="font-variation-settings: \'FILL\' 1; color: var(--color-primary-container);">person</span>'
                 }
                 </div>
                 <div class="flex-1 min-w-0">
-                    <h4 class="font-serif font-bold text-sm leading-tight" style="color: var(--color-on-surface); word-break: break-word;">${fullName}</h4>
-                    <p class="font-label text-[10px] uppercase tracking-widest mt-0.5" style="color: var(--color-on-surface-variant); opacity: 0.7;">${expandedSanctity || 'Святой'}</p>
+                    <h4 class="font-serif font-bold text-sm leading-tight" style="color: var(--color-on-surface); word-break: break-word;">${escapeHtml(fullName)}</h4>
+                    <p class="font-label text-[10px] uppercase tracking-widest mt-0.5" style="color: var(--color-on-surface-variant); opacity: 0.7;">${escapeHtml(expandedSanctity || 'Святой')}</p>
                 </div>
             `;
 
@@ -3732,10 +3844,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dayOfWeek) {
             const days = ['воскресенье', 'понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота'];
             dayOfWeek.textContent = days[date.getDay()];
-            dayOfWeek.style.color = isSunday ? '#ef4444' : '';
+            dayOfWeek.style.color = isSunday ? 'var(--color-accent-red)' : '';
         }
-        if (cardDateDay) cardDateDay.style.color = isSunday ? '#ef4444' : '';
-        if (cardDateMonth) cardDateMonth.style.color = isSunday ? '#ef4444' : '';
+        if (cardDateDay) cardDateDay.style.color = isSunday ? 'var(--color-accent-red)' : '';
+        if (cardDateMonth) cardDateMonth.style.color = isSunday ? 'var(--color-accent-red)' : '';
 
         // Вспомогательные функции прогресс-бара кэша
         function showProgress(pct, label) {
@@ -3790,7 +3902,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Красный цвет даты в праздник или воскресенье
-            const dateColor = (holidayTitle || isSunday) ? '#ef4444' : '';
+            const dateColor = (holidayTitle || isSunday) ? 'var(--color-accent-red)' : '';
             if (cardDateDay) cardDateDay.style.color = dateColor;
             if (cardDateMonth) cardDateMonth.style.color = dateColor;
             if (sedmitsaText) {

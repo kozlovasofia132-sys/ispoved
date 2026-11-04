@@ -1,247 +1,185 @@
-# YooKassa Webhook Server
+# Сервер «Исповеди»
 
-Сервер для обработки webhook-уведомлений от ЮKassa в приложении "Исповедь".
+Отдаёт приложению ИИ-комментарии к чтениям дня и принимает уведомления ЮKassa.
 
-## 📋 Требования
+## Требования
 
-- Node.js >= 18.0.0
-- npm или yarn
+- Node.js >= 18
+- npm
 
-## 🚀 Быстрый старт
-
-### 1. Установка зависимостей
+## Быстрый старт
 
 ```bash
 cd server
 npm install
+node generate-summaries.js   # заполнить data/summaries.json
+node server.js               # или npm start / npm run dev
 ```
 
-### 2. Настройка переменных окружения
+Переменные окружения читаются из `.env` (пример — в корне проекта, `.env.example`).
 
-Скопируйте файл `.env.example` в `.env` и заполните значения:
+## Эндпоинты
 
-```bash
-cp .env.example .env
-```
+### `GET /summaries.json`
 
-Откройте `.env` и укажите:
+Комментарии к чтениям дня. Формат — объект по датам:
 
-```env
-# Секретный ключ для проверки подписи webhook
-# Получите в личном кабинете ЮKassa в настройках HTTP-уведомлений
-YOOKASSA_WEBHOOK_SECRET=your_actual_secret_key_here
-
-# Порт сервера
-PORT=3000
-
-# Окружение (development/production)
-NODE_ENV=development
-
-# Путь к файлу логов
-LOG_FILE_PATH=./logs/payments.log
-```
-
-### 3. Запуск сервера
-
-**Режим разработки (с авто-перезагрузкой):**
-```bash
-npm run dev
-```
-
-**Продакшен режим:**
-```bash
-npm start
-```
-
-## 📡 Webhook Endpoint
-
-### POST /v1/webhook
-
-Обрабатывает уведомления от ЮKassa.
-
-**Заголовок:**
-- `X-Yookassa-Signature` - подпись запроса
-
-**Тело запроса:**
 ```json
 {
-  "event": "payment.succeeded",
-  "object": {
-    "id": "2d3df78f-000e-500b-9000-1e7c9a9b0e0e",
-    "status": "succeeded",
-    "amount": {
-      "value": "100.00",
-      "currency": "RUB"
-    },
-    "description": "Пожертвование на приложение Исповедь",
-    "metadata": {
-      "user_id": "12345",
-      "campaign": "donation"
-    },
-    ...
+  "2026-11-04": {
+    "feast": { "name": "Празднование Казанской иконе Божией Матери" },
+    "readings": [
+      { "ref": "Лк.1:39", "summary": "Краткое содержание отрывка" }
+    ]
   }
 }
 ```
 
-**Ответ:**
-- `200 OK` - уведомление получено и обработано
-- `401 Unauthorized` - отсутствует подпись
-- `403 Forbidden` - неверная подпись
+Кэшируется на 24 часа (`Cache-Control: public, max-age=86400`).
 
-## 🔐 Проверка подписи
+### `GET /health`
 
-Сервер автоматически проверяет подпись каждого запроса используя HMAC-SHA256.
+```json
+{ "status": "ok", "timestamp": "2026-11-04T12:00:00.000Z" }
+```
 
-**Алгоритм:**
-1. Получает подпись из заголовка `X-Yookassa-Signature`
-2. Вычисляет HMAC-SHA256 от тела запроса с секретным ключом
-3. Сравнивает подписи используя constant-time comparison
+### `POST /v1/webhook`
 
-## 📝 Логирование
+Уведомления ЮKassa. Обрабатывается событие `payment.succeeded`.
 
-Все успешные платежи записываются в лог-файл (по умолчанию `./logs/payments.log`).
+Защита:
+- источник проверяется по официальным IP-диапазонам ЮKassa
+  (`YOOKASSA_ALLOWED_IPS`, по умолчанию — список из документации);
+- если задан `YOOKASSA_WEBHOOK_SECRET`, дополнительно проверяется заголовок
+  `X-Webhook-Secret` (имеет смысл только за прокси).
 
-**Формат записи:**
+Ответы: `200` — принято, `400` — некорректный JSON, `403` — чужой IP/секрет.
+
+> ЮKassa не подписывает HTTP-уведомления HMAC-подписью — рекомендуемый способ
+> проверки подлинности — allowlist IP. Старый заголовок `X-Yookassa-Signature`
+> больше не используется.
+
+### `GET /v1/payments?limit=10`
+
+Журнал успешных платежей (последние `limit` записей, максимум 100).
+
+Требует `Authorization: Bearer <ADMIN_TOKEN>`. Если `ADMIN_TOKEN` не задан,
+эндпоинт отключён и отвечает `404`.
+
+## Переменные окружения
+
+```env
+PORT=3000
+NODE_ENV=production
+
+# Админ-токен для /v1/payments. Если не задан — эндпоинт отключён (404).
+ADMIN_TOKEN=
+
+# Необязательно: дополнительный секрет для вебхука (заголовок X-Webhook-Secret).
+YOOKASSA_WEBHOOK_SECRET=
+
+# Необязательно: переопределить список разрешённых IP/CIDR ЮKassa.
+YOOKASSA_ALLOWED_IPS=185.71.76.0/27,185.71.77.0/27,77.75.153.0/25,77.75.156.11/32,77.75.156.35/32,77.75.154.128/25
+
+# Если сервер за nginx — доверять X-Forwarded-For
+TRUST_PROXY=1
+
+# Необязательно: HTTPS напрямую, без reverse-proxy
+SSL_KEY_PATH=/etc/letsencrypt/live/ispoved.app/privkey.pem
+SSL_CERT_PATH=/etc/letsencrypt/live/ispoved.app/fullchain.pem
+```
+
+## Логирование
+
+Успешные платежи пишутся в `logs/payments.log` (или `LOG_FILE_PATH`) по одной
+JSON-записи на строку:
+
 ```json
 {
-  "timestamp": "2026-03-29T12:00:00.000Z",
+  "timestamp": "2026-11-04T12:00:00.000Z",
   "status": "Успешно",
-  "payment_id": "2d3df78f-000e-500b-9000-1e7c9a9b0e0e",
-  "amount": {
-    "value": "100.00",
-    "currency": "RUB"
-  },
-  "description": "Пожертвование на приложение Исповедь",
-  "metadata": {...},
-  "payment_method": {...},
-  "created_at": "2026-03-29T12:00:00.000Z",
-  "captured_at": "2026-03-29T12:00:01.000Z"
+  "payment_id": "...",
+  "amount": { "value": "100.00", "currency": "RUB" },
+  "description": "Пожертвование на развитие приложения «Исповедь»",
+  "metadata": {},
+  "payment_method": { "type": "bank_card", "card": { "last4": "4444" } },
+  "created_at": "...",
+  "captured_at": "..."
 }
 ```
 
-## 📊 API для получения платежей
+## Настройка ЮKassa
 
-### GET /v1/payments
+1. Личный кабинет → **Настройки** → **HTTP-уведомления**.
+2. URL: `https://ispoved.app/v1/webhook`.
+3. Событие: `payment.succeeded`.
+4. Проверьте, что запросы приходят с IP из официального списка.
 
-Получить список успешных платежей.
+## HTTPS (обязательно для production)
 
-**Параметры:**
-- `limit` (опционально) - количество записей (по умолчанию 10)
+Приложение сейчас обращается к `http://82.146.34.140:3000/summaries.json`.
+Пока используется HTTP, ответ сервера можно подменить в публичной сети.
+Порядок переезда:
 
-**Ответ:**
-```json
-{
-  "payments": [...],
-  "total": 150
-}
-```
-
-### GET /health
-
-Проверка работоспособности сервера.
-
-**Ответ:**
-```json
-{
-  "status": "ok",
-  "timestamp": "2026-03-29T12:00:00.000Z"
-}
-```
-
-## 🔧 Настройка в ЮKassa
-
-1. Войдите в личный кабинет ЮKassa
-2. Перейдите в **Настройки** → **HTTP-уведомления**
-3. Нажмите **Добавить webhook**
-4. Укажите URL вашего сервера:
+1. Направить A-запись домена (например, `ispoved.app`) на `82.146.34.140`.
+2. Выпустить сертификат:
+   ```bash
+   sudo apt install certbot python3-certbot-nginx
+   sudo certbot --nginx -d ispoved.app
    ```
-   https://your-domain.com/v1/webhook
+3. Поставить nginx перед Node (пример — `nginx-ispoved.conf.example`).
+4. В `.env` приложения указать:
+   ```env
+   VITE_SUMMARIES_URL=https://ispoved.app/summaries.json
    ```
-5. Выберите события:
-   - ✅ `payment.succeeded`
-6. Скопируйте **Секретный ключ** и вставьте в `.env`
+5. Удалить исключение cleartext из
+   `android/app/src/main/res/xml/network_security_config.xml`.
+6. Пересобрать приложение: `npm run build`.
 
-## 🛡️ Безопасность
+## Деплой (systemd)
 
-- ✅ Проверка HMAC-SHA256 подписи
-- ✅ Constant-time comparison для предотвращения timing attacks
-- ✅ Raw body parsing для корректной верификации
-- ✅ Логирование всех событий
+```ini
+[Unit]
+Description=Ispoved backend
+After=network.target
 
-## 📦 Структура проекта
+[Service]
+WorkingDirectory=/opt/ispoved/server
+ExecStart=/usr/bin/node server.js
+Restart=always
+EnvironmentFile=/opt/ispoved/server/.env
 
+[Install]
+WantedBy=multi-user.target
 ```
-server/
-├── server.js           # Основной сервер
-├── package.json        # Зависимости
-├── .env.example        # Пример переменных окружения
-├── .env                # Реальные переменные (не коммитить!)
-├── .gitignore          # Игнорируемые файлы
-└── logs/
-    └── payments.log    # Лог платежей
-```
-
-## 🚀 Деплой
-
-### Heroku
 
 ```bash
-heroku create ispoved-server
-heroku config:set YOOKASSA_WEBHOOK_SECRET=your_secret
-heroku config:set NODE_ENV=production
-git push heroku main
+sudo systemctl enable --now ispoved
 ```
 
-### Vercel
-
-Создайте `vercel.json`:
-```json
-{
-  "version": 2,
-  "builds": [{ "src": "server.js", "use": "@vercel/node" }],
-  "routes": [{ "src": "/(.*)", "dest": "server.js" }]
-}
-```
-
-### Docker
-
-Создайте `Dockerfile`:
-```dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY . .
-EXPOSE 3000
-CMD ["npm", "start"]
-```
-
-## 🧪 Тестирование
-
-### Тестовый webhook
-
-Используйте curl для проверки:
+## Проверка
 
 ```bash
+curl http://localhost:3000/health
+curl -H "Authorization: Bearer $ADMIN_TOKEN" http://localhost:3000/v1/payments
+
+# Локальный вебхук будет отклонён (IP не из ЮKassa) — это ожидаемо:
 curl -X POST http://localhost:3000/v1/webhook \
   -H "Content-Type: application/json" \
-  -H "X-Yookassa-Signature: test" \
   -d '{"event":"payment.succeeded","object":{"id":"test123"}}'
 ```
 
-### Проверка логов
+Для отладки вебхука на своей машине можно временно добавить `127.0.0.1/32`
+в `YOOKASSA_ALLOWED_IPS`.
 
-```bash
-tail -f logs/payments.log
+## Структура
+
 ```
-
-## 📞 Поддержка
-
-При возникновении проблем:
-1. Проверьте логи сервера
-2. Убедитесь, что секретный ключ указан верно
-3. Проверьте, что ЮKassa отправляет уведомления на правильный URL
-
-## 📄 Лицензия
-
-MIT
+server/
+├── server.js                    # HTTP-сервер
+├── generate-summaries.js        # генерация комментариев (Anthropic API)
+├── setup-server.sh              # установка на сервер + cron
+├── nginx-ispoved.conf.example   # пример HTTPS-прокси
+├── data/summaries.json          # результат генерации
+└── logs/payments.log            # журнал платежей
+```

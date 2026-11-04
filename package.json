@@ -1,12 +1,13 @@
 {
   "name": "ispoved",
   "private": true,
-  "version": "2.1.5",
+  "version": "2.3.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "node sync-version.js && vite build && npx cap sync",
     "preview": "vite preview",
+    "test": "node --test \"tests/**/*.test.js\"",
     "cap:sync": "node sync-version.js && npx cap sync",
     "sync-version": "node sync-version.js",
     "sync-github": "node sync-github.js",
@@ -15,6 +16,7 @@
     "release:major": "node release.js major"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.6.0",
     "autoprefixer": "^10.4.18",
     "dotenv": "^16.4.5",
     "postcss": "^8.4.35",
@@ -24,22 +26,15 @@
     "vite-plugin-pwa": "^0.19.0"
   },
   "dependencies": {
-    "@a2seven/yoo-checkout": "^1.1.4",
-    "@aparajita/capacitor-biometric-auth": "^10.0.0",
-    "@capacitor-community/keep-awake": "^8.0.0",
     "@capacitor-community/text-to-speech": "^8.0.0",
     "@capacitor/android": "^8.2.0",
+    "@capacitor/app": "^8.0.1",
     "@capacitor/browser": "^8.0.3",
-    "@capacitor/cli": "^8.2.0",
     "@capacitor/core": "^8.2.0",
-    "@capacitor/geolocation": "^8.1.0",
-    "@capacitor/motion": "^8.0.0",
-    "@capacitor/share": "^8.0.1",
     "@capacitor/splash-screen": "^8.0.1",
     "@capacitor/status-bar": "^8.0.1",
     "@capgo/capacitor-navigation-bar": "^8.0.25",
     "html2canvas": "^1.4.1",
-    "jspdf": "^4.2.0",
-    "lucide-react": "^1.6.0"
+    "jspdf": "^4.2.0"
   }
 }
