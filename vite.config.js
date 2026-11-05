@@ -15,7 +15,7 @@ const CSP = [
     "font-src 'self' data: https://fonts.gstatic.com",
     "img-src 'self' data: blob: https:",
     "media-src 'self' blob: https:",
-    "connect-src 'self' https://azbyka.ru https://*.azbyka.ru https://pravoslavie-audio.com https://ispoved.app http://82.146.34.140:3000",
+    "connect-src 'self' https://azbyka.ru https://*.azbyka.ru https://ispoved.app http://82.146.34.140:3000",
     "form-action 'self'"
 ].join('; ');
 
@@ -116,20 +116,6 @@ export default defineConfig(({ command }) => ({
                             cacheName: 'azbyka-audio-cache',
                             expiration: {
                                 maxEntries: 200,
-                                maxAgeSeconds: 60 * 60 * 24 * 60
-                            },
-                            cacheableResponse: {
-                                statuses: [0, 200]
-                            }
-                        }
-                    },
-                    {
-                        urlPattern: /^https:\/\/pravoslavie-audio\.com\/.*/i,
-                        handler: 'CacheFirst',
-                        options: {
-                            cacheName: 'pravoslavie-audio-cache',
-                            expiration: {
-                                maxEntries: 20,
                                 maxAgeSeconds: 60 * 60 * 24 * 60
                             },
                             cacheableResponse: {

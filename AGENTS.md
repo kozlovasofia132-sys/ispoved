@@ -51,3 +51,6 @@
 - В dev возможны CORS-ошибки `azbyka.ru` (API разрешает origin `https://localhost`) — это ограничение API, а не регрессия.
 - `npx cap sync` перезаписывает `android/app/capacitor.build.gradle` и `android/capacitor.settings.gradle`; не редактируй их вручную.
 - `jspdf` и `html2canvas` намеренно загружаются через динамический `import()` только при экспорте PDF — не возвращай статические импорты, иначе основной чанк снова вырастет почти втрое.
+- В Android WebView страница открывается с `https://localhost`, поэтому любые `http://`-запросы блокируются как mixed content (CSP и `network_security_config` тут не помогают). Для HTTP-API используй нативный `CapacitorHttp` из `@capacitor/core`.
+- Debug-APK нельзя поставить поверх release-сборки: подписи разные (`INSTALL_FAILED_UPDATE_INCOMPATIBLE`). Чтобы обновиться на телефоне без потери `localStorage`, переподпиши debug-APK release-ключом: `apksigner sign --ks android/app/my-release-key.jks --ks-key-alias my-key-alias --ks-pass pass:270676 --key-pass pass:270676 --out signed.apk app-debug.apk`.
+- После установки нового APK первый запуск может показать старый бандл из Service Worker, затем страница перезагружается на новый. Если проверяешь именно свежий код, дождись в логах `assets/index-<новый хэш>.js`.

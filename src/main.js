@@ -1,5 +1,5 @@
 import './style.css';
-import { Capacitor } from '@capacitor/core';
+import { Capacitor, CapacitorHttp } from '@capacitor/core';
 import { App } from '@capacitor/app';
 import { Browser } from '@capacitor/browser';
 import { TextToSpeech } from '@capacitor-community/text-to-speech';
@@ -40,6 +40,31 @@ function getRemoteSummaries() {
     } catch { return null; }
 }
 
+// Загрузка JSON с комментариями. В Android/iOS используем нативный HttpClient:
+// WebView грузится с https://localhost и блокирует http-запросы как mixed content,
+// а нативный запрос учитывает network_security_config и CSP не применяется.
+async function requestRemoteSummaries() {
+    if (Capacitor.isNativePlatform()) {
+        const res = await CapacitorHttp.get({
+            url: REMOTE_SUMMARIES_URL,
+            headers: { Accept: 'application/json' },
+            connectTimeout: 8000,
+            readTimeout: 8000
+        });
+        if (res.status < 200 || res.status >= 300) return null;
+        if (typeof res.data === 'string') {
+            try { return JSON.parse(res.data); } catch { return null; }
+        }
+        return res.data;
+    }
+
+    const r = await fetch(REMOTE_SUMMARIES_URL, { cache: 'no-store' });
+    if (!r.ok) return null;
+    const contentType = r.headers.get('content-type') || '';
+    if (!contentType.includes('json')) return null;
+    return r.json();
+}
+
 function fetchRemoteSummariesIfStale() {
     try {
         const raw = localStorage.getItem(REMOTE_SUMMARIES_KEY);
@@ -48,13 +73,7 @@ function fetchRemoteSummariesIfStale() {
             if (Date.now() - ts < REMOTE_SUMMARIES_TTL) return;
         }
     } catch {}
-    fetch(REMOTE_SUMMARIES_URL, { cache: 'no-store' })
-        .then(r => {
-            if (!r.ok) return null;
-            const contentType = r.headers.get('content-type') || '';
-            if (!contentType.includes('json')) return null;
-            return r.json();
-        })
+    requestRemoteSummaries()
         .then(data => {
             // Ожидаем объект вида { "2026-04-05": { ... } }
             if (!data || typeof data !== 'object' || Array.isArray(data)) return;
@@ -1425,8 +1444,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Navigation Bar (Bottom) - Android
                 if (Capacitor.getPlatform() === 'android') {
-                    await NavigationBar.setColor({ color: isDark ? '#120F16' : '#fbf9f4' });
-                    await NavigationBar.setDarkIcons({ darkIcons: !isDark });
+                    await NavigationBar.setNavigationBarColor({
+                        color: isDark ? '#120F16' : '#fbf9f4',
+                        darkButtons: !isDark
+                    });
                 }
             }
         } catch (err) {
@@ -2519,7 +2540,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentPrayerIdInPlayer === 'repentanceCanon') {
                 audioUrl = 'https://azbyka.ru/audio/audio1/Molitvy-i-bogosluzhenija/ko_svyatomy_prichacheniyu/prichastie/01-bulchuk_kanon_pokayannyy_ko_gospodu_iisusu_hristu.mp3';
             } else if (currentPrayerIdInPlayer === 'theotokosCanon') {
-                audioUrl = 'https://pravoslavie-audio.com/wp-content/uploads/2020/12/kanon-molebnyj-ko-presvyatoj-bogoroditse.mp3';
+                audioUrl = 'https://azbyka.ru/audio/audio1/Molitvy-i-bogosluzhenija/ko_svyatomy_prichacheniyu/prichastie/02-bulchuk_kanon_molebnyy_ko_presvyatoy_bogorodice.mp3';
             } else if (currentPrayerIdInPlayer === 'guardianAngelCanon') {
                 audioUrl = 'https://azbyka.ru/audio/audio1/Molitvy-i-bogosluzhenija/ko_svyatomy_prichacheniyu/prichastie/03-bulchuk_kanon_angelu_hranitelyu.mp3';
             } else if (currentPrayerIdInPlayer === 'beforeCommunion') {
@@ -2596,10 +2617,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         currentGlobalAudio.src = '/04-kanon-pokayanny.mp3';
                         currentGlobalAudio.play();
                         return; // Stop here if fallback is started
-                    } else if (currentPrayerIdInPlayer === 'theotokosCanon' && currentGlobalAudio.src.includes('pravoslavie-audio.com')) {
-                        currentGlobalAudio.src = 'https://azbyka.ru/audio/audio1/Molitvy-i-bogosluzhenija/ko_svyatomy_prichacheniyu/prichastie/02-bulchuk_kanon_molebnyy_ko_presvyatoy_bogorodice.mp3';
-                        currentGlobalAudio.play();
-                        return;
                     }
 
                     // Only show toast if all fallbacks failed
@@ -4524,7 +4541,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!('caches' in window)) return;
         const urls = [
             ['azbyka-audio-cache',       'https://azbyka.ru/audio/audio1/Molitvy-i-bogosluzhenija/ko_svyatomy_prichacheniyu/prichastie/01-bulchuk_kanon_pokayannyy_ko_gospodu_iisusu_hristu.mp3'],
-            ['pravoslavie-audio-cache',  'https://pravoslavie-audio.com/wp-content/uploads/2020/12/kanon-molebnyj-ko-presvyatoj-bogoroditse.mp3'],
             ['azbyka-audio-cache',       'https://azbyka.ru/audio/audio1/Molitvy-i-bogosluzhenija/ko_svyatomy_prichacheniyu/prichastie/02-bulchuk_kanon_molebnyy_ko_presvyatoy_bogorodice.mp3'],
             ['azbyka-audio-cache',       'https://azbyka.ru/audio/audio1/Molitvy-i-bogosluzhenija/ko_svyatomy_prichacheniyu/prichastie/03-bulchuk_kanon_angelu_hranitelyu.mp3'],
             ['azbyka-audio-cache',       'https://azbyka.ru/audio/audio1/Molitvy-i-bogosluzhenija/ko_svyatomy_prichacheniyu/prichastie/32_ermakov-posledovanie-ko-svjatomu-prichashheniju.mp3'],
