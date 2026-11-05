@@ -26,6 +26,7 @@
 - `index.html` — весь HTML-каркас. `src/main.js` (~4000 строк) — вся логика в одном обработчике `DOMContentLoaded`; экраны переключаются вручную.
 - `src/data/` — контент и i18n: `sins.js` (профили `adult`/`child`/`monastic`), `translations.js` (только `ru`/`cs`, не uk/en), `prayers.js`, `preparation.js`.
 - `src/services/calendarService.js` — API `azbyka.ru/days/api`.
+- `src/utils/readings.js` — разбор ссылок чтений (`refs` API), подписи «глава/стихи», аудио Азбуки и сопоставление с конспектами. Конспекты — `src/data/readingSummaries.js` (`{ "YYYY-MM-DD": { readings: [{ ref, summary }] } }`).
 - `src/components/DonationScreen.js` — единственный вынесенный экран.
 - Состояние хранится только в `localStorage`; список ключей — в `CLAUDE.md`.
 

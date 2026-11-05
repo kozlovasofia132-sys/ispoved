@@ -15,6 +15,7 @@ import { quotes } from './data/quotes.js';
 import { prayersData } from './data/prayers.js';
 import { createDonationScreen, initDonationScreen, openDonationScreen, closeDonationScreen } from './components/DonationScreen.js';
 import { readingSummaries } from './data/readingSummaries.js';
+import { parseReadings, summaryScore } from './utils/readings.js';
 import { escapeHtml, escapeAttr, safeUrl } from './utils/escapeHtml.js';
 
 // Удалённые ИИ-комментарии к чтениям (загружаются раз в неделю).
@@ -3045,218 +3046,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Парсинг текста чтений из API
-    function parseReadingsText(text) {
-        console.log('[parseReadingsText] Input:', text);
-
-        if (!text) return [];
-
-        const readings = [];
-
-        // Декодируем HTML-сущности
-        function decodeHtml(html) {
-            const txt = document.createElement('textarea');
-            txt.innerHTML = html;
-            return txt.value;
-        }
-
-        // Очищаем текст от HTML тегов, сущностей, переносов строк и лишних пробелов
-        let cleanText = decodeHtml(text)
-            .replace(/&ndash;/g, '–')
-            .replace(/&mdash;/g, '—')
-            .replace(/&nbsp;/g, ' ')
-            .replace(/<[^>]*>/g, '')  // Удаляем все HTML теги
-            .replace(/\n/g, ' ')
-            .replace(/\s+/g, ' ')
-            .trim();
-
-        console.log('[parseReadingsText] Clean text:', cleanText);
-
-        // Определяем тип службы по префиксу
-        const serviceTypes = {
-            'утр.': 'Утреня',
-            'утр': 'Утреня',
-            'лит.': 'Литургия',
-            'лит': 'Литургия',
-            'мчч.': 'Мученики',
-            'мчч': 'Мученики',
-            'мч.': 'Мученик',
-            'мч': 'Мученик',
-            'за упокой': 'За упокой',
-            'на 6-м часе': 'На 6-м часе',
-            'на веч.': 'На вечерне',
-            'на веч': 'На вечерне',
-            'веч.': 'На вечерне',
-            'веч': 'На вечерне'
-        };
-
-        // Разбиваем текст на части по точкам, но не после сокращений служб
-        // Используем более умное разбиение: точка + пробел + заглавная буква (не после утр/лит/мчч и т.д.)
-        const parts = cleanText.split(/(?<!\bутр|лит|мчч|мч|веч)\.\s+/i);
-
-        console.log('[parseReadingsText] Parts:', parts);
-
-        let currentServiceType = '';
-
-        for (let part of parts) {
-            part = part.trim();
-            if (!part) continue;
-
-            // Разбиваем часть на подчасти по ". " где следующая буква заглавная
-            const subParts = part.split(/\.\s+(?=[А-Я])/);
-
-            for (let subPart of subParts) {
-                subPart = subPart.trim();
-                if (!subPart) continue;
-
-                // Для каждой подчасти заново определяем тип службы
-                let partServiceType = currentServiceType;
-                
-                // Проверяем, есть ли тип службы в начале части
-                for (const [abbrev, fullName] of Object.entries(serviceTypes)) {
-                    const regex = new RegExp(`^${abbrev.replace('.', '\\.')}\\s*[:–-]\\s*`, 'i');
-                    if (regex.test(subPart)) {
-                        partServiceType = fullName;
-                        currentServiceType = fullName; // Сохраняем для следующих чтений
-                        subPart = subPart.replace(regex, '');
-                        break;
-                    }
-                }
-
-                // Используем regex для поиска всех вхождений чтений
-                // Паттерн: Книга Глава:Стихи (зач. Номер) или Книга.Глава:Стихи (зач. Номер)
-                // Примеры: "Ис.37:33–38:6", "Быт.13:12–18", "Притч.14:27–15:4"
-                // Поддерживаем диапазон глав: 37:33–38:6
-                // Используем более гибкий паттерн для тире
-                const regex = /([А-Яа-я]+)\.?(\d+):(\d+)\s*[-–—]\s*(\d+):?(\d+)?(?:\s*\(\s*зач\s*\.?\s*(\d+)\s*\))?/g;
-                let match;
-
-                while ((match = regex.exec(subPart)) !== null) {
-                    const [, book, chapter1, startVerse, chapter2, endVerse, zachalo] = match;
-
-                    console.log('[parseReadingsText] Match found:', { book, chapter1, startVerse, chapter2, endVerse, zachalo });
-
-                    // Если есть вторая глава, используем её для конца диапазона
-                    const endVerseFinal = endVerse || chapter2;
-                    const chapter = chapter1;
-
-                    // Определяем тип чтения и полное название книги
-                    let type = partServiceType || 'Апостол';
-                    const bookLower = book.toLowerCase();
-
-                    // Если тип службы не установлен, определяем по книге
-                    if (!partServiceType) {
-                        if (['мк', 'мф', 'лк', 'ин'].some(b => bookLower.includes(b))) {
-                            type = 'Евангелие';
-                        } else {
-                            type = 'Апостол';
-                        }
-                    }
-
-                    // Расшифровка сокращений книг
-                    const bookNames = {
-                        'Ис.': 'Книга пророка Исаии',
-                        'Ис': 'Книга пророка Исаии',
-                        'Быт.': 'Книга Бытия',
-                        'Быт': 'Книга Бытия',
-                        'Притч.': 'Книга Притчей Соломоновых',
-                        'Притч': 'Книга Притчей Соломоновых',
-                        'Евр.': 'Послание к Евреям',
-                        'Евр': 'Послание к Евреям',
-                        'Мк.': 'Евангелие от Марка',
-                        'Мк': 'Евангелие от Марка',
-                        'Мф.': 'Евангелие от Матфея',
-                        'Мф': 'Евангелие от Матфея',
-                        'Лк.': 'Евангелие от Луки',
-                        'Лк': 'Евангелие от Луки',
-                        'Ин.': 'Евангелие от Иоанна',
-                        'Ин': 'Евангелие от Иоанна',
-                        'Кор.': 'Послание к Коринфянам',
-                        'Кор': 'Послание к Коринфянам',
-                        '1Кор.': '1-е послание к Коринфянам',
-                        '1Кор': '1-е послание к Коринфянам',
-                        '2Кор.': '2-е послание к Коринфянам',
-                        '2Кор': '2-е послание к Коринфянам',
-                        '1Фес.': '1-е послание к Фессалоникийцам',
-                        '1Фес': '1-е послание к Фессалоникийцам',
-                        '2Фес.': '2-е послание к Фессалоникийцам',
-                        '2Фес': '2-е послание к Фессалоникийцам',
-                        '1Тим.': '1-е послание к Тимофею',
-                        '1Тим': '1-е послание к Тимофею',
-                        '2Тим.': '2-е послание к Тимофею',
-                        '2Тим': '2-е послание к Тимофею',
-                        '1Пет.': '1-е послание Петра',
-                        '1Пет': '1-е послание Петра',
-                        '2Пет.': '2-е послание Петра',
-                        '2Пет': '2-е послание Петра',
-                        '1Ин.': '1-е послание Иоанна',
-                        '1Ин': '1-е послание Иоанна',
-                        '2Ин.': '2-е послание Иоанна',
-                        '2Ин': '2-е послание Иоанна',
-                        '3Ин.': '3-е послание Иоанна',
-                        '3Ин': '3-е послание Иоанна',
-                        'Гал.': 'Послание к Галатам',
-                        'Гал': 'Послание к Галатам',
-                        'Еф.': 'Послание к Ефесянам',
-                        'Еф': 'Послание к Ефесянам',
-                        'Флп.': 'Послание к Филиппийцам',
-                        'Флп': 'Послание к Филиппийцам',
-                        'Кол.': 'Послание к Колоссянам',
-                        'Кол': 'Послание к Колоссянам',
-                        'Рим.': 'Послание к Римлянам',
-                        'Рим': 'Послание к Римлянам',
-                        'Деян.': 'Деяния святых Апостолов',
-                        'Деян': 'Деяния святых Апостолов',
-                        'Иак.': 'Послание Иакова',
-                        'Иак': 'Послание Иакова',
-                        'Иуд.': 'Послание Иуды',
-                        'Иуд': 'Послание Иуды',
-                        'Тит.': 'Послание к Титу',
-                        'Тит': 'Послание к Титу',
-                        'Флм.': 'Послание к Филимону',
-                        'Флм': 'Послание к Филимону',
-                        'Откр.': 'Откровение Иоанна Богослова',
-                        'Откр': 'Откровение Иоанна Богослова'
-                    };
-
-                    // Получаем полное название книги
-                    let fullBookName = book;
-                    let bookAbbrev = book;
-                    for (const [abbrev, fullName] of Object.entries(bookNames)) {
-                        if (book === abbrev || book === abbrev.replace('.', '')) {
-                            fullBookName = fullName;
-                            bookAbbrev = abbrev.replace('.', '');
-                            break;
-                        }
-                    }
-
-                    // Форматируем текст: Полное название, глава, стихи (зачало опционально)
-                    const formattedText = zachalo
-                        ? `${fullBookName}, ${zachalo} зач., глава ${parseInt(chapter)}, стихи ${startVerse}–${endVerseFinal}`
-                        : `${fullBookName}, глава ${parseInt(chapter)}, стихи ${startVerse}–${endVerseFinal}`;
-
-                    // Генерируем MP3 ссылку для Азбуки.ru
-                    // Формат: https://azbyka.ru/audio/audio1/zachala/In/In.20.19.mp3
-                    let mp3Url = null;
-                    if (zachalo) {
-                        // Для зачал используем формат с номером зачала
-                        mp3Url = `https://azbyka.ru/audio/audio1/zachala/${bookAbbrev}/${bookAbbrev}.${zachalo}.mp3`;
-                    }
-
-                    readings.push({
-                        type: type,
-                        text: formattedText,
-                        link_mp3: mp3Url,
-                        audio: mp3Url,
-                        mp3_remote: mp3Url
-                    });
-                }
-            }
-        }
-
-        console.log('[parseReadingsText] Result:', readings);
-
-        return readings;
+    // Парсинг чтений из API. Реализация — src/utils/readings.js
+    function parseReadingsText(text, refs) {
+        return parseReadings(text, refs);
     }
 
     // Преобразование арабских цифр в римские
@@ -3370,16 +3162,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const allParsed = [];
             texts.forEach(textEntry => {
                 if (!textEntry.text) return;
-                const parsedReadings = parseReadingsText(textEntry.text);
+                const parsedReadings = parseReadingsText(textEntry.text, textEntry.refs);
                 if (parsedReadings.length > 0) {
-                    // Привязываем MP3 ссылки из refs если количество совпадает
-                    if (textEntry.refs && textEntry.refs.length === parsedReadings.length) {
-                        parsedReadings.forEach((r, i) => {
-                            const ref = textEntry.refs[i];
-                            const bookPart = ref.split('.')[0];
-                            r.link_mp3 = 'https://azbyka.ru/audio/audio1/zachala/' + bookPart + '/' + ref + '.mp3';
-                        });
-                    }
                     allParsed.push(...parsedReadings);
                 }
             });
@@ -3479,18 +3263,21 @@ document.addEventListener('DOMContentLoaded', () => {
             return (remote && remote[dateKey]) ? remote[dateKey] : null;
         }
 
-        // Поиск краткого содержания по тексту чтения
-        function findSummary(readingText, dayEntry) {
-            if (!dayEntry || !dayEntry.readings || !readingText) return null;
-            const chapterMatch = readingText.match(/глава\s+(\d+)/i);
-            const verseMatch = readingText.match(/стихи?\s+(\d+)/i);
-            if (!chapterMatch || !verseMatch) return null;
-            const ch = chapterMatch[1];
-            const vs = verseMatch[1];
-            return dayEntry.readings.find(s => {
-                const m = s.ref.match(/(\d+):(\d+)/);
-                return m && m[1] === ch && m[2] === vs;
-            }) || null;
+        // Поиск краткого содержания для чтения дня
+        function findSummary(reading, dayEntry) {
+            if (!dayEntry || !dayEntry.readings || !reading) return null;
+            let best = null;
+            let bestScore = 0;
+            for (const entry of dayEntry.readings) {
+                if (!entry || !entry.ref) continue;
+                const score = summaryScore(reading, entry.ref);
+                if (score > bestScore) {
+                    best = entry;
+                    bestScore = score;
+                    if (score === 3) break;
+                }
+            }
+            return best;
         }
 
         // Баннер праздника
@@ -3517,9 +3304,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const formattedText = formatReadingText(reading.text || reading);
             const dropCapLetter = dropCapLetters[reading.type] || (reading.type ? reading.type[0].toUpperCase() : '');
             const typeLabel = reading.type.charAt(0).toUpperCase() + reading.type.slice(1);
-            const summaryEntry = findSummary(reading.text || '', dayEntry);
+            const summaryEntry = findSummary(reading, dayEntry);
             const summaryHtml = summaryEntry
-                ? `<p class="text-sm leading-relaxed mt-3 italic w-full" style="color: var(--color-on-surface-variant);">${escapeHtml(summaryEntry.summary)}</p>`
+                ? `<div class="mt-3 pl-3 border-l-2" style="border-color: var(--color-primary);">
+                    <span class="font-label text-[10px] font-bold uppercase tracking-widest" style="color: var(--color-secondary);">Кратко</span>
+                    <p class="text-sm leading-relaxed mt-1" style="color: var(--color-on-surface-variant);">${escapeHtml(summaryEntry.summary)}</p>
+                </div>`
                 : '';
 
             html += `
@@ -4107,14 +3897,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const allReadings = [];
             allTexts.forEach(entry => {
                 if (!entry.text) return;
-                const parsed = parseReadingsText(entry.text);
+                const parsed = parseReadingsText(entry.text, entry.refs);
                 if (parsed.length > 0) {
-                    if (entry.refs && entry.refs.length === parsed.length) {
-                        parsed.forEach((r, i) => {
-                            const ref = entry.refs[i];
-                            r.link_mp3 = 'https://azbyka.ru/audio/audio1/zachala/' + ref.split('.')[0] + '/' + ref + '.mp3';
-                        });
-                    }
                     allReadings.push(...parsed);
                 }
             });
